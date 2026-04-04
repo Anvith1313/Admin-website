@@ -396,6 +396,11 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
       </div>
     </div>
 
+    <!-- ARCHIVED -->
+    <div class="a-sec" id="secArchived">
+      <div class="card-grid" id="archGrid"></div>
+    </div>
+
     <!-- INTERESTS -->
     <div class="a-sec" id="secInterests">
       <div class="card-grid" id="intGrid"></div>
@@ -836,6 +841,315 @@ function closeOv(id){document.getElementById(id).classList.remove('open');}
 function bgC(e,id){if(e.target===document.getElementById(id))closeOv(id);}
 let _tt;
 function toast(msg){const el=document.getElementById('toastEl');el.textContent=msg;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),4000);}
+
+// ═══════════════════════════════════════
+// OFFLINE MEMBER FORM
+// ═══════════════════════════════════════
+function pickOT(t){
+  offT=t;
+  ['VIP','VVIP','Elite'].forEach(x=>document.getElementById('o'+x[0].toUpperCase()+(x==='VVIP'?'VV':x==='Elite'?'El':''))?.classList.remove('sel'));
+  const idMap={VIP:'oV',VVIP:'oVV',Elite:'oEl'};
+  document.getElementById(idMap[t])?.classList.add('sel');
+}
+function clearOff(){
+  ['on','odob','oht','osal','oedu','ofp','oci','oco','om','oe','ou','oadh','onotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const og=document.getElementById('og');if(og)og.value='';
+  const ocx=document.getElementById('ocx');if(ocx)ocx.value='';
+  const ost=document.getElementById('ost');if(ost)ost.value='';
+  offT=null;
+  ['oV','oVV','oEl'].forEach(id=>document.getElementById(id)?.classList.remove('sel'));
+  toast('Form cleared.');
+}
+function addOffline(){
+  const name=document.getElementById('on').value.trim();
+  const dob=document.getElementById('odob').value;
+  const g=document.getElementById('og').value;
+  const u=document.getElementById('ou').value.trim();
+  const mob=document.getElementById('om').value.trim();
+  const city=document.getElementById('oci').value.trim();
+  if(!name||!dob||!g||!u||!mob||!city){toast('Please fill in all required fields.');return;}
+  if(!offT){toast('Please select a membership tier.');return;}
+  if(ST.profiles.find(p=>p.u===u)){toast('Username already exists.');return;}
+  const now=new Date();
+  const age=Math.floor((now-new Date(dob))/(365.25*24*3600*1000));
+  const newP={
+    u,name,age,g,dob,
+    ht:parseInt(document.getElementById('oht').value)||0,
+    prof:document.getElementById('opf').value.trim()||'—',
+    sal:document.getElementById('osal').value?`${Math.round(document.getElementById('osal').value/100000)} L`:'—',
+    city,
+    state:document.getElementById('ost').value||'—',
+    country:document.getElementById('oco').value.trim()||'India',
+    tier:offT,
+    mob,
+    email:document.getElementById('oe').value.trim()||'—',
+    em:g==='Female'?'👩':'👨',
+    edu:document.getElementById('oedu').value.trim()||'—',
+    fp:document.getElementById('ofp').value.trim()||'—',
+    notes:document.getElementById('onotes').value.trim()||'Walk-in / Offline registration',
+    adh:document.getElementById('oadh').value.trim()||'—',
+  };
+  ST.profiles.push(newP);
+  renderAll();
+  clearOff();
+  toast(`✅ ${name} registered successfully as ${offT} member.`);
+}
+
+// ═══════════════════════════════════════
+// DELETE PROFILE
+// ═══════════════════════════════════════
+function delProf(u){
+  if(!confirm('Remove this profile? This cannot be undone.'))return;
+  const p=ST.profiles.find(x=>x.u===u);
+  if(p){ST.archived=ST.archived||[];ST.archived.push({...p,closedDate:new Date().toISOString().split('T')[0],reason:'Admin removed'});}
+  ST.profiles=ST.profiles.filter(x=>x.u!==u);
+  ST.interests=ST.interests.filter(i=>i.from!==u&&i.to!==u);
+  renderAll();
+  renderProfiles(ST.profiles);
+  toast('Profile removed and archived.');
+}
+
+// ═══════════════════════════════════════
+// INTERESTS SECTION
+// ═══════════════════════════════════════
+const statusLabel={pending:'💌 Pending',mutual:'❤ Mutual',contact_released:'📞 Contact Released',released:'🔓 Released'};
+const statusCls={pending:'s-mut',mutual:'s-mut',contact_released:'s-cont',released:''};
+
+function renderInterests(){
+  const grid=document.getElementById('intGrid');
+  if(!grid)return;
+  if(!ST.interests.length){grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No interest records found.</p>';return;}
+  grid.innerHTML=ST.interests.map((int,idx)=>{
+    const p1=ST.profiles.find(x=>x.u===int.from)||{name:int.from,em:'👤'};
+    const p2=ST.profiles.find(x=>x.u===int.to)||{name:int.to,em:'👤'};
+    const lbl=statusLabel[int.status]||int.status;
+    const cls=statusCls[int.status]||'';
+    const actions=[];
+    if(int.status==='pending'){
+      actions.push(`<button class="act-b prim" onclick="markMutual(${idx})">✓ Mark Mutual</button>`);
+      actions.push(`<button class="act-b" onclick="removeInterest(${idx})">Remove</button>`);
+    }
+    if(int.status==='mutual'){
+      actions.push(`<button class="act-b grn" onclick="prepContact(${idx})">📞 Release Contact</button>`);
+      actions.push(`<button class="act-b" onclick="prepRelease(${idx})">🔓 Release Hold</button>`);
+    }
+    if(int.status==='contact_released'){
+      actions.push(`<button class="act-b prim" onclick="prepEngage(${idx})">💍 Confirm Engagement</button>`);
+    }
+    return `<div class="ac">
+      <div class="ac-top">
+        <div class="ac-avs"><div class="ac-av">${p1.em}</div><div class="ac-av">${p2.em}</div></div>
+        <div><div class="ac-name">${p1.name} &amp; ${p2.name}</div><div class="ac-status ${cls}">${lbl}</div></div>
+      </div>
+      <div class="ac-det"><strong>From:</strong> ${p1.name} (${int.from})<br><strong>To:</strong> ${p2.name} (${int.to})<br><strong>Date:</strong> ${int.date||'—'}</div>
+      <div class="ac-acts">${actions.join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function markMutual(idx){
+  ST.interests[idx].status='mutual';
+  renderInterests();
+  renderDash();
+  renderAll();
+  toast('Marked as mutual match.');
+}
+function removeInterest(idx){
+  if(!confirm('Remove this interest record?'))return;
+  ST.interests.splice(idx,1);
+  renderInterests();
+  renderAll();
+  toast('Interest record removed.');
+}
+
+// ═══════════════════════════════════════
+// MUTUAL SECTION
+// ═══════════════════════════════════════
+function renderMutual(){
+  const grid=document.getElementById('mutGrid');
+  if(!grid)return;
+  const list=ST.interests.filter(i=>i.status==='mutual'||i.status==='contact_released');
+  if(!list.length){grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No mutual matches yet.</p>';return;}
+  grid.innerHTML=list.map((int,_)=>{
+    const idx=ST.interests.indexOf(int);
+    const p1=ST.profiles.find(x=>x.u===int.from)||{name:int.from,em:'👤'};
+    const p2=ST.profiles.find(x=>x.u===int.to)||{name:int.to,em:'👤'};
+    const lbl=statusLabel[int.status]||int.status;
+    const cls=statusCls[int.status]||'';
+    const actions=[];
+    if(int.status==='mutual'){
+      actions.push(`<button class="act-b grn" onclick="prepContact(${idx});goSec('secMutual')">📞 Release Contact</button>`);
+      actions.push(`<button class="act-b" onclick="prepRelease(${idx});goSec('secMutual')">🔓 Release Hold</button>`);
+    }
+    if(int.status==='contact_released'){
+      actions.push(`<button class="act-b prim" onclick="prepEngage(${idx});goSec('secMutual')">💍 Confirm Engagement</button>`);
+    }
+    return `<div class="ac">
+      <div class="ac-top">
+        <div class="ac-avs"><div class="ac-av">${p1.em}</div><div class="ac-av">${p2.em}</div></div>
+        <div><div class="ac-name">${p1.name} &amp; ${p2.name}</div><div class="ac-status ${cls}">${lbl}</div></div>
+      </div>
+      <div class="ac-det"><strong>Match Date:</strong> ${int.date||'—'}<br><strong>Status:</strong> ${lbl}</div>
+      <div class="ac-acts">${actions.join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// ENGAGED SECTION
+// ═══════════════════════════════════════
+function renderEngaged(){
+  const grid=document.getElementById('engGrid');
+  if(!grid)return;
+  if(!ST.engaged.length){grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No engaged couples recorded.</p>';return;}
+  grid.innerHTML=ST.engaged.map((e,idx)=>{
+    const deadline=e.engDate?new Date(new Date(e.engDate).getTime()+7*24*3600*1000).toISOString().split('T')[0]:'—';
+    const bothPaid=e.p1_paid&&e.p2_paid;
+    return `<div class="ac">
+      <div class="ac-top">
+        <div class="ac-avs"><div class="ac-av">${e.p1?.em||'👤'}</div><div class="ac-av">${e.p2?.em||'👤'}</div></div>
+        <div><div class="ac-name">${e.p1?.name||'—'} &amp; ${e.p2?.name||'—'}</div>
+          <div class="ac-status ${bothPaid?'s-cont':'s-mut'}">${bothPaid?'✅ Fully Paid':'⏳ Payment Pending'}</div></div>
+      </div>
+      <div class="ac-det">
+        <strong>Engagement Date:</strong> ${e.engDate||'—'}<br>
+        <strong>Payment Deadline:</strong> ${deadline}<br>
+        <strong>${e.p1?.name||'P1'} (${e.p1?.tier||'VIP'}):</strong> ${e.p1_paid?'✅ Paid':'❌ Unpaid'} &nbsp;·&nbsp; <strong>${e.p2?.name||'P2'} (${e.p2?.tier||'VIP'}):</strong> ${e.p2_paid?'✅ Paid':'❌ Unpaid'}
+      </div>
+      <div class="ac-acts">
+        ${!e.p1_paid?`<button class="act-b" onclick="markPaid(${idx},1)">Mark ${e.p1?.name||'P1'} Paid</button>`:''}
+        ${!e.p2_paid?`<button class="act-b" onclick="markPaid(${idx},2)">Mark ${e.p2?.name||'P2'} Paid</button>`:''}
+        <button class="act-b" onclick="sendReminder(${idx})">📨 Reminder</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markPaid(idx,side){
+  if(side===1)ST.engaged[idx].p1_paid=true;
+  else ST.engaged[idx].p2_paid=true;
+  renderEngaged();renderDash();
+  toast('Payment marked as received.');
+}
+function sendReminder(idx){
+  const e=ST.engaged[idx];
+  toast(`📨 Reminder sent to ${e.p1?.name||'P1'} & ${e.p2?.name||'P2'}.`);
+}
+
+// ═══════════════════════════════════════
+// CHATS SECTION
+// ═══════════════════════════════════════
+function renderChats(){
+  const grid=document.getElementById('chatGrid');
+  if(!grid)return;
+  const keys=Object.keys(ST.chats||{});
+  if(!keys.length){grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No conversations found.</p>';return;}
+  grid.innerHTML=keys.map(k=>{
+    const msgs=ST.chats[k];
+    const last=msgs[msgs.length-1];
+    const parts=k.split('_');
+    const p1=ST.profiles.find(x=>x.u===parts[0])||{name:parts[0],em:'👤'};
+    const p2=ST.profiles.find(x=>x.u===parts[1])||{name:parts[1],em:'👤'};
+    return `<div class="ac">
+      <div class="ac-top">
+        <div class="ac-avs"><div class="ac-av">${p1.em}</div><div class="ac-av">${p2.em}</div></div>
+        <div><div class="ac-name">${p1.name} &amp; ${p2.name}</div><div class="ac-status s-cont">${msgs.length} messages</div></div>
+      </div>
+      <div class="ac-det"><strong>Last message:</strong> "${last?.msg||'—'}"<br><em style="font-size:.78rem;">${last?.sender||''} · ${last?.time||''}</em></div>
+      <div class="ac-acts"><button class="act-b prim" onclick="viewChat('${k}')">👁 View Conversation</button></div>
+    </div>`;
+  }).join('');
+}
+function viewChat(k){
+  const msgs=ST.chats[k]||[];
+  document.getElementById('caTitle').textContent=k.replace(/_/g,' & ');
+  document.getElementById('caBody').innerHTML=msgs.map(m=>`
+    <div style="margin-bottom:.9rem;padding:.7rem .9rem;background:#fff;border:1px solid var(--border);">
+      <div style="font-family:'Cinzel',serif;font-size:.44rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;">${m.sender} &nbsp;·&nbsp; ${m.time}</div>
+      <div style="font-family:'EB Garamond',serif;font-size:.9rem;color:var(--text);">${m.msg}</div>
+    </div>`).join('')||'<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No messages yet.</p>';
+  openOv('chatViewOv');
+}
+
+// ═══════════════════════════════════════
+// ARCHIVED SECTION
+// ═══════════════════════════════════════
+function renderArchived(){
+  const grid=document.getElementById('archGrid');
+  if(!grid)return;
+  const list=ST.archived||[];
+  if(!list.length){grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No archived profiles.</p>';return;}
+  grid.innerHTML=list.map((p,idx)=>`
+    <div class="ac">
+      <div class="ac-top">
+        <div class="ac-avs"><div class="ac-av">${p.em||'👤'}</div></div>
+        <div><div class="ac-name">${p.name}</div><div class="ac-status" style="color:var(--muted);border-color:rgba(107,83,64,.2);background:rgba(107,83,64,.04);">Archived</div></div>
+      </div>
+      <div class="ac-det"><strong>Age:</strong> ${p.age} · <strong>Gender:</strong> ${p.g}<br><strong>Tier:</strong> ${p.tier} · <strong>City:</strong> ${p.city}<br><strong>Closed:</strong> ${p.closedDate||'—'} · <strong>Reason:</strong> ${p.reason||'—'}</div>
+      <div class="ac-acts">
+        <button class="act-b prim" onclick="restoreProfile(${idx})">↩ Restore</button>
+        <button class="act-b" onclick="purgeProfile(${idx})">🗑 Delete Permanently</button>
+      </div>
+    </div>`).join('');
+}
+function restoreProfile(idx){
+  const p=ST.archived.splice(idx,1)[0];
+  delete p.closedDate;delete p.reason;
+  ST.profiles.push(p);
+  renderArchived();renderAll();
+  toast(`${p.name} restored to active profiles.`);
+}
+function purgeProfile(idx){
+  if(!confirm('Permanently delete this record? Cannot be undone.'))return;
+  ST.archived.splice(idx,1);
+  renderArchived();renderAll();
+  toast('Record permanently deleted.');
+}
+
+// ═══════════════════════════════════════
+// MODAL ACTION FUNCTIONS
+// ═══════════════════════════════════════
+let _actIdx=null;
+
+function prepRelease(idx){_actIdx=idx;openOv('releaseOv');}
+function doRelease(){
+  if(_actIdx===null)return;
+  ST.interests.splice(_actIdx,1);
+  closeOv('releaseOv');
+  renderInterests();renderMutual();renderAll();
+  toast('Profiles released back to active pool.');
+  _actIdx=null;
+}
+
+function prepContact(idx){_actIdx=idx;openOv('contactOv');}
+function doContact(){
+  if(_actIdx===null)return;
+  ST.interests[_actIdx].status='contact_released';
+  const int=ST.interests[_actIdx];
+  const chatKey=`${int.from}_${int.to}`;
+  if(!ST.chats[chatKey])ST.chats[chatKey]=[];
+  closeOv('contactOv');
+  renderInterests();renderMutual();renderAll();
+  toast('Contact details released. Family chat enabled.');
+  _actIdx=null;
+}
+
+function prepEngage(idx){_actIdx=idx;openOv('engOv');}
+function doEngage(){
+  if(_actIdx===null)return;
+  const d=document.getElementById('engD').value;
+  if(!d){toast('Please select an engagement date.');return;}
+  const int=ST.interests[_actIdx];
+  const p1=ST.profiles.find(x=>x.u===int.from);
+  const p2=ST.profiles.find(x=>x.u===int.to);
+  ST.engaged.push({p1,p2,engDate:d,p1_paid:false,p2_paid:false});
+  ST.profiles=ST.profiles.filter(x=>x.u!==int.from&&x.u!==int.to);
+  ST.interests.splice(_actIdx,1);
+  closeOv('engOv');
+  renderAll();
+  toast(`💍 Engagement confirmed for ${p1?.name||'—'} & ${p2?.name||'—'}. Payment countdown started.`);
+  _actIdx=null;
+}
 </script>
 </body>
 </html>
