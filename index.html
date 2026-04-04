@@ -388,9 +388,21 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
         <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Full Name *</label><input class="inp-f-field" id="on" placeholder="As per Aadhaar"></div><div class="inp-f-group"><label class="inp-f-lbl">Date of Birth *</label><input class="inp-f-field" id="odob" type="date"></div></div>
         <div class="fr3"><div class="inp-f-group"><label class="inp-f-lbl">Gender *</label><select class="inp-f-sel" id="og"><option value="">Select</option><option>Male</option><option>Female</option></select></div><div class="inp-f-group"><label class="inp-f-lbl">Height (cm) *</label><input class="inp-f-field" id="oht" type="number" placeholder="170"></div><div class="inp-f-group"><label class="inp-f-lbl">Complexion</label><select class="inp-f-sel" id="ocx"><option value="">Select</option><option>Very Fair</option><option>Fair</option><option>Wheatish</option><option>Dusky</option></select></div></div>
         <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Profession *</label><input class="inp-f-field" id="opf" placeholder="e.g. Engineer"></div><div class="inp-f-group"><label class="inp-f-lbl">Annual Salary (₹) *</label><input class="inp-f-field" id="osal" type="number" placeholder="1200000"></div></div>
-        <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Education</label><input class="inp-f-field" id="oedu" placeholder="e.g. B.Tech, MBA"></div><div class="inp-f-group"><label class="inp-f-lbl">Father's Profession</label><input class="inp-f-field" id="ofp" placeholder="e.g. Farmer / Business"></div></div>
-        <div class="fr3"><div class="inp-f-group"><label class="inp-f-lbl">City *</label><input class="inp-f-field" id="oci" placeholder="Hyderabad"></div><div class="inp-f-group"><label class="inp-f-lbl">State *</label><select class="inp-f-sel" id="ost"><option value="">Select</option><option>Telangana</option><option>Andhra Pradesh</option><option>Karnataka</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Delhi</option><option>Other</option></select></div><div class="inp-f-group"><label class="inp-f-lbl">Country *</label><input class="inp-f-field" id="oco" placeholder="India"></div></div>
+        <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Education</label><input class="inp-f-field" id="oedu" placeholder="e.g. B.Tech, MBA"></div><div class="inp-f-group"><label class="inp-f-lbl">Sub-Caste / Gotra</label><select class="inp-f-sel" id="ogotra"><option value="">Select</option><option>Motati</option><option>Gudati</option><option>Pakanati</option><option>Gone</option><option>Chittepu</option><option>Bhumanchi</option><option>Pedakanti</option><option>Velama</option><option>Mudiraj</option><option>Gajula</option><option>Niyogi</option><option>Vaidiki</option><option>Turpu Kapu</option><option>Telaga</option><option>Other</option></select></div></div>
+        <div class="fr3"><div class="inp-f-group"><label class="inp-f-lbl">City *</label><input class="inp-f-field" id="oci" placeholder="Hyderabad"></div><div class="inp-f-group"><label class="inp-f-lbl">State *</label><select class="inp-f-sel" id="ost"><option value="">Select</option><option>Telangana</option><option>Andhra Pradesh</option><option>Karnataka</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Delhi</option><option>Gujarat</option><option>Other</option></select></div><div class="inp-f-group"><label class="inp-f-lbl">Country *</label><input class="inp-f-field" id="oco" placeholder="India"></div></div>
         <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Mobile *</label><input class="inp-f-field" id="om" type="tel" placeholder="+91 98765 43210"></div><div class="inp-f-group"><label class="inp-f-lbl">Email *</label><input class="inp-f-field" id="oe" type="email" placeholder="member@email.com"></div></div>
+        <div style="font-family:'Cinzel',serif;font-size:.48rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:.6rem 0 .4rem;">Parents Information</div>
+        <div class="fr2">
+          <div class="inp-f-group"><label class="inp-f-lbl">Father's Name</label><input class="inp-f-field" id="ofn" placeholder="Father's full name"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Father's Mobile</label><input class="inp-f-field" id="ofmob" type="tel" placeholder="+91 98765 43210"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Father's Status</label><select class="inp-f-sel" id="ofas" onchange="toggleAdminFatherOcc()"><option value="">Select</option><option>Employed</option><option>Business</option><option>Retired</option><option>Farmer</option><option>Passed Away</option></select></div>
+          <div class="inp-f-group" id="ofp_wrap"><label class="inp-f-lbl">Father's Occupation</label><input class="inp-f-field" id="ofp" placeholder="e.g. Govt Officer"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Father's Gotra</label><select class="inp-f-sel" id="ofg"><option value="">Select</option><option>Motati</option><option>Gudati</option><option>Pakanati</option><option>Gone</option><option>Chittepu</option><option>Bhumanchi</option><option>Pedakanti</option><option>Velama</option><option>Mudiraj</option><option>Gajula</option><option>Niyogi</option><option>Vaidiki</option><option>Turpu Kapu</option><option>Telaga</option><option>Other</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Mother's Name</label><input class="inp-f-field" id="omn" placeholder="Mother's full name"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Mother's Mobile</label><input class="inp-f-field" id="ommob" type="tel" placeholder="+91 98765 43210"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Mother's Status</label><select class="inp-f-sel" id="omas" onchange="toggleAdminMotherOcc()"><option value="">Select</option><option>Homemaker</option><option>Employed</option><option>Business</option><option>Retired</option><option>Passed Away</option></select></div>
+          <div class="inp-f-group" id="omo_wrap" style="display:none;"><label class="inp-f-lbl">Mother's Occupation</label><input class="inp-f-field" id="omo" placeholder="e.g. Teacher"></div>
+        </div>
         <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Username *</label><input class="inp-f-field" id="ou" placeholder="login username"></div><div class="inp-f-group"><label class="inp-f-lbl">Aadhaar Number</label><input class="inp-f-field" id="oadh" placeholder="XXXX XXXX XXXX" maxlength="14"></div></div>
         <div class="inp-f-group"><label class="inp-f-lbl">Notes</label><textarea class="inp-f-field" id="onotes" rows="2" style="resize:vertical;" placeholder="Walk-in / Phone enquiry / Referral details…"></textarea></div>
         <div style="display:flex;gap:.8rem;margin-top:.8rem;flex-wrap:wrap;">
@@ -865,11 +877,22 @@ function pickOT(t){
   const idMap={VIP:'oV',VVIP:'oVV',Elite:'oEl'};
   document.getElementById(idMap[t])?.classList.add('sel');
 }
+function toggleAdminFatherOcc(){
+  const v=document.getElementById('ofas').value;
+  const w=document.getElementById('ofp_wrap');
+  if(w) w.style.display=(v&&v!=='Passed Away')?'':'none';
+}
+function toggleAdminMotherOcc(){
+  const v=document.getElementById('omas').value;
+  const w=document.getElementById('omo_wrap');
+  if(w) w.style.display=(v&&v!=='Passed Away'&&v!=='Homemaker')?'':'none';
+}
 function clearOff(){
-  ['on','odob','oht','osal','oedu','ofp','oci','oco','om','oe','ou','oadh','onotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const og=document.getElementById('og');if(og)og.value='';
-  const ocx=document.getElementById('ocx');if(ocx)ocx.value='';
-  const ost=document.getElementById('ost');if(ost)ost.value='';
+  ['on','odob','oht','osal','oedu','ofp','oci','oco','om','oe','ou','oadh','onotes',
+   'ofn','ofmob','ofp','omn','ommob','omo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['og','ocx','ost','ofas','ofg','omas','ogotra'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ofp_wrap') && (document.getElementById('ofp_wrap').style.display='');
+  document.getElementById('omo_wrap') && (document.getElementById('omo_wrap').style.display='none');
   offT=null;
   ['oV','oVV','oEl'].forEach(id=>document.getElementById(id)?.classList.remove('sel'));
   toast('Form cleared.');
@@ -902,6 +925,16 @@ function addOffline(){
     fp:document.getElementById('ofp').value.trim()||'—',
     notes:document.getElementById('onotes').value.trim()||'Walk-in / Offline registration',
     adh:document.getElementById('oadh').value.trim()||'—',
+    fn:document.getElementById('ofn').value.trim()||'—',
+    fmob:document.getElementById('ofmob').value.trim()||'—',
+    fas:document.getElementById('ofas').value||'—',
+    fo:document.getElementById('ofp').value.trim()||'—',
+    fg:document.getElementById('ofg').value||'—',
+    mn:document.getElementById('omn').value.trim()||'—',
+    mmob:document.getElementById('ommob').value.trim()||'—',
+    mas:document.getElementById('omas').value||'—',
+    mo:document.getElementById('omo').value.trim()||'—',
+    gotra:document.getElementById('ogotra').value||'—',
   };
   ST.profiles.push(newP);
   renderAll();
