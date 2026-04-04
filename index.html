@@ -624,7 +624,7 @@ function viewProf(u){
 
   // Helper: build a labeled section
   function sec(title, rows){
-    const visible = rows.filter(([l,v]) => v && v !== '—' && v !== 'undefined' && String(v).trim() !== '');
+    const visible = rows.filter(([l,v]) => v !== undefined && v !== null && String(v).trim() !== '' && v !== 'undefined');
     if(!visible.length) return '';
     return `<div style="margin-bottom:1.4rem;">
       <div style="font-family:'Cinzel',serif;font-size:0.52rem;font-weight:700;
@@ -642,7 +642,7 @@ function viewProf(u){
   document.getElementById('pdBody').innerHTML = `
     <div style="text-align:center;font-size:2.8rem;margin:0.3rem 0 0.8rem;">${p.em||'👤'}</div>
     <div style="text-align:center;margin-bottom:1.4rem;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
-      <button onclick="editProf('${p.u}')"
+      <button onclick="closeOv('profOv');editProf('${p.u}')"
         style="background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;
         border-radius:50px;padding:0.5rem 1.4rem;cursor:pointer;font-family:'Cinzel',serif;
         font-size:0.46rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;
@@ -790,23 +790,39 @@ function editProf(u){
         <button class="m-close" onclick="document.getElementById('editProfModal').remove()">✕</button>
       </div>
       <div class="m-body" style="overflow-y:auto;flex:1;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem;">
+        ${buildEditSection('Basic Information')}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem;margin-bottom:1rem;">
           ${buildEditField('Name','name',p.name,'text')}
-          ${buildEditField('Age','age',p.age,'number')}
+          ${buildEditField('Date of Birth','dob',p.dob,'date')}
+          ${buildEditField('Gender','g',p.g,'text')}
           ${buildEditField('Mobile','mob',p.mob,'tel')}
           ${buildEditField('Email','email',p.email,'email')}
+          ${buildEditField('Height (cm)','ht',p.ht,'text')}
           ${buildEditField('City','city',p.city,'text')}
+          ${buildEditField('State','state',p.state,'text')}
           ${buildEditField('Country','country',p.country,'text')}
           ${buildEditField('Profession / Occupation','prof',p.prof,'text')}
           ${buildEditField('Annual Income','inc',p.inc||p.sal,'text')}
           ${buildEditField('Education','edu',p.edu,'text')}
-          ${buildEditField('Height (cm)','ht',p.ht,'text')}
           ${buildEditField('Sub-Caste / Gotra','gotra',p.gotra,'text')}
           ${buildEditField('Nakshatra','nak',p.nak,'text')}
           ${buildEditField('Rashi','rashi',p.rashi,'text')}
           ${buildEditField('Native Place','nat',p.nat||p.native,'text')}
+        </div>
+        ${buildEditSection("Father's Details")}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem;margin-bottom:1rem;">
           ${buildEditField("Father's Name",'fn',p.fn,'text')}
+          ${buildEditField("Father's Mobile",'fmob',p.fmob,'tel')}
+          ${buildEditField("Father's Status",'fas',p.fas,'text')}
+          ${buildEditField("Father's Occupation",'fo',p.fo||p.fp,'text')}
+          ${buildEditField("Father's Gotra",'fg',p.fg,'text')}
+        </div>
+        ${buildEditSection("Mother's Details")}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem;margin-bottom:1rem;">
           ${buildEditField("Mother's Name",'mn',p.mn,'text')}
+          ${buildEditField("Mother's Mobile",'mmob',p.mmob,'tel')}
+          ${buildEditField("Mother's Status",'mas',p.mas,'text')}
+          ${buildEditField("Mother's Occupation",'mo',p.mo,'text')}
         </div>
         <div style="margin-top:0.8rem;">
           <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Membership Tier</label>
@@ -832,31 +848,37 @@ function editProf(u){
 function buildEditField(label, key, value, type){
   return `<div>
     <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">${label}</label>
-    <input id="edit_${key}" type="${type}" value="${value||''}" 
+    <input id="edit_${key}" type="${type}" value="${value||''}"
       style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);">
   </div>`;
+}
+function buildEditSection(title){
+  return `<div style="font-family:'Cinzel',serif;font-size:0.48rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,150,12,0.15);padding-bottom:0.3rem;margin:0.8rem 0 0.5rem;">${title}</div>`;
 }
 
 function saveEditProf(u){
   const p = ST.profiles.find(x=>x.u===u);
   if(!p){ toast('Profile not found.'); return; }
-  const fields = ['name','age','mob','email','city','country','prof','inc','edu','ht','gotra','nak','rashi','nat','fn','mn'];
+  const fields = ['name','dob','g','mob','email','city','state','country','prof','inc','edu','ht','gotra','nak','rashi','nat',
+                  'fn','fmob','fas','fo','fg','mn','mmob','mas','mo'];
   fields.forEach(f=>{
     const el = document.getElementById('edit_'+f);
     if(el) p[f] = el.value.trim();
   });
+  // Recalculate age from DOB if changed
+  if(p.dob){ const now=new Date(); p.age=Math.floor((now-new Date(p.dob))/(365.25*24*3600*1000)); }
   const tierEl = document.getElementById('edit_tier');
   if(tierEl) p.tier = tierEl.value;
   const notesEl = document.getElementById('edit_notes');
   if(notesEl) p.notes = notesEl.value.trim();
   // Keep backward compat fields in sync
-  p.sal = p.inc; p.occ = p.prof; p.native = p.nat;
+  p.sal = p.inc; p.occ = p.prof; p.native = p.nat; p.fp = p.fo;
   document.getElementById('editProfModal').remove();
   renderAll();
   toast('✅ Profile updated successfully.');
   // Firebase update
   if(window.FIREBASE_READY && window.FB){
-    window.FB.updateDoc(window.FB.doc(window.FB.db,'members',u), p)
+    window.FB.updateDoc(window.FB.doc(window.FB.db,'users',u), p)
       .catch(e=>console.warn('Firebase update:', e.message));
   }
 }
