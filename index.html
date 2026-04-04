@@ -272,18 +272,23 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
     window.FIREBASE_READY = true;
     console.log("✅ Admin Firebase initialized");
 
-    // Auto-load profiles from Firestore when admin logs in
     window.loadProfilesFromFirebase = async ()=>{
+      console.log("🔄 Loading profiles from Firestore...");
       try{
         const snap = await getDocs(collection(db,'users'));
-        ST.profiles = [];
+        console.log("📦 Firestore returned", snap.size, "users");
+        window.ST.profiles = [];
         snap.forEach(d=>{
           const data = d.data();
-          ST.profiles.push({ ...data, uid: d.id, u: data.u||d.id });
+          window.ST.profiles.push({ ...data, uid: d.id, u: data.u||d.id });
         });
-        renderAll();
-        console.log("✅ Profiles loaded from Firebase:", snap.size);
-      } catch(e){ console.warn("Firebase load failed:", e.message); }
+        window.renderAll();
+        if(window.renderProfiles) window.renderProfiles(window.ST.profiles);
+        toast('✅ '+snap.size+' profiles loaded from Firebase.');
+      } catch(e){
+        console.error("❌ Firebase load failed:", e.code, e.message);
+        toast('Firebase error: '+e.message);
+      }
     };
   </script>
 
@@ -542,6 +547,10 @@ function renderAll(){
   document.getElementById('mutCnt').textContent=ST.interests.filter(i=>i.status==='mutual'||i.status==='contact_released').length;
   document.getElementById('intCnt').textContent=ST.interests.length;
 }
+// Expose to module scope
+window.ST=ST;
+window.renderAll=renderAll;
+window.renderProfiles=renderProfiles;
 
 function renderDash(){
   const mut=ST.interests.filter(i=>i.status==='mutual'||i.status==='contact_released').length;
