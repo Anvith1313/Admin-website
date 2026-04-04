@@ -275,12 +275,11 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
     // Auto-load profiles from Firestore when admin logs in
     window.loadProfilesFromFirebase = async ()=>{
       try{
-        const snap = await getDocs(collection(db,'members'));
+        const snap = await getDocs(collection(db,'users'));
+        ST.profiles = [];
         snap.forEach(d=>{
           const data = d.data();
-          if(!ST.profiles.find(p=>p.u===d.id)){
-            ST.profiles.push({ u: d.id, ...data });
-          }
+          ST.profiles.push({ ...data, uid: d.id, u: data.u||d.id });
         });
         renderAll();
         console.log("✅ Profiles loaded from Firebase:", snap.size);
@@ -479,19 +478,8 @@ const ACRED=[
 ];
 let offT=null;
 let ST={archived:[],
-  profiles:[
-    {u:'priya_r',name:'Priya Reddy',age:26,g:'Female',ht:163,prof:'Software Engineer',sal:'18 L',city:'Hyderabad',state:'Telangana',country:'India',tier:'VIP',mob:'+91 9876500001',email:'priya@email.com',em:'👩',edu:'B.Tech (CSE)',fp:'Govt Officer',notes:'Online registration'},
-    {u:'rahul_r',name:'Rahul Reddy',age:29,g:'Male',ht:178,prof:'IAS Officer',sal:'25 L',city:'Delhi',state:'Andhra Pradesh',country:'India',tier:'VVIP',mob:'+91 9876500002',email:'rahul@email.com',em:'👨',edu:'UPSC Cleared',fp:'Businessman',notes:'VIP referral'},
-    {u:'ananya_r',name:'Ananya Reddy',age:24,g:'Female',ht:159,prof:'Doctor (MBBS)',sal:'22 L',city:'Bangalore',state:'Karnataka',country:'India',tier:'Elite',mob:'+91 9876500003',email:'ananya@email.com',em:'👩',edu:'MBBS',fp:'Doctor',notes:'Walk-in'},
-    {u:'kiran_r',name:'Kiran Reddy',age:31,g:'Male',ht:182,prof:'Business Owner',sal:'60 L',city:'Houston',state:'Telangana',country:'USA',tier:'Elite',mob:'+1 7135550001',email:'kiran@email.com',em:'👨',edu:'MBA (USA)',fp:'Landlord',notes:'NRI member'},
-    {u:'deepa_r',name:'Deepa Reddy',age:27,g:'Female',ht:165,prof:'Chartered Accountant',sal:'16 L',city:'Mumbai',state:'Maharashtra',country:'India',tier:'VIP',mob:'+91 9876500004',email:'deepa@email.com',em:'👩',edu:'CA',fp:'Farmer',notes:''},
-    {u:'vivek_r',name:'Vivek Reddy',age:30,g:'Male',ht:176,prof:'Software Architect',sal:'45 L',city:'London',state:'Andhra Pradesh',country:'UK',tier:'VVIP',mob:'+44 7700900001',email:'vivek@email.com',em:'👨',edu:'M.Tech',fp:'Teacher',notes:'NRI - UK'},
-  ],
-  interests:[
-    {from:'priya_r',to:'rahul_r',status:'mutual',date:'2024-03-10'},
-    {from:'ananya_r',to:'kiran_r',status:'contact_released',date:'2024-03-08'},
-    {from:'deepa_r',to:'vivek_r',status:'pending',date:'2024-03-12'},
-  ],
+  profiles:[],
+  interests:[],
   chats:{
     'ananya_r_kiran_r':[
       {sender:'Ananya Family',msg:'Namaste. We are most pleased to make your acquaintance.',time:'10:30 AM'},
