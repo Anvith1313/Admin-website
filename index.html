@@ -127,11 +127,11 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 .ac-det{font-family:'EB Garamond',serif;font-size:.85rem;color:var(--muted);line-height:1.8;margin-bottom:1rem;}
 .ac-det strong{color:var(--text);}
 .ac-acts{display:flex;gap:.5rem;flex-wrap:wrap;}
-.act-b{padding:.35rem .9rem;background:transparent;border:1px solid rgba(184,150,12,.28);cursor:pointer;font-family:'Cinzel',serif;font-size:.44rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:all .2s;}
-.act-b:hover{border-color:var(--gold);color:var(--gold);}
-.act-b.prim{background:var(--crimson);border-color:var(--crimson);color:rgba(255,248,220,.95);}
+.act-b{padding:.4rem 1rem;background:transparent;border:1px solid rgba(184,150,12,.28);border-radius:20px;cursor:pointer;font-family:'Cinzel',serif;font-size:.46rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.act-b:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 2px 8px rgba(184,150,12,0.15);}
+.act-b.prim{background:var(--crimson);border-color:var(--crimson);color:rgba(255,248,220,.95);box-shadow:0 2px 8px rgba(139,0,0,0.2);}
 .act-b.prim:hover{opacity:.88;}
-.act-b.grn{background:#1b5e20;border-color:#1b5e20;color:#fff;}
+.act-b.grn{background:#2e7d32;border-color:#2e7d32;color:#fff !important;box-shadow:0 2px 8px rgba(46,125,50,0.2);}
 .act-b.grn:hover{opacity:.88;}
 
 /* Section tools */
@@ -239,6 +239,42 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
   .stats-row{grid-template-columns:1fr 1fr;}
   .fr2,.fr3{grid-template-columns:1fr;}
 }
+
+/* ── ADMIN GLOBAL IMPROVEMENTS ── */
+body{font-size:16px;}
+.inp-f-field{font-size:0.96rem;}
+.inp-f-lbl{font-size:0.5rem;}
+.inp-f-sel{font-size:0.96rem;}
+.ac-det{font-size:0.9rem;}
+.a-title{font-size:1.5rem;}
+
+/* Soft edges on sidebar buttons */
+.sb-btn{border-radius:8px;}
+.sb-badge{border-radius:12px;}
+
+/* Soft edges on stat cards */
+.stat-card{border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+
+/* Action button font size */
+.act-b{font-size:0.48rem;}
+
+/* ── ADMIN BIODATA STYLES ── */
+.biodata-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.biodata-sheet{background:#fff;max-width:620px;width:100%;max-height:92vh;overflow-y:auto;border:2px solid #c0392b;font-family:Georgia,serif;padding:1.5rem;position:relative;}
+.bio-header{text-align:center;border-bottom:1px solid #c0392b;padding-bottom:0.8rem;margin-bottom:0.8rem;}
+.bio-meta{display:flex;justify-content:space-between;font-size:0.75rem;color:#c0392b;font-style:italic;margin-bottom:0.4rem;}
+.bio-bureau{font-family:'Times New Roman',serif;font-size:1.3rem;font-weight:700;color:#c0392b;letter-spacing:0.04em;}
+.bio-sub{font-size:0.75rem;color:#555;letter-spacing:0.1em;text-transform:uppercase;}
+.bio-address{font-size:0.7rem;color:#c0392b;font-style:italic;text-decoration:underline;margin-top:0.3rem;}
+.bio-row{display:flex;gap:0.5rem;margin-bottom:0.35rem;font-size:0.85rem;}
+.bio-lbl{color:#c0392b;font-style:italic;font-weight:600;min-width:160px;flex-shrink:0;}
+.bio-val{color:#111;}
+.bio-two{display:grid;grid-template-columns:1fr 1fr;gap:0.4rem 1rem;}
+.bio-sec-title{font-style:italic;font-weight:700;text-decoration:underline;color:#c0392b;margin:0.8rem 0 0.4rem;font-size:0.9rem;}
+.bio-footer{text-align:right;font-style:italic;color:#c0392b;font-size:0.78rem;margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid #eee;}
+
+/* ── VIEW DETAILS - blank field style ── */
+.pd-v:empty::after,.pd-v:not(:has(>*)):empty{content:'— not filled —';color:rgba(107,83,64,0.35);font-style:italic;}
 </style>
 
   <!-- ══ FIREBASE SDK (Admin) ══ -->
@@ -611,9 +647,10 @@ function renderProfiles(list){
       </div>
       <div class="ac-det"><strong>Age:</strong> ${p.age} · <strong>Ht:</strong> ${p.ht}cm · <strong>Gender:</strong> ${p.g}<br><strong>Profession:</strong> ${p.prof}<br><strong>City:</strong> ${p.city}, ${p.state}, ${p.country}<br><strong>Salary:</strong> ₹${p.sal}/yr<br><strong>📞</strong> ${p.mob} &nbsp;·&nbsp; <strong>✉</strong> ${p.email}${p.edu?`<br><strong>Education:</strong> ${p.edu}`:''}${p.notes?`<br><em style="font-size:.78rem;">${p.notes}</em>`:''}</div>
       <div class="ac-acts">
-        <button class="act-b prim" onclick="viewProf('${p.u}')">👁 View Full Details</button>
-        <button class="act-b" onclick="editProf('${p.u}')" style="background:linear-gradient(135deg,#2d6a4f,#1b4332);">✏ Edit</button>
-        <button class="act-b" onclick="delProf('${p.u}')">Remove</button>
+        <button class="act-b prim" onclick="viewProf('${p.u}')">👁 View Details</button>
+        <button class="act-b grn" onclick="editProf('${p.u}')">✏ Edit</button>
+        <button class="act-b" onclick="adminViewBiodata('${p.u}')">📄 Biodata</button>
+        <button class="act-b" onclick="delProf('${p.u}')" style="color:#c0392b;border-color:rgba(192,57,43,0.3);">Remove</button>
       </div>
     </div>`).join('')||'<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No profiles match the selected filters.</p>';
 }
@@ -624,7 +661,7 @@ function viewProf(u){
 
   // Helper: build a labeled section
   function sec(title, rows){
-    const visible = rows.filter(([l,v]) => v !== undefined && v !== null && String(v).trim() !== '' && v !== 'undefined');
+    const visible = rows.filter(([l,v]) => l); // Show all rows with a label
     if(!visible.length) return '';
     return `<div style="margin-bottom:1.4rem;">
       <div style="font-family:'Cinzel',serif;font-size:0.52rem;font-weight:700;
@@ -633,7 +670,7 @@ function viewProf(u){
         margin-bottom:0.7rem;">${title}</div>
       <div class="pd-grid">
         ${visible.map(([l,v])=>`
-          <div class="pd-chip"><div class="pd-lbl">${l}</div><div class="pd-v">${v}</div></div>
+          <div class="pd-chip"><div class="pd-lbl">${l}</div><div class="pd-v">${(v&&v!=='—'&&String(v).trim()!==''&&v!=='undefined')?v:'<span style="color:rgba(107,83,64,0.35);font-style:italic;">— not filled —</span>'}</div></div>
         `).join('')}
       </div>
     </div>`;
@@ -690,11 +727,16 @@ function viewProf(u){
 
     ${sec('Education & Career', [
       ['Highest Qualification', p.edu||'—'],
-      ['College / University',  p.col||'—'],
+      ['SSC / 10th School',     p.school||'—'],
+      ['Inter / 12th College',  p.inter||'—'],
+      ['Engineering College',   p.engcol||'—'],
+      ['PG / Higher Education', p.col||'—'],
       ['Employed In',           p.emp||'—'],
       ['Occupation',            p.prof||p.occ||'—'],
       ['Company / Organisation',p.co||'—'],
-      ['Annual Income',         p.inc||p.sal ? '₹' + (p.inc||p.sal) + '/yr' : '—'],
+      ['Place of Work',         p.workplace||'—'],
+      ['Annual Income',         p.inc ? formatIncomeDisplay(p.inc) : (p.sal ? '₹'+p.sal+'/yr' : '—')],
+      ['Visa Status',           p.visa||'—'],
     ])}
 
     ${sec('Lifestyle', [
@@ -718,18 +760,21 @@ function viewProf(u){
     ])}
 
     ${sec("Father's Details", [
-      ["Father's Name",       p.fn||'—'],
-      ["Father's Status",     p.fas||'—'],
-      ["Father's Occupation", p.fo||p.fp||'—'],
-      ["Father's Mobile",     p.fmob||'—'],
-      ["Father's Gotra",      p.fg||'—'],
+      ["Father's Name",            p.fn||'—'],
+      ["Father's Status",          p.fas||'—'],
+      ["Father's Occupation",      p.fo||p.fp||'—'],
+      ["Father's Sub-Caste/Gotra", p.fg||'—'],
     ])}
 
     ${sec("Mother's Details", [
       ["Mother's Name",       p.mn||'—'],
       ["Mother's Status",     p.mas||'—'],
       ["Mother's Occupation", p.mo||'—'],
-      ["Mother's Mobile",     p.mmob||'—'],
+    ])}
+
+    ${sec("Parent / Guardian Contacts", [
+      ["Guardian Mobile 1",  p.pgmob1||p.fmob||'—'],
+      ["Guardian Mobile 2",  p.pgmob2||p.mmob||'—'],
     ])}
 
     ${sec('Siblings & Property', [
@@ -809,20 +854,32 @@ function editProf(u){
           ${buildEditField('Rashi','rashi',p.rashi,'text')}
           ${buildEditField('Native Place','nat',p.nat||p.native,'text')}
         </div>
+        ${buildEditSection("Additional Education")}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem;margin-bottom:1rem;">
+          ${buildEditField('SSC / 10th School','school',p.school,'text')}
+          ${buildEditField('Intermediate / 12th College','inter',p.inter,'text')}
+          ${buildEditField('Engineering / Degree College','engcol',p.engcol,'text')}
+          ${buildEditField('Place of Work','workplace',p.workplace,'text')}
+          ${buildEditField('Visa Status','visa',p.visa,'text')}
+          ${buildEditField('Total Property Value','pval',p.pval,'text')}
+        </div>
         ${buildEditSection("Father's Details")}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem;margin-bottom:1rem;">
           ${buildEditField("Father's Name",'fn',p.fn,'text')}
-          ${buildEditField("Father's Mobile",'fmob',p.fmob,'tel')}
           ${buildEditField("Father's Status",'fas',p.fas,'text')}
           ${buildEditField("Father's Occupation",'fo',p.fo||p.fp,'text')}
-          ${buildEditField("Father's Gotra",'fg',p.fg,'text')}
+          ${buildEditField("Father's Sub-Caste/Gotra",'fg',p.fg,'text')}
         </div>
         ${buildEditSection("Mother's Details")}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem;margin-bottom:1rem;">
           ${buildEditField("Mother's Name",'mn',p.mn,'text')}
-          ${buildEditField("Mother's Mobile",'mmob',p.mmob,'tel')}
           ${buildEditField("Mother's Status",'mas',p.mas,'text')}
           ${buildEditField("Mother's Occupation",'mo',p.mo,'text')}
+        </div>
+        ${buildEditSection("Parent / Guardian Contacts")}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem;margin-bottom:1rem;">
+          ${buildEditField('Guardian Mobile 1','pgmob1',p.pgmob1||p.fmob,'tel')}
+          ${buildEditField('Guardian Mobile 2','pgmob2',p.pgmob2||p.mmob,'tel')}
         </div>
         <div style="margin-top:0.8rem;">
           <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Membership Tier</label>
@@ -860,7 +917,7 @@ function saveEditProf(u){
   const p = ST.profiles.find(x=>x.u===u);
   if(!p){ toast('Profile not found.'); return; }
   const fields = ['name','dob','g','mob','email','city','state','country','prof','inc','edu','ht','gotra','nak','rashi','nat',
-                  'fn','fmob','fas','fo','fg','mn','mmob','mas','mo'];
+                  'fn','fas','fo','fg','mn','mas','mo','pgmob1','pgmob2','school','inter','engcol','workplace','visa','pval'];
   fields.forEach(f=>{
     const el = document.getElementById('edit_'+f);
     if(el) p[f] = el.value.trim();
@@ -962,6 +1019,76 @@ function addOffline(){
   renderAll();
   clearOff();
   toast(`✅ ${name} registered successfully as ${offT} member.`);
+}
+
+// ═══════════════════════════════════════
+// ADMIN BIODATA VIEW
+// ═══════════════════════════════════════
+function formatIncomeDisplay(val){
+  const n=parseFloat(val);
+  if(isNaN(n)||n<=0)return val||'—';
+  if(n>=10000000) return '₹'+(n/10000000).toFixed(2).replace(/\.?0+$/,'')+' Crore/yr';
+  if(n>=100000)   return '₹'+(n/100000).toFixed(2).replace(/\.?0+$/,'')+' Lakhs/yr';
+  if(n>=1000)     return '₹'+(n/1000).toFixed(1).replace(/\.?0+$/,'')+' Thousand/yr';
+  return '₹'+n+'/yr';
+}
+
+function adminViewBiodata(u){
+  const p=ST.profiles.find(x=>x.u===u);
+  if(!p){toast('Profile not found.');return;}
+  const existing=document.getElementById('adminBiodataOv');if(existing)existing.remove();
+  const tier=p.tier||'VIP';
+  const slId=tier.toUpperCase()+' '+String(10000+Math.abs(p.u.charCodeAt(0)*17+p.u.charCodeAt(1||0)*7)%9000);
+  const gender=p.g==='Female'?'Bride':'Groom';
+  const dobStr=p.dob&&p.dob!=='—'?new Date(p.dob).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}):p.dob||'—';
+  const inc=p.inc?formatIncomeDisplay(p.inc):(p.sal||'—');
+  function row(label,val,label2,val2){
+    if(label2&&val2) return `<div class="bio-two"><div class="bio-row"><span class="bio-lbl">${label}</span><span class="bio-val">: ${val||'—'}</span></div><div class="bio-row"><span class="bio-lbl">${label2}</span><span class="bio-val">: ${val2||'—'}</span></div></div>`;
+    return `<div class="bio-row"><span class="bio-lbl">${label}</span><span class="bio-val">: ${val||'—'}</span></div>`;
+  }
+  const el=document.createElement('div');
+  el.className='biodata-overlay';el.id='adminBiodataOv';
+  el.onclick=(e)=>{if(e.target===el)el.remove();};
+  el.innerHTML=`<div class="biodata-sheet">
+    <div class="bio-header">
+      <div class="bio-meta"><span><em>Since 2000</em></span><span><strong>Sl No : ${slId}</strong></span></div>
+      <div class="bio-bureau">NAVEEN REDDY</div>
+      <div class="bio-sub">MARRIAGE BUREAU</div>
+      <div class="bio-address">Corporate office: <u>Somajiguda</u>, Branches: <u>Kothapet</u>, <u>Warangal</u>, <u>Karimnagar</u></div>
+    </div>
+    ${row('Name of the '+gender,p.name)}
+    ${row('Date of Birth',dobStr,'Height',p.ht||'—')}
+    ${p.pob&&p.pob!=='—'?row('Time and Place of Birth',p.pob):''}
+    ${row('Complexion / Color',p.cx||'—','Gotram',p.gotra||p.fg||'—')}
+    ${row('Sub Caste',p.gotra||'—','Star',p.nak||'—')}
+    ${row('Native Dist',p.nat||p.native||'—','Raasi',p.rashi||'—')}
+    ${row('Settled Place',p.city||'—')}
+    ${p.school&&p.school!=='—'?row('SSC School Name',p.school):''}
+    ${p.inter&&p.inter!=='—'?row('Inter College Name',p.inter):''}
+    ${p.engcol&&p.engcol!=='—'?row('Engineering College Name',p.engcol):''}
+    ${p.col&&p.col!=='—'?row('PG / MS College',p.col):''}
+    ${row('Occupation',p.prof||p.occ||'—')}
+    ${p.co&&p.co!=='—'?row('Company Name',p.co):''}
+    ${p.workplace&&p.workplace!=='—'?row('Place of Job/Business',p.workplace):''}
+    ${inc&&inc!=='—'?row('Annual Income',inc):''}
+    ${p.visa&&p.visa!=='—'?row('Visa Status',p.visa):''}
+    <div class="bio-sec-title">FAMILY MEMBERS DETAILS</div>
+    ${row("Father's Profession",p.fo||p.fp||'—')}
+    ${row("Mother's Profession",p.mo||'—')}
+    ${p.br&&p.br!=='0'?row('Brothers',p.br+' (Married: '+(p.brm||'0')+')'):''}
+    ${p.sr&&p.sr!=='0'?row('Sisters',p.sr+' (Married: '+(p.srm||'0')+')'):''}
+    ${(p.br==='0'&&p.sr==='0')?'<div class="bio-row"><span class="bio-lbl"> </span><span class="bio-val">: No Siblings</span></div>':''}
+    <div class="bio-sec-title">CHOICE PREFERRED</div>
+    ${p.pp_af&&p.pp_at?row('Age Gap',(parseInt(p.pp_at)-parseInt(p.pp_af))+' Years Acceptable'):''}
+    ${p.pp_hf&&p.pp_hf!=='Any'?row('Height',p.pp_hf+' & Above'):''}
+    ${p.pp_edu&&p.pp_edu!=='Any'?row('Qualification',p.pp_edu):''}
+    <div class="bio-footer">Relationship : Father / Guardian &nbsp;&nbsp; Contact : ${p.pgmob1||p.fmob||'—'}</div>
+    <div style="text-align:center;margin-top:0.6rem;display:flex;gap:0.6rem;justify-content:center;">
+      <button onclick="window.print()" style="padding:0.5rem 1.2rem;background:var(--crimson);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;font-weight:600;letter-spacing:0.12em;color:#fff;">🖨 Print</button>
+      <button onclick="document.getElementById('adminBiodataOv').remove()" style="padding:0.5rem 1.2rem;background:transparent;border:1px solid var(--crimson);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.12em;color:var(--crimson);">Close</button>
+    </div>
+  </div>`;
+  document.body.appendChild(el);
 }
 
 // ═══════════════════════════════════════
