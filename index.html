@@ -1038,13 +1038,17 @@ function adminViewBiodata(u){
   if(!p){toast('Profile not found.');return;}
   const existing=document.getElementById('adminBiodataOv');if(existing)existing.remove();
   const tier=p.tier||'VIP';
-  const slId=tier.toUpperCase()+' '+String(10000+Math.abs(p.u.charCodeAt(0)*17+p.u.charCodeAt(1||0)*7)%9000);
+  const slId=tier.toUpperCase()+' '+String(10000+Math.abs(p.u.charCodeAt(0)*17+(p.u.charCodeAt(1)||0)*7)%9000);
   const gender=p.g==='Female'?'Bride':'Groom';
   const dobStr=p.dob&&p.dob!=='—'?new Date(p.dob).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}):p.dob||'—';
   const inc=p.inc?formatIncomeDisplay(p.inc):(p.sal||'—');
+  function fmt12(t){if(!t||t==='—')return '';try{const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';const h12=h%12||12;return h12+':'+String(m).padStart(2,'0')+' '+ampm;}catch(e){return t;}}
+  const tobStr=fmt12(p.tob);
+  const timePlace=(tobStr||p.pob&&p.pob!=='—')?[tobStr,p.pob&&p.pob!=='—'?p.pob:''].filter(Boolean).join(', '):'';
+  const boardLbl=p.board&&p.board!=='—'&&p.board!=='Other'?p.board+' School Name':'School Name';
   function row(label,val,label2,val2){
-    if(label2&&val2) return `<div class="bio-two"><div class="bio-row"><span class="bio-lbl">${label}</span><span class="bio-val">: ${val||'—'}</span></div><div class="bio-row"><span class="bio-lbl">${label2}</span><span class="bio-val">: ${val2||'—'}</span></div></div>`;
-    return `<div class="bio-row"><span class="bio-lbl">${label}</span><span class="bio-val">: ${val||'—'}</span></div>`;
+    if(label2!==undefined) return `<div class="bio-two"><div class="bio-row"><span class="bio-lbl">${label}</span><span class="bio-val"> : ${val||'—'}</span></div><div class="bio-row"><span class="bio-lbl">${label2}</span><span class="bio-val"> : ${val2||'—'}</span></div></div>`;
+    return `<div class="bio-row"><span class="bio-lbl">${label}</span><span class="bio-val"> : ${val||'—'}</span></div>`;
   }
   const el=document.createElement('div');
   el.className='biodata-overlay';el.id='adminBiodataOv';
@@ -1058,31 +1062,35 @@ function adminViewBiodata(u){
     </div>
     ${row('Name of the '+gender,p.name)}
     ${row('Date of Birth',dobStr,'Height',p.ht||'—')}
-    ${p.pob&&p.pob!=='—'?row('Time and Place of Birth',p.pob):''}
+    ${timePlace?row('Time and Place of Birth',timePlace):''}
     ${row('Complexion / Color',p.cx||'—','Gotram',p.gotra||p.fg||'—')}
-    ${row('Sub Caste',p.gotra||'—','Star',p.nak||'—')}
-    ${row('Native Dist',p.nat||p.native||'—','Raasi',p.rashi||'—')}
+    ${row('Sub Caste',p.subCaste||p.gotra||'Reddy','Star / Nakshatra',p.nak||'—')}
+    ${row('Native District',p.nat||p.native||'—','Raasi',p.rashi||'—')}
     ${row('Settled Place',p.city||'—')}
-    ${p.school&&p.school!=='—'?row('SSC School Name',p.school):''}
+    ${p.school&&p.school!=='—'?row(boardLbl,p.school):''}
     ${p.inter&&p.inter!=='—'?row('Inter College Name',p.inter):''}
     ${p.engcol&&p.engcol!=='—'?row('Engineering College Name',p.engcol):''}
     ${p.col&&p.col!=='—'?row('PG / MS College',p.col):''}
     ${row('Occupation',p.prof||p.occ||'—')}
     ${p.co&&p.co!=='—'?row('Company Name',p.co):''}
-    ${p.workplace&&p.workplace!=='—'?row('Place of Job/Business',p.workplace):''}
+    ${p.workplace&&p.workplace!=='—'?row('Place of Job / Business',p.workplace):''}
     ${inc&&inc!=='—'?row('Annual Income',inc):''}
     ${p.visa&&p.visa!=='—'?row('Visa Status',p.visa):''}
     <div class="bio-sec-title">FAMILY MEMBERS DETAILS</div>
+    ${row("Father's Name",p.fn||'—')}
     ${row("Father's Profession",p.fo||p.fp||'—')}
+    ${row("Mother's Name",p.mn||'—')}
     ${row("Mother's Profession",p.mo||'—')}
     ${p.br&&p.br!=='0'?row('Brothers',p.br+' (Married: '+(p.brm||'0')+')'):''}
     ${p.sr&&p.sr!=='0'?row('Sisters',p.sr+' (Married: '+(p.srm||'0')+')'):''}
-    ${(p.br==='0'&&p.sr==='0')?'<div class="bio-row"><span class="bio-lbl"> </span><span class="bio-val">: No Siblings</span></div>':''}
+    ${(!p.br||p.br==='0')&&(!p.sr||p.sr==='0')?row('Siblings','No Siblings'):''}
+    ${p.pval&&p.pval!=='—'?row('Property Value',p.pval):''}
     <div class="bio-sec-title">CHOICE PREFERRED</div>
-    ${p.pp_af&&p.pp_at?row('Age Gap',(parseInt(p.pp_at)-parseInt(p.pp_af))+' Years Acceptable'):''}
-    ${p.pp_hf&&p.pp_hf!=='Any'?row('Height',p.pp_hf+' & Above'):''}
+    ${p.pp_af&&p.pp_at?row('Age Preferred',p.pp_af+' to '+p.pp_at+' Years'):''}
+    ${p.pp_hf&&p.pp_hf!=='Any'?row('Height',p.pp_hf+' &amp; Above'):''}
     ${p.pp_edu&&p.pp_edu!=='Any'?row('Qualification',p.pp_edu):''}
-    <div class="bio-footer">Relationship : Father / Guardian &nbsp;&nbsp; Contact : ${p.pgmob1||p.fmob||'—'}</div>
+    ${p.pp_note&&p.pp_note!=='—'?row('Other Preferences',p.pp_note):''}
+    <div class="bio-footer">Relationship : Father / Guardian &nbsp;&nbsp;&nbsp; Contact : ${p.pgmob1||p.fmob||'—'}</div>
     <div style="text-align:center;margin-top:0.6rem;display:flex;gap:0.6rem;justify-content:center;">
       <button onclick="window.print()" style="padding:0.5rem 1.2rem;background:var(--crimson);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;font-weight:600;letter-spacing:0.12em;color:#fff;">🖨 Print</button>
       <button onclick="document.getElementById('adminBiodataOv').remove()" style="padding:0.5rem 1.2rem;background:transparent;border:1px solid var(--crimson);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.12em;color:var(--crimson);">Close</button>
