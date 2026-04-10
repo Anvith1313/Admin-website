@@ -321,6 +321,23 @@ body{font-size:16px;}
         window.renderAll();
         if(window.renderProfiles) window.renderProfiles(window.ST.profiles);
         toast('✅ '+snap.size+' profiles loaded from Firebase.');
+        // Also load interests from Firestore
+        try{
+          const intSnap=await getDocs(collection(db,'interests'));
+          const seen=new Set();
+          intSnap.forEach(d=>{
+            const i=d.data();
+            const key=i.from+'_'+i.to;
+            if(!seen.has(key)){
+              seen.add(key);
+              const exists=window.ST.interests.find(x=>x.from===i.from&&x.to===i.to);
+              if(exists) exists.status=i.status;
+              else window.ST.interests.push(i);
+            }
+          });
+          window.renderAll();
+          if(window.renderInterests) window.renderInterests();
+        }catch(ie){console.warn('Interest load failed:',ie);}
       } catch(e){
         console.error("❌ Firebase load failed:", e.code, e.message);
         toast('Firebase error: '+e.message);
@@ -388,6 +405,10 @@ body{font-size:16px;}
     <div class="a-topbar">
       <div class="a-title" id="secTitleEl">Dashboard</div>
       <div class="a-meta" id="secMetaEl">Bureau Administrator</div>
+      <button onclick="openAdminNotifPanel()" style="position:relative;background:none;border:1.5px solid var(--border);border-radius:50px;padding:0.4rem 0.9rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:0.35rem;">
+        🔔 Notifications
+        <span id="adminNotifBadge" style="display:none;background:#e8002d;color:#fff;font-size:0.38rem;font-weight:700;min-width:16px;height:16px;border-radius:20px;padding:0 4px;align-items:center;justify-content:center;line-height:16px;text-align:center;">0</span>
+      </button>
     </div>
 
     <!-- DASHBOARD -->
@@ -432,7 +453,7 @@ body{font-size:16px;}
           <div class="inp-f-group"><label class="inp-f-lbl">Father's Name</label><input class="inp-f-field" id="ofn" placeholder="Father's full name"></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Father's Mobile</label><input class="inp-f-field" id="ofmob" type="tel" placeholder="+91 98765 43210"></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Father's Status</label><select class="inp-f-sel" id="ofas" onchange="toggleAdminFatherOcc()"><option value="">Select</option><option>Employed</option><option>Business</option><option>Retired</option><option>Farmer</option><option>Passed Away</option></select></div>
-          <div class="inp-f-group" id="ofp_wrap"><label class="inp-f-lbl">Father's Occupation</label><input class="inp-f-field" id="ofp" placeholder="e.g. Govt Officer"></div>
+          <div class="inp-f-group" id="ofp_wrap" style="display:none;"><label class="inp-f-lbl">Father's Occupation</label><input class="inp-f-field" id="ofp" placeholder="e.g. Govt Officer"></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Father's Gotra</label><select class="inp-f-sel" id="ofg"><option value="">Select</option><option>Motati</option><option>Gudati</option><option>Pakanati</option><option>Gone</option><option>Chittepu</option><option>Bhumanchi</option><option>Pedakanti</option><option>Velama</option><option>Mudiraj</option><option>Gajula</option><option>Niyogi</option><option>Vaidiki</option><option>Turpu Kapu</option><option>Telaga</option><option>Other</option></select></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Mother's Name</label><input class="inp-f-field" id="omn" placeholder="Mother's full name"></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Mother's Mobile</label><input class="inp-f-field" id="ommob" type="tel" placeholder="+91 98765 43210"></div>
@@ -564,6 +585,7 @@ function adminLogin(){
   if(window.FIREBASE_READY && window.loadProfilesFromFirebase){
     setTimeout(window.loadProfilesFromFirebase, 500);
   }
+  if(window.FIREBASE_READY) loadAdminNotifications();
 }
 function adminLogout(){
   currentAdmin=null;
@@ -595,10 +617,47 @@ function renderAll(){
   document.getElementById('mutCnt').textContent=ST.interests.filter(i=>i.status==='mutual'||i.status==='contact_released').length;
   document.getElementById('intCnt').textContent=ST.interests.length;
 }
+// ═══ ADMIN NOTIFICATIONS ═══
+let adminNotifs=[];
+async function loadAdminNotifications(){
+  if(!window.FIREBASE_READY)return;
+  try{
+    const {getDocs,query,where,collection,db}=window.FB;
+    const snap=await getDocs(query(collection(db,'notifications'),where('uid','==','__admin__')));
+    adminNotifs=[];
+    snap.forEach(d=>adminNotifs.push({...d.data(),id:d.id}));
+    adminNotifs.sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+    const unread=adminNotifs.filter(n=>!n.read).length;
+    const badge=document.getElementById('adminNotifBadge');
+    if(badge){badge.textContent=unread;badge.style.display=unread>0?'inline-flex':'none';}
+  }catch(e){console.warn('Admin notif load failed:',e);}
+}
+function openAdminNotifPanel(){
+  const existing=document.getElementById('adminNotifOv');if(existing)existing.remove();
+  const ov=document.createElement('div');
+  ov.id='adminNotifOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.4);';
+  ov.onclick=e=>{if(e.target===ov)ov.remove();};
+  const panel=document.createElement('div');
+  panel.style.cssText='position:fixed;top:0;right:0;width:360px;max-width:100vw;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,0.12);overflow-y:auto;display:flex;flex-direction:column;';
+  const items=adminNotifs.length?adminNotifs.map(n=>`<div style="padding:0.9rem 1.5rem;border-bottom:1px solid #eee;${n.read?'opacity:0.55':''}"><div style="font-family:'EB Garamond',serif;font-size:0.95rem;line-height:1.5;">${n.msg||'Notification'}</div><div style="font-family:'Cinzel',serif;font-size:0.4rem;color:#999;margin-top:0.3rem;">${(n.ts||'').substring(0,10)} ${n.read?'· Read':'· New'}</div></div>`).join(''):'<div style="padding:2rem;text-align:center;font-style:italic;color:#999;">No notifications.</div>';
+  panel.innerHTML=`<div style="padding:1.2rem 1.5rem;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;color:#8b0000;">NOTIFICATIONS</div><button onclick="document.getElementById('adminNotifOv').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✕</button></div>${items}`;
+  ov.appendChild(panel);document.body.appendChild(ov);
+  // Mark all read
+  adminNotifs.forEach(n=>n.read=true);
+  const badge=document.getElementById('adminNotifBadge');
+  if(badge)badge.style.display='none';
+  if(window.FIREBASE_READY){
+    const {doc,updateDoc,db}=window.FB;
+    adminNotifs.forEach(n=>{if(n.id)updateDoc(doc(db,'notifications',n.id),{read:true}).catch(()=>{});});
+  }
+}
+
 // Expose to module scope
 window.ST=ST;
 window.renderAll=renderAll;
 window.renderProfiles=renderProfiles;
+window.renderInterests=renderInterests;
 
 function renderDash(){
   const mut=ST.interests.filter(i=>i.status==='mutual'||i.status==='contact_released').length;
@@ -613,13 +672,14 @@ function renderDash(){
     const fee = feeMap[e.p1?.tier||'VIP']||3;
     return sum + (e.p1_paid?fee/2:0) + (e.p2_paid?fee/2:0);
   }, 0);
+  const isSuper=currentAdmin&&currentAdmin.role==='superadmin';
   document.getElementById('statsRow').innerHTML=`
     <div class="stat-card"><div class="s-num">${ST.profiles.length}</div><div class="s-lbl">Active Members</div></div>
     <div class="stat-card"><div class="s-num">${mut}</div><div class="s-lbl">Active Matches</div></div>
     <div class="stat-card"><div class="s-num">${ST.engaged.length}</div><div class="s-lbl">Engaged Couples</div></div>
     <div class="stat-card"><div class="s-num">${archived}</div><div class="s-lbl">Archived / Closed</div></div>
-    <div class="stat-card" style="border-color:rgba(45,106,79,0.3);"><div class="s-num" style="color:#2d6a4f;">₹${totalRevenue}L</div><div class="s-lbl">Revenue Collected</div></div>
-    <div class="stat-card" style="border-color:rgba(192,57,43,0.3);"><div class="s-num" style="color:var(--crimson);">${pendingPayment}</div><div class="s-lbl">Payments Pending</div></div>
+    ${isSuper?`<div class="stat-card" style="border-color:rgba(45,106,79,0.3);"><div class="s-num" style="color:#2d6a4f;">₹${totalRevenue}L</div><div class="s-lbl">Revenue Collected</div></div>`:''}
+    ${isSuper?`<div class="stat-card" style="border-color:rgba(192,57,43,0.3);"><div class="s-num" style="color:var(--crimson);">${pendingPayment}</div><div class="s-lbl">Payments Pending</div></div>`:''}
   `;
   const acts=[...ST.interests.map(i=>{
     const p1=ST.profiles.find(x=>x.u===i.from);const p2=ST.profiles.find(x=>x.u===i.to);
@@ -959,18 +1019,18 @@ function pickOT(t){
 function toggleAdminFatherOcc(){
   const v=document.getElementById('ofas').value;
   const w=document.getElementById('ofp_wrap');
-  if(w) w.style.display=(v&&v!=='Passed Away')?'':'none';
+  if(w) w.style.display=(v==='Employed'||v==='Business'||v==='Farmer')?'':'none';
 }
 function toggleAdminMotherOcc(){
   const v=document.getElementById('omas').value;
   const w=document.getElementById('omo_wrap');
-  if(w) w.style.display=(v&&v!=='Passed Away'&&v!=='Homemaker')?'':'none';
+  if(w) w.style.display=(v==='Employed'||v==='Business')?'':'none';
 }
 function clearOff(){
   ['on','odob','oht','osal','oedu','ofp','oci','oco','om','oe','ou','oadh','onotes',
    'ofn','ofmob','ofp','omn','ommob','omo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['og','ocx','ost','ofas','ofg','omas','ogotra'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('ofp_wrap') && (document.getElementById('ofp_wrap').style.display='');
+  document.getElementById('ofp_wrap') && (document.getElementById('ofp_wrap').style.display='none');
   document.getElementById('omo_wrap') && (document.getElementById('omo_wrap').style.display='none');
   offT=null;
   ['oV','oVV','oEl'].forEach(id=>document.getElementById(id)?.classList.remove('sel'));
