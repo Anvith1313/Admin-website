@@ -282,10 +282,12 @@ body{font-size:16px;}
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut }
       from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, query, where }
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, addDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp }
       from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
     import { getDatabase, ref as dbRef, get, set, onValue }
       from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+    import { getStorage, ref as stRef, uploadBytes, getDownloadURL }
+      from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDWg8XpuuQGp-aPYMW-ESiUh74Gj-hdKHg",
@@ -300,10 +302,12 @@ body{font-size:16px;}
     const auth = getAuth(app);
     const db   = getFirestore(app);
     const rtdb = getDatabase(app);
-    window.FB = { auth, db, rtdb,
+    const storage = getStorage(app);
+    window.FB = { auth, db, rtdb, storage,
       signInWithEmailAndPassword, signOut,
-      collection, doc, setDoc, getDoc, getDocs, updateDoc, query, where,
-      dbRef, get, set, onValue
+      collection, doc, setDoc, getDoc, getDocs, updateDoc, addDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp,
+      dbRef, get, set, onValue,
+      stRef, uploadBytes, getDownloadURL
     };
     window.FIREBASE_READY = true;
     console.log("✅ Admin Firebase initialized");
@@ -393,6 +397,7 @@ body{font-size:16px;}
     <div class="sb-sec-lbl">Records</div>
     <button class="sb-btn" id="bEng" onclick="goSec('secEngaged')">💍 &nbsp;Engaged Couples</button>
     <button class="sb-btn" id="bChat" onclick="goSec('secChats')">💬 &nbsp;All Conversations</button>
+    <button class="sb-btn" id="bEditReq" onclick="goSec('secEditReq')">✏ &nbsp;Edit Requests <span class="sb-badge" id="editReqCnt" style="display:none;">0</span></button>
 
     <div class="sb-sec-lbl">Records</div>
     <button class="sb-btn" id="bArch" onclick="goSec('secArchived')">📁 &nbsp;Archived / Closed</button>
@@ -494,6 +499,15 @@ body{font-size:16px;}
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">All family conversations are accessible to the bureau administrator for oversight and record-keeping.</p>
       <div class="card-grid" id="chatGrid"></div>
     </div>
+
+    <!-- ─── EDIT REQUESTS ─── -->
+    <div class="a-sec" id="secEditReq">
+      <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Profile update requests submitted by members. Review and apply changes directly to their Firestore profile.</p>
+      <div style="margin-bottom:1rem;">
+        <button onclick="loadEditRequests()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh Requests</button>
+      </div>
+      <div id="editReqGrid" class="card-grid"></div>
+    </div>
   </main>
 </div>
 
@@ -586,6 +600,8 @@ function adminLogin(){
     setTimeout(window.loadProfilesFromFirebase, 500);
   }
   if(window.FIREBASE_READY) loadAdminNotifications();
+  if(window.FIREBASE_READY) setTimeout(loadEditRequests, 800);
+  if(window.FIREBASE_READY) setTimeout(_startAdminRealTime, 1200);
 }
 function adminLogout(){
   currentAdmin=null;
@@ -595,8 +611,8 @@ function adminLogout(){
   document.getElementById('ap').value='';
 }
 
-const secT={secDash:'Dashboard',secArchived:'Archived Profiles',secProfiles:'All Member Profiles',secAdd:'Add Offline Member',secInterests:'All Interest Records',secMutual:'Mutual Matches',secEngaged:'Engaged Couples',secChats:'All Conversations'};
-const bMap={secDash:'bDash',secArchived:'bArch',secProfiles:'bProf',secAdd:'bAdd',secInterests:'bInt',secMutual:'bMut',secEngaged:'bEng',secChats:'bChat'};
+const secT={secDash:'Dashboard',secArchived:'Archived Profiles',secProfiles:'All Member Profiles',secAdd:'Add Offline Member',secInterests:'All Interest Records',secMutual:'Mutual Matches',secEngaged:'Engaged Couples',secChats:'All Conversations',secEditReq:'Member Edit Requests'};
+const bMap={secDash:'bDash',secArchived:'bArch',secProfiles:'bProf',secAdd:'bAdd',secInterests:'bInt',secMutual:'bMut',secEngaged:'bEng',secChats:'bChat',secEditReq:'bEditReq'};
 function goSec(id){
   document.querySelectorAll('.a-sec').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -609,6 +625,7 @@ function goSec(id){
   if(id==='secEngaged')renderEngaged();
   if(id==='secChats')renderChats();
   if(id==='secArchived')renderArchived();
+  if(id==='secEditReq')renderEditRequests();
 }
 
 function renderAll(){
@@ -953,6 +970,14 @@ function editProf(u){
           <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Admin Notes</label>
           <textarea id="edit_notes" rows="3" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.2);padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);resize:vertical;">${p.notes||''}</textarea>
         </div>
+        ${buildEditSection('Profile Photos')}
+        <div id="adminPhotosSection_${u}" style="margin-bottom:1rem;">
+          <div id="adminPhotoGrid_${u}" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">
+            ${(p.photos||[]).map((url,i)=>`<div style="position:relative;"><img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(139,0,0,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join('')}
+            ${(p.photos||[]).length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,150,12,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:''}
+          </div>
+          <div style="font-family:'EB Garamond',serif;font-size:0.75rem;font-style:italic;color:var(--muted);">Up to 5 photos. ${5-(p.photos||[]).length} slot(s) remaining.</div>
+        </div>
         <div style="margin-top:1.2rem;display:flex;gap:0.6rem;">
           <button onclick="saveEditProf('${u}')" style="flex:1;padding:0.85rem;background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,248,220,0.96);box-shadow:0 4px 16px rgba(139,0,0,0.2);">Save Changes</button>
           <button onclick="document.getElementById('editProfModal').remove()" style="padding:0.85rem 1.5rem;background:transparent;border:1.5px solid rgba(184,150,12,0.28);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);">Cancel</button>
@@ -992,12 +1017,61 @@ function saveEditProf(u){
   p.sal = p.inc; p.occ = p.prof; p.native = p.nat; p.fp = p.fo;
   document.getElementById('editProfModal').remove();
   renderAll();
-  toast('✅ Profile updated successfully.');
-  // Firebase update
+  // Firebase update — use UID as document ID (not username)
+  const docId = p.uid || u;
   if(window.FIREBASE_READY && window.FB){
-    window.FB.updateDoc(window.FB.doc(window.FB.db,'users',u), p)
-      .catch(e=>console.warn('Firebase update:', e.message));
+    window.FB.updateDoc(window.FB.doc(window.FB.db,'users',docId), p)
+      .then(()=>toast('✅ Profile updated & synced to main site.'))
+      .catch(e=>{
+        toast('⚠ Local update done, Firebase sync failed: '+e.message);
+        console.warn('Firebase update:', e.message);
+      });
+  } else {
+    toast('✅ Profile updated locally.');
   }
+}
+
+async function adminUploadPhoto(u, file){
+  if(!file)return;
+  if(!window.FIREBASE_READY){toast('Firebase not ready.');return;}
+  const p=ST.profiles.find(x=>x.u===u);if(!p){toast('Profile not found.');return;}
+  const photos=p.photos||[];
+  if(photos.length>=5){toast('Maximum 5 photos allowed.');return;}
+  if(file.size>5*1024*1024){toast('Photo must be under 5MB.');return;}
+  toast('Uploading…');
+  try{
+    const {storage,stRef,uploadBytes,getDownloadURL,updateDoc,doc,db}=window.FB;
+    const docId=p.uid||u;
+    const ref=stRef(storage,`profiles/${docId}/photos/photo_${photos.length}_${Date.now()}`);
+    await uploadBytes(ref,file);
+    const url=await getDownloadURL(ref);
+    photos.push(url);p.photos=photos;
+    await updateDoc(doc(db,'users',docId),{photos});
+    // Re-render photo grid
+    const grid=document.getElementById('adminPhotoGrid_'+u);
+    if(grid){
+      grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(139,0,0,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
+        +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,150,12,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
+    }
+    toast('✅ Photo uploaded!');
+  }catch(e){toast('Upload failed: '+e.message);}
+}
+async function adminDeletePhoto(u, idx){
+  if(!confirm('Remove this photo?'))return;
+  const p=ST.profiles.find(x=>x.u===u);if(!p)return;
+  const photos=p.photos||[];
+  photos.splice(idx,1);p.photos=photos;
+  if(window.FIREBASE_READY){
+    const {updateDoc,doc,db}=window.FB;
+    const docId=p.uid||u;
+    await updateDoc(doc(db,'users',docId),{photos}).catch(e=>console.warn(e));
+  }
+  const grid=document.getElementById('adminPhotoGrid_'+u);
+  if(grid){
+    grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(139,0,0,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
+      +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,150,12,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
+  }
+  toast('Photo removed.');
 }
 
 function tpwd(id,btn){const el=document.getElementById(id);el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🙈';}
@@ -1368,6 +1442,152 @@ function purgeProfile(idx){
   ST.archived.splice(idx,1);
   renderArchived();renderAll();
   toast('Record permanently deleted.');
+}
+
+// ═══ REAL-TIME ADMIN SYNC ═══
+let _adminRtUnsubs=[];
+function _startAdminRealTime(){
+  if(!window.FIREBASE_READY)return;
+  _adminRtUnsubs.forEach(u=>{try{u();}catch(e){}});
+  _adminRtUnsubs=[];
+  const {onSnapshot,collection,db,query,where}=window.FB;
+  // Watch users — new registrations appear in real-time
+  const u1=onSnapshot(collection(db,'users'),(snap)=>{
+    snap.docChanges().forEach(change=>{
+      const data={...change.doc.data(),uid:change.doc.id,u:change.doc.data().u||change.doc.id};
+      if(change.type==='added'){
+        const exists=window.ST.profiles.some(p=>p.uid===data.uid||p.u===data.u);
+        if(!exists){ window.ST.profiles.push(data); window.renderAll(); }
+      } else if(change.type==='modified'){
+        const idx=window.ST.profiles.findIndex(p=>p.uid===data.uid||p.u===data.u);
+        if(idx>-1){ window.ST.profiles[idx]=data; window.renderAll(); }
+      } else if(change.type==='removed'){
+        const idx=window.ST.profiles.findIndex(p=>p.uid===data.uid||p.u===data.u);
+        if(idx>-1){ window.ST.profiles.splice(idx,1); window.renderAll(); }
+      }
+    });
+    const cnt=document.getElementById('profCnt');
+    if(cnt)cnt.textContent=window.ST.profiles.length;
+  });
+  _adminRtUnsubs.push(u1);
+  // Watch edit requests — new ones show badge immediately
+  const u2=onSnapshot(query(collection(db,'editRequests'),where('status','==','pending')),(snap)=>{
+    snap.docChanges().forEach(change=>{
+      if(change.type==='added'){
+        const d={...change.doc.data(),docId:change.doc.id};
+        const exists=_editRequests.some(r=>r.docId===d.docId);
+        if(!exists){ _editRequests.unshift(d); }
+      } else if(change.type==='removed'||change.type==='modified'){
+        const idx=_editRequests.findIndex(r=>r.docId===change.doc.id);
+        if(change.type==='removed'&&idx>-1) _editRequests.splice(idx,1);
+      }
+    });
+    const cnt=_editRequests.length;
+    const badge=document.getElementById('editReqCnt');
+    if(badge){badge.textContent=cnt;badge.style.display=cnt>0?'inline-flex':'none';}
+    // Refresh if section is active
+    if(document.getElementById('secEditReq')?.classList.contains('active')) renderEditRequests();
+  });
+  _adminRtUnsubs.push(u2);
+  // Watch interests — shows real-time mutual matches
+  const u3=onSnapshot(collection(db,'interests'),(snap)=>{
+    snap.docChanges().forEach(change=>{
+      const d=change.doc.data();
+      const idx=window.ST.interests.findIndex(i=>i.from===d.from&&i.to===d.to);
+      if(change.type==='removed'){ if(idx>-1)window.ST.interests.splice(idx,1); }
+      else if(idx>-1){ window.ST.interests[idx]=d; }
+      else { window.ST.interests.push(d); }
+    });
+    window.renderAll();
+  });
+  _adminRtUnsubs.push(u3);
+}
+
+// ═══ EDIT REQUESTS ═══
+let _editRequests=[];
+async function loadEditRequests(){
+  if(!window.FIREBASE_READY){toast('Firebase not ready.');return;}
+  try{
+    const {getDocs,query,collection,where,db}=window.FB;
+    const snap=await getDocs(query(collection(db,'editRequests'),where('status','==','pending')));
+    _editRequests=[];
+    snap.forEach(d=>_editRequests.push({...d.data(),docId:d.id}));
+    _editRequests.sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+    const cnt=_editRequests.length;
+    const badge=document.getElementById('editReqCnt');
+    if(badge){badge.textContent=cnt;badge.style.display=cnt>0?'inline-flex':'none';}
+    renderEditRequests();
+  }catch(e){toast('Failed to load requests: '+e.message);}
+}
+function renderEditRequests(){
+  const grid=document.getElementById('editReqGrid');
+  if(!grid)return;
+  if(!_editRequests.length){
+    grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No pending edit requests.</p>';
+    return;
+  }
+  grid.innerHTML=_editRequests.map((req,i)=>{
+    const chFields=Object.entries(req.changes||{}).map(([k,v])=>`<div><span style="font-family:'Cinzel',serif;font-size:0.42rem;text-transform:uppercase;color:var(--gold);letter-spacing:0.1em;">${k}</span>: <strong>${v}</strong></div>`).join('');
+    return `<div class="ac">
+      <div class="ac-top">
+        <div class="ac-av">✏</div>
+        <div>
+          <div class="ac-name">${req.name||req.u}</div>
+          <div class="ac-status s-pend">Pending Review</div>
+        </div>
+      </div>
+      <div class="ac-det" style="line-height:1.9;">
+        <strong>Member:</strong> ${req.u} · ${req.email||'—'}<br>
+        <strong>Submitted:</strong> ${(req.ts||'').substring(0,10)}<br>
+        <div style="margin-top:0.5rem;display:flex;flex-direction:column;gap:0.2rem;">${chFields||'<em>No field changes</em>'}</div>
+        ${req.note?`<div style="margin-top:0.4rem;font-style:italic;color:var(--muted);">Note: ${req.note}</div>`:''}
+      </div>
+      <div class="ac-acts">
+        <button class="act-b grn" onclick="applyEditRequest('${req.docId}',${i})">✓ Apply Changes</button>
+        <button class="act-b" onclick="dismissEditRequest('${req.docId}',${i})" style="color:#c0392b;border-color:rgba(192,57,43,0.3);">✕ Dismiss</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function applyEditRequest(docId,idx){
+  if(!window.FIREBASE_READY){toast('Firebase not ready.');return;}
+  const req=_editRequests[idx];
+  if(!req){toast('Request not found.');return;}
+  // Find profile by UID or username
+  const p=ST.profiles.find(x=>x.uid===req.uid||x.u===req.u);
+  const profileDocId=p?.uid||req.uid;
+  try{
+    const {updateDoc,doc,db,deleteDoc:delDoc}=window.FB;
+    // Apply changes to user profile
+    if(profileDocId&&Object.keys(req.changes||{}).length){
+      await updateDoc(doc(db,'users',profileDocId),{...req.changes});
+      // Update local copy
+      if(p)Object.assign(p,req.changes);
+    }
+    // Mark request as applied
+    await updateDoc(doc(db,'editRequests',docId),{status:'applied',appliedAt:new Date().toISOString()});
+    _editRequests.splice(idx,1);
+    const cnt=_editRequests.length;
+    const badge=document.getElementById('editReqCnt');
+    if(badge){badge.textContent=cnt;badge.style.display=cnt>0?'inline-flex':'none';}
+    renderEditRequests();
+    renderAll();
+    toast('✅ Changes applied to '+req.name+' profile.');
+  }catch(e){toast('Apply failed: '+e.message);}
+}
+async function dismissEditRequest(docId,idx){
+  if(!confirm('Dismiss this request without applying?'))return;
+  if(!window.FIREBASE_READY){toast('Firebase not ready.');return;}
+  try{
+    const {updateDoc,doc,db}=window.FB;
+    await updateDoc(doc(db,'editRequests',docId),{status:'dismissed',dismissedAt:new Date().toISOString()});
+    _editRequests.splice(idx,1);
+    const cnt=_editRequests.length;
+    const badge=document.getElementById('editReqCnt');
+    if(badge){badge.textContent=cnt;badge.style.display=cnt>0?'inline-flex':'none';}
+    renderEditRequests();
+    toast('Request dismissed.');
+  }catch(e){toast('Dismiss failed: '+e.message);}
 }
 
 // ═══════════════════════════════════════
