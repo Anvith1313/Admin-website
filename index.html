@@ -297,6 +297,13 @@ body{font-size:16px;}
 .bio-sec-title{font-style:italic;font-weight:700;text-decoration:underline;color:#c0392b;margin:0.8rem 0 0.4rem;font-size:0.9rem;}
 .bio-footer{text-align:right;font-style:italic;color:#c0392b;font-size:0.78rem;margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid #eee;}
 
+/* ── OFFLINE FORM ENHANCEMENTS ── */
+.off-sec-title{font-family:'Cinzel',serif;font-size:.5rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,150,12,.12);padding-bottom:.4rem;margin:1.4rem 0 .9rem;}
+.off-sec-title:first-of-type{margin-top:0;}
+.o-radio-row{display:flex;gap:1.2rem;flex-wrap:wrap;padding:.3rem 0;}
+.o-r-opt{display:flex;align-items:center;gap:.5rem;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--text);}
+.o-r-opt input[type=radio]{accent-color:var(--crimson);width:16px;height:16px;cursor:pointer;}
+.inp-f-field[readonly]{color:var(--muted);font-style:italic;opacity:.6;cursor:default;}
 /* ── DOB DATE PARTS ── */
 .dob-parts{display:flex;gap:.5rem;align-items:center;}
 .dob-parts select{flex:1;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6 4.5-6z' fill='%23b8960c'/%3E%3C/svg%3E") no-repeat right .3rem center;border:none;border-bottom:1px solid rgba(184,150,12,.18);outline:none;padding:.42rem 1.2rem .42rem .2rem;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);cursor:pointer;appearance:none;transition:border-color .25s;background-color:transparent;}
@@ -480,35 +487,150 @@ body{font-size:16px;}
     <div class="a-sec" id="secAdd">
       <div class="off-form">
         <div class="off-form-title">Register Offline / Walk-In Member</div>
-        <div class="off-form-sub">Manually register members who visit the bureau office or contact us by phone</div>
+        <div class="off-form-sub">Manually register members who visit the bureau office or contact us by phone. All fields mirror online registration for full compatibility.</div>
 
-        <div style="font-family:'Cinzel',serif;font-size:.48rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem;">Membership Tier *</div>
+        <!-- MEMBERSHIP TIER -->
+        <div class="off-sec-title">Membership Tier *</div>
         <div class="tier-mini-row">
           <div class="tier-mini" id="oV" onclick="pickOT('VIP')"><div class="tm-name">VIP</div><div class="tm-price">₹15,000/yr</div></div>
           <div class="tier-mini" id="oVV" onclick="pickOT('VVIP')"><div class="tm-name">VVIP</div><div class="tm-price">₹30,000/yr</div></div>
           <div class="tier-mini" id="oEl" onclick="pickOT('Elite')"><div class="tm-name">Elite</div><div class="tm-price">₹1,00,000/yr</div></div>
         </div>
-        <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Full Name *</label><input class="inp-f-field" id="on" placeholder="As per Aadhaar"></div><div class="inp-f-group"><label class="inp-f-lbl">Date of Birth *</label><div class="dob-parts"><select id="odob_d"><option value="">Day</option></select><span class="dob-sep">/</span><select id="odob_m"><option value="">Month</option><option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select><span class="dob-sep">/</span><select id="odob_y"><option value="">Year</option></select></div></div></div>
-        <div class="fr3"><div class="inp-f-group"><label class="inp-f-lbl">Gender *</label><select class="inp-f-sel" id="og"><option value="">Select</option><option>Male</option><option>Female</option></select></div><div class="inp-f-group"><label class="inp-f-lbl">Height (cm) *</label><input class="inp-f-field" id="oht" type="number" placeholder="170"></div><div class="inp-f-group"><label class="inp-f-lbl">Complexion</label><select class="inp-f-sel" id="ocx"><option value="">Select</option><option>Very Fair</option><option>Fair</option><option>Wheatish</option><option>Dusky</option></select></div></div>
-        <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Profession *</label><input class="inp-f-field" id="opf" placeholder="e.g. Engineer"></div><div class="inp-f-group"><label class="inp-f-lbl">Annual Salary (₹) *</label><input class="inp-f-field" id="osal" type="number" placeholder="1200000"></div></div>
-        <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Education</label><input class="inp-f-field" id="oedu" placeholder="e.g. B.Tech, MBA"></div><div class="inp-f-group"><label class="inp-f-lbl">Sub-Caste / Gotra</label><select class="inp-f-sel" id="ogotra"><option value="">Select</option><option>Motati</option><option>Gudati</option><option>Pakanati</option><option>Gone</option><option>Chittepu</option><option>Bhumanchi</option><option>Pedakanti</option><option>Velama</option><option>Mudiraj</option><option>Gajula</option><option>Niyogi</option><option>Vaidiki</option><option>Turpu Kapu</option><option>Telaga</option><option>Other</option></select></div></div>
-        <div class="fr3"><div class="inp-f-group"><label class="inp-f-lbl">City *</label><input class="inp-f-field" id="oci" placeholder="Hyderabad"></div><div class="inp-f-group"><label class="inp-f-lbl">State *</label><select class="inp-f-sel" id="ost"><option value="">Select</option><option>Telangana</option><option>Andhra Pradesh</option><option>Karnataka</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Delhi</option><option>Gujarat</option><option>Other</option></select></div><div class="inp-f-group"><label class="inp-f-lbl">Country *</label><input class="inp-f-field" id="oco" placeholder="India"></div></div>
-        <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Mobile *</label><input class="inp-f-field" id="om" type="tel" placeholder="+91 98765 43210"></div><div class="inp-f-group"><label class="inp-f-lbl">Email *</label><input class="inp-f-field" id="oe" type="email" placeholder="member@email.com"></div></div>
-        <div style="font-family:'Cinzel',serif;font-size:.48rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:.6rem 0 .4rem;">Parents Information</div>
+
+        <!-- PROFILE FOR -->
+        <div class="off-sec-title">Profile For *</div>
+        <div class="inp-f-group">
+          <div class="o-radio-row">
+            <label class="o-r-opt"><input type="radio" name="o_gender" value="Male" id="oGMale" checked onchange="onOGenderChange()"><span>Male</span></label>
+            <label class="o-r-opt"><input type="radio" name="o_gender" value="Female" id="oGFemale" onchange="onOGenderChange()"><span>Female</span></label>
+          </div>
+        </div>
+
+        <!-- BASIC INFORMATION -->
+        <div class="off-sec-title">Basic Information</div>
+        <div class="fr2">
+          <div class="inp-f-group"><label class="inp-f-lbl">Full Name *</label><input class="inp-f-field" id="on" placeholder="As per Aadhaar card"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Date of Birth *</label><div class="dob-parts"><select id="odob_d"><option value="">Day</option></select><span class="dob-sep">/</span><select id="odob_m"><option value="">Month</option><option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select><span class="dob-sep">/</span><select id="odob_y"><option value="">Year</option></select></div><small id="oDobHint" style="color:var(--muted);font-style:italic;font-size:0.78rem;display:block;margin-top:0.2rem;">Min age: 21 for Male, 18 for Female</small></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Time of Birth</label><input class="inp-f-field" id="o_tob" type="time" placeholder="e.g. 02:30 AM"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Place of Birth</label><input class="inp-f-field" id="o_pob" placeholder="e.g. Hyderabad"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Mother Tongue *</label><select class="inp-f-sel" id="o_mt"><option value="">Select</option><option>Telugu</option><option>Kannada</option><option>Tamil</option><option>Hindi</option><option>Other</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Marital Status *</label><select class="inp-f-sel" id="o_ms"><option value="">Select</option><option>Never Married</option><option>Divorced</option><option>Divorced (2nd Time)</option><option>Widowed</option><option>Awaiting Divorce</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Religion</label><input class="inp-f-field" value="Hindu" readonly></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Caste</label><input class="inp-f-field" value="Reddy" readonly></div>
+        </div>
+        <div class="fr3">
+          <div class="inp-f-group"><label class="inp-f-lbl">Sub-Caste / Gotra *</label><input class="inp-f-field" id="ogotra" list="oGotraList" placeholder="Type or select gotra…"><datalist id="oGotraList"><option>Motati</option><option>Gudati</option><option>Pakanati</option><option>Gone</option><option>Chittepu</option><option>Bhumanchi</option><option>Pedakanti</option><option>Velama</option><option>Mudiraj</option><option>Gajula</option><option>Niyogi</option><option>Vaidiki</option><option>Turpu Kapu</option><option>Telaga</option><option>Konukanula</option><option>Cherukunutla</option><option>Chegolla</option><option>Other</option></datalist></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Nakshatra *</label><input class="inp-f-field" id="o_nak" list="oNakList" placeholder="Type or select nakshatra…"><datalist id="oNakList"><option>Ashwini</option><option>Bharani</option><option>Krittika</option><option>Rohini</option><option>Mrigashira</option><option>Ardra</option><option>Punarvasu</option><option>Pushya</option><option>Ashlesha</option><option>Magha</option><option>Purva Phalguni</option><option>Uttara Phalguni</option><option>Hasta</option><option>Chitra</option><option>Swati</option><option>Vishakha</option><option>Anuradha</option><option>Jyeshtha</option><option>Mula</option><option>Purva Ashadha</option><option>Uttara Ashadha</option><option>Shravana</option><option>Dhanishtha</option><option>Shatabhisha</option><option>Purva Bhadrapada</option><option>Uttara Bhadrapada</option><option>Revati</option></datalist></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Rashi (Moon Sign) *</label><input class="inp-f-field" id="o_rashi" list="oRashiList" placeholder="Type or select rashi…"><datalist id="oRashiList"><option>Mesha (Aries)</option><option>Vrishabha (Taurus)</option><option>Mithuna (Gemini)</option><option>Karka (Cancer)</option><option>Simha (Leo)</option><option>Kanya (Virgo)</option><option>Tula (Libra)</option><option>Vrishchika (Scorpio)</option><option>Dhanu (Sagittarius)</option><option>Makara (Capricorn)</option><option>Kumbha (Aquarius)</option><option>Meena (Pisces)</option></datalist></div>
+        </div>
+
+        <!-- CONTACT & LOCATION -->
+        <div class="off-sec-title">Contact &amp; Location</div>
+        <div class="fr2">
+          <div class="inp-f-group"><label class="inp-f-lbl">Mobile Number *</label><input class="inp-f-field" id="om" type="tel" placeholder="+91 98765 43210"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Email Address *</label><input class="inp-f-field" id="oe" type="email" placeholder="member@email.com"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">City *</label><input class="inp-f-field" id="oci" placeholder="e.g. Hyderabad"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">State *</label><input class="inp-f-field" id="ost" list="oStateList" placeholder="Type to search state…"><datalist id="oStateList"><option>Telangana</option><option>Andhra Pradesh</option><option>Karnataka</option><option>Tamil Nadu</option><option>Kerala</option><option>Maharashtra</option><option>Delhi</option><option>Gujarat</option><option>Rajasthan</option><option>Uttar Pradesh</option><option>Madhya Pradesh</option><option>Punjab</option><option>Haryana</option><option>Bihar</option><option>West Bengal</option><option>Odisha</option><option>Goa</option><option>Other</option></datalist></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Country *</label><input class="inp-f-field" id="oco" list="oCountryList" placeholder="Type to search country…"><datalist id="oCountryList"><option>India</option><option>USA</option><option>UK</option><option>Canada</option><option>Australia</option><option>UAE</option><option>Singapore</option><option>New Zealand</option><option>Germany</option><option>Qatar</option><option>Kuwait</option><option>Bahrain</option><option>Oman</option><option>Saudi Arabia</option><option>Malaysia</option><option>Other</option></datalist></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Residential Status</label><select class="inp-f-sel" id="o_res"><option>Permanent Resident</option><option>NRI</option><option>Student Abroad</option><option>Work Visa</option></select></div>
+        </div>
+
+        <!-- LOGIN CREDENTIALS -->
+        <div class="off-sec-title">Login Credentials</div>
+        <div class="fr2">
+          <div class="inp-f-group"><label class="inp-f-lbl">Username *</label><input class="inp-f-field" id="ou" placeholder="Choose a username (lowercase, no spaces)"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Aadhaar Number</label><input class="inp-f-field" id="oadh" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
+        </div>
+
+        <!-- PHYSICAL ATTRIBUTES -->
+        <div class="off-sec-title">Physical Attributes</div>
+        <div class="fr3">
+          <div class="inp-f-group"><label class="inp-f-lbl">Height *</label><input class="inp-f-field" id="oht" list="oHtList" placeholder="e.g. 5'6&quot; (167cm)"><datalist id="oHtList"><option>4'10" (147cm)</option><option>4'11" (149cm)</option><option>5'0" (152cm)</option><option>5'1" (154cm)</option><option>5'2" (157cm)</option><option>5'3" (160cm)</option><option>5'4" (162cm)</option><option>5'5" (165cm)</option><option>5'6" (167cm)</option><option>5'7" (170cm)</option><option>5'8" (172cm)</option><option>5'9" (175cm)</option><option>5'10" (177cm)</option><option>5'11" (180cm)</option><option>6'0" (182cm)</option><option>6'1" (185cm)</option><option>6'2" (187cm)</option><option>6'3" (190cm)</option></datalist></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Weight (kg)</label><input class="inp-f-field" id="o_wt" type="number" placeholder="65"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Complexion</label><select class="inp-f-sel" id="ocx"><option value="">Select</option><option>Very Fair</option><option>Fair</option><option>Wheatish</option><option>Wheatish Brown</option><option>Dark</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Body Type</label><select class="inp-f-sel" id="o_bt"><option value="">Select</option><option>Slim</option><option>Athletic</option><option>Average</option><option>Heavy</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Blood Group</label><select class="inp-f-sel" id="o_bg"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Differently Abled</label><select class="inp-f-sel" id="o_da"><option>No</option><option>Yes</option></select></div>
+        </div>
+
+        <!-- EDUCATION & CAREER -->
+        <div class="off-sec-title">Education &amp; Career</div>
+        <div class="fr2">
+          <div class="inp-f-group"><label class="inp-f-lbl">Highest Qualification *</label><select class="inp-f-sel" id="oedu"><option value="">Select</option><option>10th / SSC</option><option>Intermediate / 12th</option><option>Diploma</option><option>B.Tech / B.E.</option><option>B.Sc / B.Com / B.A.</option><option>MBBS</option><option>LLB</option><option>CA / CMA / CS</option><option>M.Tech / M.E.</option><option>M.Sc / M.Com / M.A.</option><option>M.B.A.</option><option>MD / MS</option><option>MS (USA/UK)</option><option>Ph.D.</option><option>Other</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Schooling Board *</label><select class="inp-f-sel" id="o_board"><option value="">Select Board</option><option>SSC</option><option>CBSE</option><option>ICSE</option><option>State Board</option><option>Other</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">School Name</label><input class="inp-f-field" id="o_school" placeholder="e.g. Delhi Public School"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Intermediate / 12th College</label><input class="inp-f-field" id="o_inter" placeholder="e.g. Sri Chaitanya Junior College"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Engineering / Degree College</label><input class="inp-f-field" id="o_engcol" placeholder="e.g. Osmania University, IIT"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">PG / MS / Higher Education College</label><input class="inp-f-field" id="o_col" placeholder="e.g. UTD Dallas, IIT Bombay"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Employed In *</label><select class="inp-f-sel" id="o_emp"><option value="">Select</option><option>Government / PSU</option><option>Private Sector</option><option>Business / Self-Employed</option><option>Defence</option><option>Civil Services</option><option>IT / Software</option><option>Teaching / Professor</option><option>Agriculture</option><option>Not Working</option><option>Other</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Occupation / Profession *</label><input class="inp-f-field" id="opf" placeholder="e.g. Software Engineer, Director"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Company / Organisation</label><input class="inp-f-field" id="o_co" placeholder="e.g. TCS, HCL, Govt of TS"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Place of Work / Business</label><input class="inp-f-field" id="o_workplace" placeholder="e.g. Hyderabad, Salt Lake City"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Annual Income (₹) *</label><input class="inp-f-field" id="osal" type="number" min="0" placeholder="e.g. 600000 for 6 Lakhs" oninput="document.getElementById('oIncDisplay').textContent=_formatInc(this.value)"><small id="oIncDisplay" style="color:var(--crimson);font-family:'Cormorant Garamond',serif;font-size:.9rem;margin-top:.2rem;display:block;"></small></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Visa Status</label><input class="inp-f-field" id="o_visa" placeholder="e.g. H1B, PR, Citizen"></div>
+        </div>
+
+        <!-- LIFESTYLE -->
+        <div class="off-sec-title">Lifestyle</div>
+        <div class="fr3">
+          <div class="inp-f-group"><label class="inp-f-lbl">Diet *</label><select class="inp-f-sel" id="o_diet"><option value="">Select</option><option>Vegetarian</option><option>Non-Vegetarian</option><option>Eggetarian</option><option>Vegan</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Smoking</label><select class="inp-f-sel" id="o_smk"><option>Never</option><option>Occasionally</option><option>Regularly</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Drinking</label><select class="inp-f-sel" id="o_drk"><option>Never</option><option>Occasionally</option><option>Regularly</option></select></div>
+        </div>
+        <div class="inp-f-group"><label class="inp-f-lbl">About Member</label><textarea class="inp-f-field" id="o_about" rows="3" style="resize:vertical;" placeholder="Describe interests, hobbies, values and what they seek in a life partner…"></textarea></div>
+
+        <!-- FAMILY BACKGROUND -->
+        <div class="off-sec-title">Family Background</div>
+        <div class="fr2">
+          <div class="inp-f-group"><label class="inp-f-lbl">Family Type</label><select class="inp-f-sel" id="o_ft"><option>Nuclear Family</option><option>Joint Family</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Family Values</label><select class="inp-f-sel" id="o_fv"><option>Orthodox</option><option>Traditional</option><option>Moderate</option><option>Liberal</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Family Status</label><select class="inp-f-sel" id="o_fst"><option value="">Select</option><option>Middle Class</option><option>Upper Middle Class</option><option>Rich / Affluent</option><option>Wealthy</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Native Place / District *</label><input class="inp-f-field" id="o_native" placeholder="e.g. Nalgonda, Warangal"></div>
+        </div>
+
+        <!-- PARENTS -->
+        <div class="off-sec-title">Parents</div>
         <div class="fr2">
           <div class="inp-f-group"><label class="inp-f-lbl">Father's Name</label><input class="inp-f-field" id="ofn" placeholder="Father's full name"></div>
-          <div class="inp-f-group"><label class="inp-f-lbl">Father's Mobile</label><input class="inp-f-field" id="ofmob" type="tel" placeholder="+91 98765 43210"></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Father's Status</label><select class="inp-f-sel" id="ofas" onchange="toggleAdminFatherOcc()"><option value="">Select</option><option>Employed</option><option>Business</option><option>Retired</option><option>Farmer</option><option>Passed Away</option></select></div>
           <div class="inp-f-group" id="ofp_wrap" style="display:none;"><label class="inp-f-lbl">Father's Occupation</label><input class="inp-f-field" id="ofp" placeholder="e.g. Govt Officer"></div>
-          <div class="inp-f-group"><label class="inp-f-lbl">Father's Gotra</label><select class="inp-f-sel" id="ofg"><option value="">Select</option><option>Motati</option><option>Gudati</option><option>Pakanati</option><option>Gone</option><option>Chittepu</option><option>Bhumanchi</option><option>Pedakanti</option><option>Velama</option><option>Mudiraj</option><option>Gajula</option><option>Niyogi</option><option>Vaidiki</option><option>Turpu Kapu</option><option>Telaga</option><option>Other</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Father's Sub-Caste / Gotra</label><input class="inp-f-field" id="ofg" list="oFGotraList" placeholder="Type gotra…"><datalist id="oFGotraList"><option>Motati</option><option>Gudati</option><option>Pakanati</option><option>Gone</option><option>Chittepu</option><option>Bhumanchi</option><option>Pedakanti</option><option>Konukanula</option><option>Cherukunutla</option><option>Chegolla</option><option>Other</option></datalist></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Mother's Name</label><input class="inp-f-field" id="omn" placeholder="Mother's full name"></div>
-          <div class="inp-f-group"><label class="inp-f-lbl">Mother's Mobile</label><input class="inp-f-field" id="ommob" type="tel" placeholder="+91 98765 43210"></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Mother's Status</label><select class="inp-f-sel" id="omas" onchange="toggleAdminMotherOcc()"><option value="">Select</option><option>Homemaker</option><option>Employed</option><option>Business</option><option>Retired</option><option>Passed Away</option></select></div>
           <div class="inp-f-group" id="omo_wrap" style="display:none;"><label class="inp-f-lbl">Mother's Occupation</label><input class="inp-f-field" id="omo" placeholder="e.g. Teacher"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Parent / Guardian Mobile 1</label><input class="inp-f-field" id="ofmob" type="tel" placeholder="+91 98765 43210"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Parent / Guardian Mobile 2</label><input class="inp-f-field" id="ommob" type="tel" placeholder="+91 98765 43210"></div>
         </div>
-        <div class="fr2"><div class="inp-f-group"><label class="inp-f-lbl">Username *</label><input class="inp-f-field" id="ou" placeholder="login username"></div><div class="inp-f-group"><label class="inp-f-lbl">Aadhaar Number</label><input class="inp-f-field" id="oadh" placeholder="XXXX XXXX XXXX" maxlength="14"></div></div>
-        <div class="inp-f-group"><label class="inp-f-lbl">Notes</label><textarea class="inp-f-field" id="onotes" rows="2" style="resize:vertical;" placeholder="Walk-in / Phone enquiry / Referral details…"></textarea></div>
-        <div style="display:flex;gap:.8rem;margin-top:.8rem;flex-wrap:wrap;">
+
+        <!-- SIBLINGS & PROPERTY -->
+        <div class="off-sec-title">Siblings &amp; Property</div>
+        <div class="fr3">
+          <div class="inp-f-group"><label class="inp-f-lbl">Brothers</label><select class="inp-f-sel" id="o_br"><option>0</option><option>1</option><option>2</option><option>3</option><option>4+</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Brothers Married</label><select class="inp-f-sel" id="o_brm"><option>0</option><option>1</option><option>2</option><option>3</option><option>4+</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Sisters</label><select class="inp-f-sel" id="o_sr"><option>0</option><option>1</option><option>2</option><option>3</option><option>4+</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Sisters Married</label><select class="inp-f-sel" id="o_srm"><option>0</option><option>1</option><option>2</option><option>3</option><option>4+</option></select></div>
+          <div class="inp-f-group" style="grid-column:1/-1;"><label class="inp-f-lbl">Total Property Value</label><input class="inp-f-field" id="o_pval" placeholder="e.g. 2 Crores, 50 Lakhs, Agricultural land, Not applicable"></div>
+        </div>
+
+        <!-- PARTNER PREFERENCES -->
+        <div class="off-sec-title">Partner Preferences</div>
+        <div class="fr2">
+          <div class="inp-f-group"><label class="inp-f-lbl">Preferred Age From</label><input class="inp-f-field" id="o_pp_af" type="number" placeholder="e.g. 22"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Preferred Age To</label><input class="inp-f-field" id="o_pp_at" type="number" placeholder="e.g. 30"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Min Height</label><select class="inp-f-sel" id="o_pp_hf"><option value="">Any</option><option>5'0"</option><option>5'2"</option><option>5'4"</option><option>5'5"</option><option>5'6"</option><option>5'7"</option><option>5'8"</option><option>5'10"</option><option>6'0"</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Expected Education</label><select class="inp-f-sel" id="o_pp_edu"><option value="">Any</option><option>Graduate &amp; Above</option><option>Post Graduate</option><option>Professional Degree</option><option>Doctorate</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Expected Profession</label><input class="inp-f-field" id="o_pp_occ" placeholder="e.g. Doctor, Engineer, Any"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Expected Income</label><select class="inp-f-sel" id="o_pp_inc"><option value="">Any</option><option>4 L+</option><option>6 L+</option><option>10 L+</option><option>20 L+</option><option>50 L+</option></select></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Preferred Location</label><input class="inp-f-field" id="o_pp_st" placeholder="e.g. Hyderabad, London, Any"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">NRI Acceptable?</label><select class="inp-f-sel" id="o_pp_nri"><option>Open to NRI</option><option>Prefer India-based</option><option>No Preference</option></select></div>
+        </div>
+        <div class="inp-f-group"><label class="inp-f-lbl">Other Expectations</label><textarea class="inp-f-field" id="o_pp_note" rows="2" style="resize:vertical;" placeholder="Any specific expectations about partner or family…"></textarea></div>
+
+        <!-- ADMIN NOTES -->
+        <div class="off-sec-title">Admin Notes</div>
+        <div class="inp-f-group"><label class="inp-f-lbl">Notes / Remarks</label><textarea class="inp-f-field" id="onotes" rows="2" style="resize:vertical;" placeholder="Walk-in / Phone enquiry / Referral details…"></textarea></div>
+
+        <div style="display:flex;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap;">
           <button class="btn-lux" style="width:auto;padding:.7rem 2rem;" onclick="addOffline()">Register Member</button>
           <button class="btn-lux outline" style="width:auto;padding:.7rem 1.5rem;" onclick="clearOff()">Clear Form</button>
         </div>
@@ -1209,13 +1331,13 @@ function toggleAdminMotherOcc(){
 function _populateDobSelects(dayId, yrId){
   const dayEl=document.getElementById(dayId);
   const yrEl=document.getElementById(yrId);
-  if(dayEl&&!dayEl.children.length>1){
+  if(dayEl && dayEl.children.length<=1){
     for(let d=1;d<=31;d++){
       const o=document.createElement('option');
       o.value=String(d).padStart(2,'0');o.textContent=d;dayEl.appendChild(o);
     }
   }
-  if(yrEl&&yrEl.children.length<=1){
+  if(yrEl && yrEl.children.length<=1){
     const cur=new Date().getFullYear();
     for(let y=cur-18;y>=1940;y--){
       const o=document.createElement('option');
@@ -1240,83 +1362,151 @@ function _setDobParts(dId,mId,yId,dobStr){
   if(y)y.value=String(dt.getFullYear());
 }
 
+function onOGenderChange(){
+  const isMale=document.getElementById('oGMale')?.checked;
+  const minAge=isMale?21:18;
+  const hint=document.getElementById('oDobHint');
+  if(hint)hint.textContent=`Min age: ${minAge} for ${isMale?'Male':'Female'}`;
+}
+function _oVal(id){const el=document.getElementById(id);return el?el.value.trim():''}
+function _oSel(id){const el=document.getElementById(id);return el?el.value:''}
+function _formatInc(raw){
+  const n=parseFloat(raw);if(isNaN(n)||n<=0)return '';
+  if(n>=10000000)return '₹'+(n/10000000).toFixed(1).replace(/\.?0+$/,'')+' Crore/yr';
+  if(n>=100000)  return '₹'+(n/100000).toFixed(1).replace(/\.?0+$/,'')+' Lakhs/yr';
+  if(n>=1000)    return '₹'+(n/1000).toFixed(1).replace(/\.?0+$/,'')+' Thousand/yr';
+  return '₹'+n+'/yr';
+}
+
 function clearOff(){
-  ['on','oht','osal','oedu','ofp','oci','oco','om','oe','ou','oadh','onotes',
-   'ofn','ofmob','omn','ommob','omo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['og','ocx','ost','ofas','ofg','omas','ogotra'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const textIds=['on','oht','osal','ofp','oci','oco','om','oe','ou','oadh','onotes',
+    'ofn','ofmob','omn','ommob','omo','ofp','o_tob','o_pob','ogotra','o_nak','o_rashi',
+    'o_school','o_inter','o_engcol','o_col','o_co','o_workplace','o_visa','o_native',
+    'o_wt','o_pp_af','o_pp_at','o_pp_occ','o_pp_st','o_pp_note','o_about','o_pval'];
+  textIds.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const selIds=['ocx','oedu','ofas','ofg','omas','o_mt','o_ms','o_res','o_board',
+    'o_emp','o_diet','o_smk','o_drk','o_ft','o_fv','o_fst','o_bt','o_bg','o_da',
+    'o_br','o_brm','o_sr','o_srm','o_pp_hf','o_pp_edu','o_pp_inc','o_pp_nri','ost'];
+  selIds.forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
   ['odob_d','odob_m','odob_y'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ofp_wrap') && (document.getElementById('ofp_wrap').style.display='none');
   document.getElementById('omo_wrap') && (document.getElementById('omo_wrap').style.display='none');
+  const incDisp=document.getElementById('oIncDisplay');if(incDisp)incDisp.textContent='';
   offT=null;
   ['oV','oVV','oEl'].forEach(id=>document.getElementById(id)?.classList.remove('sel'));
+  document.getElementById('oGMale') && (document.getElementById('oGMale').checked=true);
   toast('Form cleared.');
 }
 async function addOffline(){
-  const name=document.getElementById('on').value.trim();
+  const name=_oVal('on');
   const dob=_dobFromParts('odob_d','odob_m','odob_y');
-  const g=document.getElementById('og').value;
-  const u=document.getElementById('ou').value.trim().toLowerCase().replace(/\s+/g,'_');
-  const mob=document.getElementById('om').value.trim();
-  const city=document.getElementById('oci').value.trim();
-  if(!name||!dob||!g||!u||!mob||!city){toast('Please fill in all required fields (Name, DOB, Gender, Username, Mobile, City).');return;}
+  const g=document.getElementById('oGMale')?.checked?'Male':'Female';
+  const u=_oVal('ou').toLowerCase().replace(/\s+/g,'_');
+  const mob=_oVal('om');
+  const city=_oVal('oci');
+  const email=_oVal('oe');
+  if(!name||!dob||!g||!u||!mob||!city||!email){toast('Please fill in all required fields (Name, DOB, Mobile, Email, City, Username).');return;}
   if(!offT){toast('Please select a membership tier.');return;}
   if(ST.profiles.find(p=>p.u===u)){toast('Username already exists. Please choose a different username.');return;}
-  const now=new Date();
-  const age=Math.floor((now-new Date(dob))/(365.25*24*3600*1000));
-  const salRaw=document.getElementById('osal').value;
+  // Age validation
+  const age=Math.floor((Date.now()-new Date(dob))/(365.25*24*3600*1000));
+  const minAge=g==='Male'?21:18;
+  if(age<minAge){toast(`Minimum age for ${g} registration is ${minAge} years.`);return;}
+  const salRaw=_oVal('osal');
   const newP={
     u,name,age,g,dob,
-    ht:parseInt(document.getElementById('oht').value)||0,
-    prof:document.getElementById('opf').value.trim()||'—',
-    inc:salRaw?`${Math.round(salRaw/100000)} Lakhs`:'—',
-    sal:salRaw?`${Math.round(salRaw/100000)} L`:'—',
+    ht:_oVal('oht')||"5'5\"",
+    prof:_oVal('opf')||'—',
+    inc:salRaw||'',
+    sal:salRaw?`${Math.round(parseFloat(salRaw)/100000)} L`:'—',
     city,
-    state:document.getElementById('ost').value||'—',
-    country:document.getElementById('oco').value.trim()||'India',
-    tier:offT,
-    mob,
-    email:document.getElementById('oe').value.trim()||'—',
-    em:g==='Female'?'👩':'👨',
-    edu:document.getElementById('oedu').value.trim()||'—',
-    fp:document.getElementById('ofp').value.trim()||'—',
-    notes:document.getElementById('onotes').value.trim()||'Walk-in / Offline registration',
-    adh:document.getElementById('oadh').value.trim()||'—',
-    fn:document.getElementById('ofn').value.trim()||'—',
-    fmob:document.getElementById('ofmob').value.trim()||'—',
-    fas:document.getElementById('ofas').value||'—',
-    fo:document.getElementById('ofp').value.trim()||'—',
-    fg:document.getElementById('ofg').value||'—',
-    mn:document.getElementById('omn').value.trim()||'—',
-    mmob:document.getElementById('ommob').value.trim()||'—',
-    mas:document.getElementById('omas').value||'—',
-    mo:document.getElementById('omo').value.trim()||'—',
-    gotra:document.getElementById('ogotra').value||'—',
+    state:_oVal('ost')||'Telangana',
+    country:_oVal('oco')||'India',
+    tier:offT,mob,email,
+    em:g==='Male'?'👨':'👩',
+    bg:g==='Male'?'#e3f2fd':'#fce4ec',
+    nat:_oVal('o_native')||'—',
+    edu:_oSel('oedu')||'—',
+    school:_oVal('o_school')||'—',
+    inter:_oVal('o_inter')||'—',
+    engcol:_oVal('o_engcol')||'—',
+    col:_oVal('o_col')||'—',
+    diet:_oSel('o_diet')||'—',
+    gotra:_oVal('ogotra')||'—',
+    rashi:_oVal('o_rashi')||'—',
+    nak:_oVal('o_nak')||'—',
+    fn:_oVal('ofn')||'—',
+    pgmob1:_oVal('ofmob')||'—',
+    pgmob2:_oVal('ommob')||'—',
+    fmob:_oVal('ofmob')||'—',
+    fas:_oSel('ofas')||'—',
+    fo:_oVal('ofp')||'—',
+    fg:_oVal('ofg')||'—',
+    mn:_oVal('omn')||'—',
+    mmob:_oVal('ommob')||'—',
+    mas:_oSel('omas')||'—',
+    mo:_oVal('omo')||'—',
+    pval:_oVal('o_pval')||'—',
+    workplace:_oVal('o_workplace')||'—',
+    visa:_oVal('o_visa')||'—',
+    pploc:_oVal('o_pp_st')||'Any',
+    wt:_oVal('o_wt')||'—',
+    cx:_oSel('ocx')||'—',
+    bt:_oSel('o_bt')||'—',
+    bl:_oSel('o_bg')||'—',
+    da:_oSel('o_da')||'No',
+    emp:_oSel('o_emp')||'—',
+    co:_oVal('o_co')||'—',
+    smk:_oSel('o_smk')||'Never',
+    drk:_oSel('o_drk')||'Never',
+    ft:_oSel('o_ft')||'—',
+    fv:_oSel('o_fv')||'—',
+    fst:_oSel('o_fst')||'—',
+    br:_oSel('o_br')||'0',
+    brm:_oSel('o_brm')||'0',
+    sr:_oSel('o_sr')||'0',
+    srm:_oSel('o_srm')||'0',
+    res:_oSel('o_res')||'—',
+    pob:_oVal('o_pob')||'—',
+    tob:_oVal('o_tob')||'—',
+    board:_oSel('o_board')||'—',
+    mt:_oSel('o_mt')||'—',
+    ms:_oSel('o_ms')||'—',
+    pp_af:_oVal('o_pp_af')||'—',
+    pp_at:_oVal('o_pp_at')||'—',
+    pp_hf:_oSel('o_pp_hf')||'Any',
+    pp_edu:_oSel('o_pp_edu')||'Any',
+    pp_occ:_oVal('o_pp_occ')||'Any',
+    pp_inc:_oSel('o_pp_inc')||'Any',
+    pp_nri:_oSel('o_pp_nri')||'No Preference',
+    pp_note:_oVal('o_pp_note')||'—',
+    about:_oVal('o_about')||'—',
+    notes:_oVal('onotes')||'Walk-in / Offline registration',
+    adh:_oVal('oadh')||'—',
+    photoURL:'',photos:[],views:0,
     registrationSource:'offline',
     registeredAt:new Date().toISOString(),
+    createdAt:new Date().toISOString(),
     status:'active',
-    photos:[],
-    views:0,
   };
-  // Save to Firestore (source of truth)
+  // Save to Firestore — source of truth
   if(window.FIREBASE_READY && window.FB){
     try{
       const {addDoc,collection,db}=window.FB;
       const docRef=await addDoc(collection(db,'users'),newP);
       newP.uid=docRef.id;
+      ST.profiles.push(newP);
+      renderAll();
+      clearOff();
+      goSec('secProfiles');
       toast(`✅ ${name} registered and saved to Firebase as ${offT} member.`);
     }catch(e){
       console.error('Firebase save error:',e);
       toast('Firebase error: '+e.message);
-      return;
     }
   } else {
-    toast('Firebase not ready — profile not saved to database.');
-    return;
+    toast('Firebase not ready — cannot register member.');
   }
-  ST.profiles.push(newP);
-  renderAll();
-  clearOff();
-  goSec('secProfiles');
 }
 
 // ═══════════════════════════════════════
