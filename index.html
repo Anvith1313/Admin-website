@@ -925,7 +925,7 @@ function renderProfiles(list){
       <div class="ac-top"><div class="ac-avs"><div class="ac-av">${p.em}</div></div>
         <div><div class="ac-name">${p.name}</div><div class="ac-status s-cont">${p.tier}</div></div>
       </div>
-      <div class="ac-det"><strong>Age:</strong> ${p.age} · <strong>Ht:</strong> ${p.ht}cm · <strong>Gender:</strong> ${p.g}<br><strong>Profession:</strong> ${p.prof}<br><strong>City:</strong> ${p.city}, ${p.state}, ${p.country}<br><strong>Salary:</strong> ₹${p.sal}/yr<br><strong>📞</strong> ${p.mob} &nbsp;·&nbsp; <strong>✉</strong> ${p.email}${p.edu?`<br><strong>Education:</strong> ${p.edu}`:''}${p.notes?`<br><em style="font-size:.78rem;">${p.notes}</em>`:''}</div>
+      <div class="ac-det"><strong>Age:</strong> ${p.age||'—'} · <strong>Ht:</strong> ${p.ht||'—'} · <strong>Gender:</strong> ${p.g||'—'}<br><strong>Profession:</strong> ${p.prof||p.occ||'—'}<br><strong>City:</strong> ${p.city||'—'}, ${p.state||'—'}, ${p.country||'—'}<br><strong>Income:</strong> ${p.inc||p.sal?'₹'+(p.inc||p.sal):' —'}<br><strong>📞</strong> ${p.mob||'—'} &nbsp;·&nbsp; <strong>✉</strong> ${p.email||'—'}${p.edu?`<br><strong>Education:</strong> ${p.edu}`:''}${p.nat||p.native?`<br><strong>Native:</strong> ${p.nat||p.native}`:''}${p.notes?`<br><em style="font-size:.78rem;">${p.notes}</em>`:''}</div>
       <div class="ac-acts">
         <button class="act-b prim" onclick="viewProf('${p.u}')">👁 View Details</button>
         <button class="act-b grn" onclick="editProf('${p.u}')">✏ Edit</button>
@@ -1244,8 +1244,9 @@ function saveEditProf(u){
   p.sal = p.inc; p.occ = p.prof; p.native = p.nat; p.fp = p.fo;
   document.getElementById('editProfModal').remove();
   renderAll();
-  // Firebase update — use UID as document ID (not username)
-  const docId = p.uid || u;
+  // Firebase update — must use Firestore doc UID (not username)
+  const docId = p.uid;
+  if(!docId){toast('⚠ Profile UID missing — cannot sync to Firebase. Please re-import this profile.');return;}
   if(window.FIREBASE_READY && window.FB){
     window.FB.updateDoc(window.FB.doc(window.FB.db,'users',docId), p)
       .then(()=>toast('✅ Profile updated & synced to main site.'))
@@ -1254,13 +1255,14 @@ function saveEditProf(u){
         console.warn('Firebase update:', e.message);
       });
   } else {
-    toast('✅ Profile updated locally.');
+    toast('✅ Profile updated locally (Firebase not ready).');
   }
 }
 
 async function adminUploadPhoto(u, file){
   if(!file)return;
   if(!window.FIREBASE_READY){toast('Firebase not ready.');return;}
+  if(!['image/jpeg','image/png','image/webp','image/jpg'].includes(file.type)){toast('Only JPG, PNG or WebP images are allowed.');return;}
   const p=ST.profiles.find(x=>x.u===u);if(!p){toast('Profile not found.');return;}
   const photos=p.photos||[];
   if(photos.length>=5){toast('Maximum 5 photos allowed.');return;}
