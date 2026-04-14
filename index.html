@@ -398,6 +398,8 @@ body{font-size:16px;}
     <button class="sb-btn" id="bEng" onclick="goSec('secEngaged')">💍 &nbsp;Engaged Couples</button>
     <button class="sb-btn" id="bChat" onclick="goSec('secChats')">💬 &nbsp;All Conversations</button>
     <button class="sb-btn" id="bEditReq" onclick="goSec('secEditReq')">✏ &nbsp;Edit Requests <span class="sb-badge" id="editReqCnt" style="display:none;">0</span></button>
+    <button class="sb-btn" id="bAppt" onclick="goSec('secAppointments')">📅 &nbsp;Appointments <span class="sb-badge" id="apptCnt" style="display:none;">0</span></button>
+    <button class="sb-btn" id="bStories" onclick="goSec('secStories')">💐 &nbsp;Pending Stories <span class="sb-badge" id="storiesCnt" style="display:none;">0</span></button>
 
     <div class="sb-sec-lbl">Records</div>
     <button class="sb-btn" id="bArch" onclick="goSec('secArchived')">📁 &nbsp;Archived / Closed</button>
@@ -508,6 +510,29 @@ body{font-size:16px;}
       </div>
       <div id="editReqGrid" class="card-grid"></div>
     </div>
+
+    <!-- APPOINTMENTS SECTION -->
+    <div class="a-sec" id="secAppointments">
+      <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Branch visit appointment requests submitted by members and visitors.</p>
+      <div style="margin-bottom:1rem;display:flex;gap:0.6rem;flex-wrap:wrap;">
+        <button onclick="loadAppointments()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+        <select id="apptStatusFilter" onchange="loadAppointments()" style="padding:0.4rem 0.8rem;border:1px solid rgba(184,150,12,0.25);border-radius:8px;font-family:'EB Garamond',serif;font-size:0.9rem;">
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+      <div id="apptGrid" class="card-grid"></div>
+    </div>
+
+    <!-- PENDING STORIES SECTION -->
+    <div class="a-sec" id="secStories">
+      <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Happy stories submitted by couples. Approve to publish on the main site, or dismiss.</p>
+      <div style="margin-bottom:1rem;">
+        <button onclick="loadPendingStories()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+      </div>
+      <div id="storiesGrid" class="card-grid"></div>
+    </div>
   </main>
 </div>
 
@@ -601,6 +626,8 @@ function adminLogin(){
   }
   if(window.FIREBASE_READY) loadAdminNotifications();
   if(window.FIREBASE_READY) setTimeout(loadEditRequests, 800);
+  if(window.FIREBASE_READY) setTimeout(loadAppointments, 900);
+  if(window.FIREBASE_READY) setTimeout(loadPendingStories, 1000);
   if(window.FIREBASE_READY) setTimeout(_startAdminRealTime, 1200);
 }
 function adminLogout(){
@@ -611,8 +638,8 @@ function adminLogout(){
   document.getElementById('ap').value='';
 }
 
-const secT={secDash:'Dashboard',secArchived:'Archived Profiles',secProfiles:'All Member Profiles',secAdd:'Add Offline Member',secInterests:'All Interest Records',secMutual:'Mutual Matches',secEngaged:'Engaged Couples',secChats:'All Conversations',secEditReq:'Member Edit Requests'};
-const bMap={secDash:'bDash',secArchived:'bArch',secProfiles:'bProf',secAdd:'bAdd',secInterests:'bInt',secMutual:'bMut',secEngaged:'bEng',secChats:'bChat',secEditReq:'bEditReq'};
+const secT={secDash:'Dashboard',secArchived:'Archived Profiles',secProfiles:'All Member Profiles',secAdd:'Add Offline Member',secInterests:'All Interest Records',secMutual:'Mutual Matches',secEngaged:'Engaged Couples',secChats:'All Conversations',secEditReq:'Member Edit Requests',secAppointments:'Appointments',secStories:'Pending Stories'};
+const bMap={secDash:'bDash',secArchived:'bArch',secProfiles:'bProf',secAdd:'bAdd',secInterests:'bInt',secMutual:'bMut',secEngaged:'bEng',secChats:'bChat',secEditReq:'bEditReq',secAppointments:'bAppt',secStories:'bStories'};
 function goSec(id){
   document.querySelectorAll('.a-sec').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -626,6 +653,8 @@ function goSec(id){
   if(id==='secChats')renderChats();
   if(id==='secArchived')renderArchived();
   if(id==='secEditReq')renderEditRequests();
+  if(id==='secAppointments')loadAppointments();
+  if(id==='secStories')loadPendingStories();
 }
 
 function renderAll(){
@@ -1633,6 +1662,100 @@ function doEngage(){
   renderAll();
   toast(`💍 Engagement confirmed for ${p1?.name||'—'} & ${p2?.name||'—'}. Payment countdown started.`);
   _actIdx=null;
+}
+
+// ═══════════════════════════════════════
+// APPOINTMENTS
+// ═══════════════════════════════════════
+async function loadAppointments(){
+  if(!window.FIREBASE_READY)return;
+  const grid=document.getElementById('apptGrid');if(!grid)return;
+  const statusFilter=document.getElementById('apptStatusFilter')?.value||'pending';
+  try{
+    const {getDocs,query,collection,where,orderBy,db}=window.FB;
+    let q;
+    if(statusFilter==='all') q=query(collection(db,'appointments'),orderBy('ts','desc'));
+    else q=query(collection(db,'appointments'),where('status','==',statusFilter));
+    const snap=await getDocs(q);
+    const appts=[];snap.forEach(d=>appts.push({...d.data(),docId:d.id}));
+    appts.sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+    const badge=document.getElementById('apptCnt');
+    const pending=appts.filter(a=>a.status==='pending').length;
+    if(badge){badge.textContent=pending;badge.style.display=pending>0?'inline-flex':'none';}
+    if(!appts.length){grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No appointments found.</p>';return;}
+    grid.innerHTML=appts.map(a=>`
+      <div class="m-card" style="border-left:3px solid ${a.status==='confirmed'?'#2e7d32':a.status==='pending'?'var(--crimson)':'var(--border)'};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;color:var(--text);">${a.name}</div>
+            <div style="font-family:'EB Garamond',serif;font-size:0.88rem;color:var(--muted);">${a.mob} ${a.username&&a.username!=='guest'?'· @'+a.username:''}</div>
+          </div>
+          <span style="font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:0.2rem 0.7rem;border-radius:20px;background:${a.status==='confirmed'?'rgba(46,125,50,0.1)':'rgba(139,0,0,0.08)'};color:${a.status==='confirmed'?'#2e7d32':'var(--crimson)'};">${a.status}</span>
+        </div>
+        <div style="font-family:'EB Garamond',serif;font-size:0.92rem;color:var(--text);margin:0.6rem 0 0.3rem;">
+          📅 ${a.date} · ${a.time}<br>
+          📍 ${a.branch}<br>
+          🎯 ${a.purpose}
+          ${a.msg?`<br>💬 <em>${a.msg}</em>`:''}
+        </div>
+        <div style="font-family:'Cinzel',serif;font-size:0.42rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(a.ts).toLocaleString('en-IN')}</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          ${a.status==='pending'?`<button onclick="confirmAppt('${a.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Confirm</button>`:''}
+          <a href="tel:${a.mob}" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);text-decoration:none;">📞 Call</a>
+          <a href="https://wa.me/${a.mob.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Namaste '+a.name+', your appointment at Naveen Reddy Marriage Bureau on '+a.date+' ('+a.time+') at '+a.branch+' is confirmed. Please arrive 10 minutes early. Contact: +91 72079 99985')}" target="_blank" style="padding:0.38rem 1rem;background:#25d366;border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;text-decoration:none;">WhatsApp</a>
+          <button onclick="deleteAppt('${a.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(139,0,0,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Remove</button>
+        </div>
+      </div>`).join('');
+  }catch(e){toast('Error loading appointments: '+e.message);}
+}
+async function confirmAppt(docId){
+  if(!window.FIREBASE_READY)return;
+  await window.FB.updateDoc(window.FB.doc(window.FB.db,'appointments',docId),{status:'confirmed'});
+  toast('✅ Appointment confirmed.');loadAppointments();
+}
+async function deleteAppt(docId){
+  if(!window.FIREBASE_READY)return;
+  await window.FB.deleteDoc(window.FB.doc(window.FB.db,'appointments',docId));
+  toast('Appointment removed.');loadAppointments();
+}
+
+// ═══════════════════════════════════════
+// PENDING STORIES
+// ═══════════════════════════════════════
+async function loadPendingStories(){
+  if(!window.FIREBASE_READY)return;
+  const grid=document.getElementById('storiesGrid');if(!grid)return;
+  try{
+    const {getDocs,query,collection,where,db}=window.FB;
+    const snap=await getDocs(query(collection(db,'stories'),where('status','==','pending')));
+    const stories=[];snap.forEach(d=>stories.push({...d.data(),docId:d.id}));
+    stories.sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+    const badge=document.getElementById('storiesCnt');
+    if(badge){badge.textContent=stories.length;badge.style.display=stories.length>0?'inline-flex':'none';}
+    if(!stories.length){grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No pending stories to review.</p>';return;}
+    grid.innerHTML=stories.map(s=>`
+      <div class="m-card" style="border-left:3px solid var(--gold2);">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--crimson);">${s.names}</div>
+        <div style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin:0.2rem 0;">Married · ${s.year}${s.location?' · '+s.location:''}</div>
+        <div style="font-family:'EB Garamond',serif;font-size:0.92rem;color:var(--muted);font-style:italic;margin:0.5rem 0 0.3rem;">"${s.text}"</div>
+        ${s.contact?`<div style="font-family:'EB Garamond',serif;font-size:0.82rem;color:var(--muted);">Contact: ${s.contact}</div>`:''}
+        <div style="font-family:'Cinzel',serif;font-size:0.42rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(s.ts).toLocaleString('en-IN')} · by ${s.submittedBy}</div>
+        <div style="display:flex;gap:0.5rem;">
+          <button onclick="approveStory('${s.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Publish</button>
+          <button onclick="dismissStory('${s.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(139,0,0,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Dismiss</button>
+        </div>
+      </div>`).join('');
+  }catch(e){toast('Error loading stories: '+e.message);}
+}
+async function approveStory(docId){
+  if(!window.FIREBASE_READY)return;
+  await window.FB.updateDoc(window.FB.doc(window.FB.db,'stories',docId),{status:'approved'});
+  toast('💐 Story published on main site!');loadPendingStories();
+}
+async function dismissStory(docId){
+  if(!window.FIREBASE_READY)return;
+  await window.FB.updateDoc(window.FB.doc(window.FB.db,'stories',docId),{status:'dismissed'});
+  toast('Story dismissed.');loadPendingStories();
 }
 </script>
 </body>
