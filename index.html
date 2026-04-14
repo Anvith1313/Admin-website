@@ -320,6 +320,7 @@ body{font-size:16px;}
         window.ST.profiles = [];
         snap.forEach(d=>{
           const data = d.data();
+          if(data.status==='deleted')return; // skip deleted profiles
           window.ST.profiles.push({ ...data, uid: d.id, u: data.u||d.id });
         });
         window.renderAll();
@@ -1265,15 +1266,38 @@ function adminViewBiodata(u){
 // ═══════════════════════════════════════
 // DELETE PROFILE
 // ═══════════════════════════════════════
-function delProf(u){
+async function delProf(u){
   if(!confirm('Remove this profile? This cannot be undone.'))return;
   const p=ST.profiles.find(x=>x.u===u);
-  if(p){ST.archived=ST.archived||[];ST.archived.push({...p,closedDate:new Date().toISOString().split('T')[0],reason:'Admin removed'});}
-  ST.profiles=ST.profiles.filter(x=>x.u!==u);
-  ST.interests=ST.interests.filter(i=>i.from!==u&&i.to!==u);
-  renderAll();
-  renderProfiles(ST.profiles);
-  toast('Profile removed and archived.');
+  if(!p){toast('Profile not found.');return;}
+  if(!window.FIREBASE_READY||!window.FB){toast('Firebase not ready.');return;}
+  const {deleteDoc,getDocs,query,collection,where,doc,db}=window.FB;
+  try{
+    // 1. Hard-delete the user doc from Firestore (source of truth)
+    if(p.uid){
+      await deleteDoc(doc(db,'users',p.uid));
+    }
+    // 2. Cascade-delete all interests involving this user
+    const intSnap1=await getDocs(query(collection(db,'interests'),where('from','==',u)));
+    const intSnap2=await getDocs(query(collection(db,'interests'),where('to','==',u)));
+    const intDeletes=[...intSnap1.docs,...intSnap2.docs];
+    await Promise.all(intDeletes.map(d=>deleteDoc(doc(db,'interests',d.id))));
+    // 3. Cascade-delete editRequests for this user
+    if(p.uid){
+      const erSnap=await getDocs(query(collection(db,'editRequests'),where('uid','==',p.uid)));
+      await Promise.all(erSnap.docs.map(d=>deleteDoc(doc(db,'editRequests',d.id))));
+    }
+    // 4. Update local state (onSnapshot will also fire, but update immediately for UX)
+    if(p){ST.archived=ST.archived||[];ST.archived.push({...p,closedDate:new Date().toISOString().split('T')[0],reason:'Admin removed'});}
+    ST.profiles=ST.profiles.filter(x=>x.u!==u);
+    ST.interests=ST.interests.filter(i=>i.from!==u&&i.to!==u);
+    renderAll();
+    renderProfiles(ST.profiles);
+    toast('Profile permanently deleted from Firebase.');
+  }catch(e){
+    console.error('delProf error:',e);
+    toast('Error deleting profile: '+e.message);
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1485,10 +1509,16 @@ function _startAdminRealTime(){
     snap.docChanges().forEach(change=>{
       const data={...change.doc.data(),uid:change.doc.id,u:change.doc.data().u||change.doc.id};
       if(change.type==='added'){
+        if(data.status==='deleted')return; // skip soft-deleted
         const exists=window.ST.profiles.some(p=>p.uid===data.uid||p.u===data.u);
         if(!exists){ window.ST.profiles.push(data); window.renderAll(); }
       } else if(change.type==='modified'){
         const idx=window.ST.profiles.findIndex(p=>p.uid===data.uid||p.u===data.u);
+        if(data.status==='deleted'){
+          // Treat a soft-deleted doc as a removal
+          if(idx>-1){ window.ST.profiles.splice(idx,1); window.renderAll(); }
+          return;
+        }
         if(idx>-1){ window.ST.profiles[idx]=data; window.renderAll(); }
       } else if(change.type==='removed'){
         const idx=window.ST.profiles.findIndex(p=>p.uid===data.uid||p.u===data.u);
