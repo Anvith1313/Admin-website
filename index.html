@@ -2194,7 +2194,9 @@ window._initCustomSelects=function(root){
     }catch(e){/* fall back to change-event only sync */}
     syncDisplay();
     sel.addEventListener('change',syncDisplay);
-    sel.style.cssText='position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
+    sel.style.display='none';
+    sel.setAttribute('tabindex','-1');
+    sel.setAttribute('aria-hidden','true');
     const openPanel=()=>{
       document.querySelectorAll('.csel-panel,.csel-backdrop').forEach(e=>e.remove());
       document.querySelectorAll('.csel-trigger.open').forEach(t=>t.classList.remove('open'));
