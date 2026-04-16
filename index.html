@@ -2175,7 +2175,6 @@ window._initCustomSelects=function(root){
     const span=document.createElement('span');
     trigger.appendChild(span);
     sel.parentNode.insertBefore(trigger,sel);
-    const nativeProp=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
     const labelEl=sel.closest('.inp-f-group')?.querySelector('.inp-f-lbl');
     const syncDisplay=()=>{
       const opt=sel.options[sel.selectedIndex];
@@ -2183,10 +2182,16 @@ window._initCustomSelects=function(root){
       span.className='csel-val'+(isEmpty?' csel-placeholder':'');
       span.textContent=isEmpty?(labelEl?.textContent?.trim()||'Select'):opt.text;
     };
-    Object.defineProperty(sel,'value',{
-      get(){return nativeProp.get.call(this);},
-      set(v){nativeProp.set.call(this,v);syncDisplay();}
-    });
+    try{
+      const nativeProp=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value')
+        ||Object.getOwnPropertyDescriptor(Object.getPrototypeOf(HTMLSelectElement.prototype),'value');
+      if(nativeProp){
+        Object.defineProperty(sel,'value',{
+          get(){return nativeProp.get.call(this);},
+          set(v){nativeProp.set.call(this,v);syncDisplay();}
+        });
+      }
+    }catch(e){/* fall back to change-event only sync */}
     syncDisplay();
     sel.addEventListener('change',syncDisplay);
     sel.style.cssText='position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
