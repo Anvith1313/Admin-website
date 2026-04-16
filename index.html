@@ -2227,7 +2227,8 @@ window._initCustomSelects=function(root){
       const rect=trigger.getBoundingClientRect();
       const pw=Math.min(Math.max(rect.width,200),340);
       panel.style.width=pw+'px';
-      const spaceBelow=window.innerHeight-rect.bottom-12;
+      const visH=window.visualViewport?.height??window.innerHeight;
+      const spaceBelow=visH-rect.bottom-12;
       if(spaceBelow>160){
         panel.style.top=(rect.bottom+4)+'px';
         panel.style.bottom='auto';
