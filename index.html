@@ -7,12 +7,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --gold:#7c3d52;--gold2:#a0445e;--gold3:#c87090;--gold4:#fdf0f3;
-  --crimson:#8b0000;--crimson2:#a50000;--crimson3:#c0392b;
-  --white:#fff;--offwhite:#fefcf8;--cream:#fdf8f0;
-  --text:#1a0f00;--muted:#6b5340;--light:#f7f3ec;
-  --border:rgba(160,68,94,0.16);
-  --sidebar:240px;
+  --crimson:#7B1F2E;--crimson2:#9B2F40;
+  --primary:#7B1F2E;--primary2:#9B2F40;--primary-light:#FFF0F2;
+  --gold:#B8892A;--gold2:#8B5E3C;--gold3:#E8C4A0;--gold4:#FFF8EC;
+  --gold-bg:#FDF3E0;
+  --white:#FFFFFF;--offwhite:#FAFAFA;--cream:#FFF8F5;
+  --bg:#FAFAFA;--bg-warm:#FFF8F5;
+  --text:#1A0A08;--muted:#6B3A28;--text2:#4A2018;
+  --border:#E8D5C8;
+  --sh-soft:0 2px 16px rgba(123,31,46,0.08);
+  --sh-card:0 4px 28px rgba(123,31,46,0.11);
+  --sh-hover:0 12px 44px rgba(123,31,46,0.18);
+  --sh-cta:0 6px 24px rgba(123,31,46,0.32);
+  --nav-h:72px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);}
@@ -24,11 +31,11 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
   background-size:cover;background-position:center;
 }
 #adminLogin::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.35);}
-#adminLogin::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(139,0,0,0.15),rgba(0,0,0,0.1));}
+#adminLogin::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(123,31,46,0.15),rgba(0,0,0,0.1));}
 
 .al-card{
   background:rgba(255,252,248,0.90);backdrop-filter:blur(24px);
-  border:1px solid rgba(212,175,55,0.32);
+  border:1px solid rgba(184,137,42,0.32);
   width:100%;max-width:420px;padding:2.8rem;
   position:relative;z-index:2;
   box-shadow:0 40px 100px rgba(0,0,0,0.3);
@@ -38,20 +45,20 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 .al-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--crimson),var(--gold2),var(--crimson),var(--gold2),var(--crimson));}
 
 .al-logo{display:flex;justify-content:center;margin-bottom:1.2rem;}
-.al-logo img{width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(184,150,12,0.3));}
+.al-logo img{width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(184,137,42,0.3));}
 .al-title{font-family:'Cinzel',serif;font-size:1rem;font-weight:600;color:var(--crimson);text-align:center;letter-spacing:0.06em;margin-bottom:0.2rem;}
 .al-sub{font-family:'Cormorant Garamond',serif;font-size:0.82rem;font-style:italic;color:var(--muted);text-align:center;margin-bottom:0.4rem;}
 .al-badge{
   display:flex;align-items:center;justify-content:center;gap:0.4rem;
   margin:.6rem 0 1.6rem;
-  background:rgba(139,0,0,0.07);border:1px solid rgba(139,0,0,0.18);
+  background:rgba(123,31,46,0.07);border:1px solid rgba(123,31,46,0.18);
   padding:.3rem 1rem;font-family:'Cinzel',serif;
   font-size:0.48rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--crimson);
 }
 
 .inp-luxury{position:relative;margin-bottom:1.4rem;}
-.inp-luxury label{display:block;font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.45rem;}
-.inp-luxury input{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.28);outline:none;padding:.55rem 0.2rem;font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:400;color:var(--text);transition:border-color .3s;}
+.inp-luxury label{display:block;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.45rem;}
+.inp-luxury input{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.28);outline:none;padding:.55rem 0.2rem;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:400;color:var(--text);transition:border-color .3s;}
 .inp-luxury input::placeholder{color:rgba(107,83,64,0.3);font-style:italic;}
 .inp-luxury input:focus{border-bottom-color:var(--gold2);}
 .inp-luxury .inp-line{position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--gold2);transition:width .4s;}
@@ -59,13 +66,13 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 .inp-luxury .eb{position:absolute;right:0.2rem;bottom:.55rem;background:none;border:none;cursor:pointer;font-size:.88rem;color:var(--muted);opacity:.6;}
 .inp-luxury .eb:hover{opacity:1;}
 
-.btn-lux{width:100%;padding:1rem;background:linear-gradient(135deg,var(--crimson),#600000);border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.58rem;font-weight:600;letter-spacing:0.26em;text-transform:uppercase;color:rgba(255,248,220,.95);box-shadow:0 6px 24px rgba(139,0,0,.28);transition:all .3s;margin-top:.3rem;}
-.btn-lux:hover{box-shadow:0 10px 36px rgba(139,0,0,.4);}
+.btn-lux{width:100%;padding:1rem;background:linear-gradient(135deg,var(--crimson),#600000);border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.72rem;font-weight:600;letter-spacing:0.26em;text-transform:uppercase;color:rgba(255,248,220,.95);box-shadow:0 6px 24px rgba(123,31,46,.28);transition:all .3s;margin-top:.3rem;}
+.btn-lux:hover{box-shadow:0 10px 36px rgba(123,31,46,.4);}
 .btn-lux.sm{width:auto;padding:.45rem 1.2rem;font-size:.5rem;}
-.btn-lux.outline{background:transparent;border:1px solid rgba(184,150,12,.35);color:var(--gold);box-shadow:none;}
-.btn-lux.outline:hover{background:rgba(184,150,12,.06);}
+.btn-lux.outline{background:transparent;border:1px solid rgba(184,137,42,.35);color:var(--gold);box-shadow:none;}
+.btn-lux.outline:hover{background:rgba(184,137,42,.06);}
 .btn-lux.grn{background:linear-gradient(135deg,#1b5e20,#2e7d32);}
-.btn-lux.danger{background:linear-gradient(135deg,#6b0000,#8b0000);}
+.btn-lux.danger{background:linear-gradient(135deg,#6b0000,var(--primary));}
 
 /* ── ADMIN LAYOUT ── */
 #adminApp{display:none;min-height:100vh;display:flex;}
@@ -73,7 +80,7 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 .sidebar{
   width:var(--sidebar);flex-shrink:0;
   position:fixed;top:0;left:0;height:100vh;overflow-y:auto;
-  background:var(--offwhite);
+  background:var(--bg-warm);
   border-right:1px solid var(--border);
   padding:1.6rem 1.1rem;z-index:50;
   box-shadow:4px 0 24px rgba(0,0,0,0.04);
@@ -86,12 +93,12 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 .sb-sec-lbl{font-family:'Cinzel',serif;font-size:.44rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);padding:.2rem .5rem;margin:.9rem 0 .3rem;}
 .sb-btn{
   width:100%;text-align:left;background:none;border:none;cursor:pointer;
-  font-family:'EB Garamond',serif;font-size:.88rem;
-  color:var(--muted);padding:.55rem .85rem;
+  font-family:'EB Garamond',serif;font-size:1rem;font-weight:500;
+  color:var(--text2);padding:.55rem .85rem;
   transition:all .2s;display:flex;align-items:center;gap:.5rem;margin-bottom:.15rem;
   border-left:2px solid transparent;
 }
-.sb-btn:hover,.sb-btn.active{color:var(--crimson);background:rgba(139,0,0,.04);border-left-color:var(--crimson);}
+.sb-btn:hover,.sb-btn.active{background:var(--primary);color:#fff;border-left-color:var(--primary);}
 .sb-badge{margin-left:auto;background:var(--crimson);color:#fff;font-family:'Cinzel',serif;font-size:.44rem;font-weight:700;padding:.12rem .5rem;}
 
 .admin-main{margin-left:var(--sidebar);flex:1;padding:2rem 2.5rem;min-height:100vh;background:var(--offwhite);}
@@ -113,7 +120,7 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 /* Cards */
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;}
 .ac{background:#fff;border:1px solid var(--border);padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.04);transition:border-color .2s;}
-.ac:hover{border-color:rgba(184,150,12,.35);}
+.ac:hover{border-color:rgba(184,137,42,.35);}
 .ac-top{display:flex;align-items:flex-start;gap:.9rem;margin-bottom:1rem;}
 .ac-av{width:44px;height:44px;background:linear-gradient(135deg,#ffe0b2,#ffcc80);display:flex;align-items:center;justify-content:center;font-size:1.3rem;border:1px solid var(--border);flex-shrink:0;}
 .ac-avs{display:flex;}
@@ -121,15 +128,15 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 .ac-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--crimson);}
 .ac-status{display:inline-block;font-family:'Cinzel',serif;font-size:.44rem;letter-spacing:.12em;text-transform:uppercase;padding:.18rem .65rem;margin-top:.2rem;border:1px solid;}
 .s-pend{color:#a08000;border-color:rgba(160,128,0,.25);background:rgba(255,248,200,.4);}
-.s-mut{color:var(--crimson);border-color:rgba(139,0,0,.2);background:rgba(139,0,0,.04);}
+.s-mut{color:var(--crimson);border-color:rgba(123,31,46,.2);background:rgba(123,31,46,.04);}
 .s-cont{color:#1b5e20;border-color:rgba(27,94,32,.2);background:rgba(27,94,32,.04);}
 .s-eng{color:#4a148c;border-color:rgba(74,20,140,.2);background:rgba(74,20,140,.04);}
 .ac-det{font-family:'EB Garamond',serif;font-size:.85rem;color:var(--muted);line-height:1.8;margin-bottom:1rem;}
 .ac-det strong{color:var(--text);}
 .ac-acts{display:flex;gap:.5rem;flex-wrap:wrap;}
-.act-b{padding:.4rem 1rem;background:transparent;border:1px solid rgba(184,150,12,.28);border-radius:20px;cursor:pointer;font-family:'Cinzel',serif;font-size:.46rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
-.act-b:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 2px 8px rgba(184,150,12,0.15);}
-.act-b.prim{background:var(--crimson);border-color:var(--crimson);color:rgba(255,248,220,.95);box-shadow:0 2px 8px rgba(139,0,0,0.2);}
+.act-b{padding:.4rem 1rem;background:transparent;border:1px solid rgba(184,137,42,.28);border-radius:20px;cursor:pointer;font-family:'Cinzel',serif;font-size:.46rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.act-b:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 2px 8px rgba(184,137,42,0.15);}
+.act-b.prim{background:var(--crimson);border-color:var(--crimson);color:rgba(255,248,220,.95);box-shadow:0 2px 8px rgba(123,31,46,0.2);}
 .act-b.prim:hover{opacity:.88;}
 .act-b.grn{background:linear-gradient(135deg,#1a6b2a,#2e7d32);border-color:#2e7d32;color:#ffffff !important;font-weight:700;box-shadow:0 2px 10px rgba(46,125,50,0.3);}
 .act-b.grn:hover{box-shadow:0 4px 16px rgba(46,125,50,0.4);opacity:.92;}
@@ -138,12 +145,12 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 .sec-tools{display:flex;gap:.8rem;align-items:center;margin-bottom:1.4rem;flex-wrap:wrap;}
 .sec-search{
   padding:.5rem .8rem;background:transparent;
-  border:none;border-bottom:1px solid rgba(184,150,12,.22);outline:none;
+  border:none;border-bottom:1px solid rgba(184,137,42,.22);outline:none;
   font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);
   min-width:220px;transition:border-color .25s;
 }
 .sec-search:focus{border-bottom-color:var(--gold);}
-.sec-filter{padding:.5rem 1.5rem .5rem .5rem;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6 4.5-6z' fill='%23b8960c'/%3E%3C/svg%3E") no-repeat right .5rem center;border:none;border-bottom:1px solid rgba(184,150,12,.22);outline:none;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);cursor:pointer;appearance:none;}
+.sec-filter{padding:.5rem 1.5rem .5rem .5rem;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6 4.5-6z' fill='%23b8960c'/%3E%3C/svg%3E") no-repeat right .5rem center;border:none;border-bottom:1px solid rgba(184,137,42,.22);outline:none;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);cursor:pointer;appearance:none;}
 .sec-filter:focus{border-bottom-color:var(--gold);}
 .sec-filter option{background:#fff;}
 
@@ -157,17 +164,17 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 
 .inp-f-group{margin-bottom:1rem;}
 .inp-f-lbl{display:block;font-family:'Cinzel',serif;font-size:.46rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:.35rem;}
-.inp-f-field{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,.18);outline:none;padding:.45rem .2rem;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);transition:border-color .25s;}
+.inp-f-field{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,.18);outline:none;padding:.45rem .2rem;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);transition:border-color .25s;}
 .inp-f-field:focus{border-bottom-color:var(--gold2);}
 .inp-f-field::placeholder{color:rgba(107,83,64,.28);font-style:italic;}
 .inp-f-field[type=number]{-moz-appearance:textfield;}
-.inp-f-sel{width:100%;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6 4.5-6z' fill='%23b8960c'/%3E%3C/svg%3E") no-repeat right .3rem center;border:none;border-bottom:1px solid rgba(184,150,12,.18);outline:none;padding:.45rem 1.2rem .45rem .2rem;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);cursor:pointer;appearance:none;transition:border-color .25s;}
+.inp-f-sel{width:100%;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6 4.5-6z' fill='%23b8960c'/%3E%3C/svg%3E") no-repeat right .3rem center;border:none;border-bottom:1px solid rgba(184,137,42,.18);outline:none;padding:.45rem 1.2rem .45rem .2rem;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);cursor:pointer;appearance:none;transition:border-color .25s;}
 .inp-f-sel:focus{border-bottom-color:var(--gold2);}
 .inp-f-sel option{background:#fff;}
 
 /* Tier mini selector */
 .tier-mini-row{display:flex;gap:.7rem;margin-bottom:1.4rem;}
-.tier-mini{flex:1;border:1px solid rgba(184,150,12,.18);padding:.7rem .5rem;text-align:center;cursor:pointer;transition:all .25s;background:#fff;}
+.tier-mini{flex:1;border:1px solid rgba(184,137,42,.18);padding:.7rem .5rem;text-align:center;cursor:pointer;transition:all .25s;background:#fff;}
 .tier-mini.sel,.tier-mini:hover{border-color:var(--gold);background:var(--gold4);}
 .tier-mini .tm-name{font-family:'Cinzel',serif;font-size:.55rem;font-weight:600;letter-spacing:.1em;color:var(--crimson);}
 .tier-mini .tm-price{font-family:'Cormorant Garamond',serif;font-size:.8rem;color:var(--gold);margin-top:.1rem;}
@@ -175,9 +182,9 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 /* Overlay / Modal */
 .overlay{position:fixed;inset:0;z-index:8000;background:rgba(10,5,0,.55);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s;}
 .overlay.open{opacity:1;pointer-events:all;}
-.modal-lux{background:var(--offwhite);border:1px solid rgba(184,150,12,.18);width:100%;max-width:560px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;position:relative;transform:translateY(16px) scale(.98);transition:transform .3s;box-shadow:0 40px 100px rgba(0,0,0,.18);}
+.modal-lux{background:var(--offwhite);border:1px solid rgba(184,137,42,.18);width:100%;max-width:560px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;position:relative;transform:translateY(16px) scale(.98);transition:transform .3s;box-shadow:0 40px 100px rgba(0,0,0,.18);}
 .overlay.open .modal-lux{transform:translateY(0) scale(1);}
-.m-head{padding:1.8rem 2.2rem 1.3rem;border-bottom:1px solid rgba(184,150,12,.1);flex-shrink:0;position:relative;background:linear-gradient(180deg,var(--cream),rgba(253,248,240,.4));}
+.m-head{padding:1.8rem 2.2rem 1.3rem;border-bottom:1px solid rgba(184,137,42,.1);flex-shrink:0;position:relative;background:linear-gradient(180deg,var(--cream),rgba(253,248,240,.4));}
 .m-head::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--crimson),var(--gold2),var(--crimson));}
 .m-title{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:600;color:var(--crimson);letter-spacing:.04em;}
 .m-sub{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-style:italic;color:var(--muted);margin-top:.2rem;}
@@ -187,16 +194,16 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 
 /* Chat admin view */
 .chat-av .modal-lux{max-width:640px;}
-.ca-head{padding:.9rem 1.4rem;background:linear-gradient(135deg,rgba(253,246,216,.6),rgba(253,248,240,.8));border-bottom:1px solid rgba(184,150,12,.1);display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+.ca-head{padding:.9rem 1.4rem;background:linear-gradient(135deg,rgba(253,246,216,.6),rgba(253,248,240,.8));border-bottom:1px solid rgba(184,137,42,.1);display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
 .ca-title{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.1em;color:var(--crimson);}
 .ca-body{height:280px;overflow-y:auto;padding:1.2rem;display:flex;flex-direction:column;gap:.65rem;scrollbar-width:thin;background:#fff;}
-.ca-msg{max-width:72%;padding:.65rem .95rem;font-family:'EB Garamond',serif;font-size:.88rem;line-height:1.65;color:var(--text);border:1px solid rgba(184,150,12,.12);background:rgba(253,246,216,.4);}
+.ca-msg{max-width:72%;padding:.65rem .95rem;font-family:'EB Garamond',serif;font-size:.88rem;line-height:1.65;color:var(--text);border:1px solid rgba(184,137,42,.12);background:rgba(253,246,216,.4);}
 .ca-msg .snd{font-family:'Cinzel',serif;font-size:.44rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.15rem;}
 .ca-msg .tm{font-size:.65rem;color:var(--muted);margin-top:.12rem;font-style:italic;}
 
 /* Profile detail */
 .pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1rem;}
-.pd-chip{border-bottom:1px solid rgba(184,150,12,.1);padding:.5rem 0;}
+.pd-chip{border-bottom:1px solid rgba(184,137,42,.1);padding:.5rem 0;}
 .pd-lbl{font-family:'Cinzel',serif;font-size:.44rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.1rem;}
 .pd-v{font-family:'Cormorant Garamond',serif;font-size:.98rem;color:var(--text);}
 
@@ -207,7 +214,7 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
   font-style:italic;color:var(--muted);margin-bottom:1.2rem;
 }
 
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%)translateY(14px);background:rgba(255,252,248,.98);border:1px solid rgba(184,150,12,.22);border-left:3px solid var(--gold2);padding:.8rem 1.8rem;font-family:'EB Garamond',serif;font-size:.92rem;color:var(--text);z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,.08);}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%)translateY(14px);background:rgba(255,252,248,.98);border:1px solid rgba(184,137,42,.22);border-left:3px solid var(--gold2);padding:.8rem 1.8rem;font-family:'EB Garamond',serif;font-size:.92rem;color:var(--text);z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,.08);}
 .toast.show{opacity:1;transform:translateX(-50%)translateY(0);}
 
 
@@ -230,7 +237,7 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
 }
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:rgba(184,150,12,.22);}
+::-webkit-scrollbar-thumb{background:rgba(184,137,42,.22);}
 
 /* ── MOBILE TOPBAR ── */
 .mobile-topbar{
@@ -239,8 +246,8 @@ html,body{width:100%;font-family:'EB Garamond',serif;background:var(--offwhite);
   border-bottom:1px solid var(--border);position:sticky;top:0;z-index:90;
   box-shadow:0 2px 8px rgba(0,0,0,.06);
 }
-.mobile-hamb{background:none;border:1.5px solid rgba(139,0,0,.2);border-radius:8px;cursor:pointer;color:var(--crimson);padding:.35rem .55rem;font-size:1.1rem;line-height:1;transition:background .2s;}
-.mobile-hamb:hover{background:rgba(139,0,0,.06);}
+.mobile-hamb{background:none;border:1.5px solid rgba(123,31,46,.2);border-radius:8px;cursor:pointer;color:var(--crimson);padding:.35rem .55rem;font-size:1.1rem;line-height:1;transition:background .2s;}
+.mobile-hamb:hover{background:rgba(123,31,46,.06);}
 .mobile-brand{font-family:'Cinzel',serif;font-size:.68rem;font-weight:600;color:var(--crimson);letter-spacing:.06em;}
 .mob-notif-btn{background:none;border:1.5px solid var(--border);border-radius:50px;padding:.3rem .7rem;cursor:pointer;font-family:'Cinzel',serif;font-size:.48rem;color:var(--muted);display:flex;align-items:center;gap:.3rem;}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;backdrop-filter:blur(3px);}
@@ -298,7 +305,7 @@ body{font-size:16px;}
 .bio-footer{text-align:right;font-style:italic;color:#c0392b;font-size:0.78rem;margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid #eee;}
 
 /* ── OFFLINE FORM ENHANCEMENTS ── */
-.off-sec-title{font-family:'Cinzel',serif;font-size:.5rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,150,12,.12);padding-bottom:.4rem;margin:1.4rem 0 .9rem;}
+.off-sec-title{font-family:'Cinzel',serif;font-size:.5rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,137,42,.12);padding-bottom:.4rem;margin:1.4rem 0 .9rem;}
 .off-sec-title:first-of-type{margin-top:0;}
 .o-radio-row{display:flex;gap:1.2rem;flex-wrap:wrap;padding:.3rem 0;}
 .o-r-opt{display:flex;align-items:center;gap:.5rem;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--text);}
@@ -306,7 +313,7 @@ body{font-size:16px;}
 .inp-f-field[readonly]{color:var(--muted);font-style:italic;opacity:.6;cursor:default;}
 /* ── DOB DATE PARTS ── */
 .dob-parts{display:flex;gap:.5rem;align-items:center;}
-.dob-parts select{flex:1;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6 4.5-6z' fill='%23b8960c'/%3E%3C/svg%3E") no-repeat right .3rem center;border:none;border-bottom:1px solid rgba(184,150,12,.18);outline:none;padding:.42rem 1.2rem .42rem .2rem;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);cursor:pointer;appearance:none;transition:border-color .25s;background-color:transparent;}
+.dob-parts select{flex:1;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6 4.5-6z' fill='%23b8960c'/%3E%3C/svg%3E") no-repeat right .3rem center;border:none;border-bottom:1px solid rgba(184,137,42,.18);outline:none;padding:.42rem 1.2rem .42rem .2rem;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);cursor:pointer;appearance:none;transition:border-color .25s;background-color:transparent;}
 .dob-parts select:focus{border-bottom-color:var(--gold2);}
 .dob-parts select option{background:#fff;}
 .dob-sep{color:rgba(107,83,64,.3);font-size:.8rem;flex-shrink:0;}
@@ -315,13 +322,13 @@ body{font-size:16px;}
 
 /* ── CUSTOM SELECT DROPDOWN (admin) ── */
 .csel-trigger{
-  width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,.18);
+  width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,.18);
   outline:none;padding:.45rem 1.6rem .45rem .2rem;
   font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);
   cursor:pointer;display:flex;align-items:center;position:relative;box-sizing:border-box;
   transition:border-color .25s;min-height:36px;
 }
-.csel-trigger:hover{border-bottom-color:rgba(184,150,12,0.4);}
+.csel-trigger:hover{border-bottom-color:rgba(184,137,42,0.4);}
 .csel-trigger.open,.csel-trigger:focus-visible{border-bottom-color:var(--gold2);outline:none;}
 .csel-trigger::after{
   content:'';position:absolute;right:.35rem;top:50%;transform:translateY(-50%);
@@ -334,7 +341,7 @@ body{font-size:16px;}
 .csel-placeholder{color:rgba(107,83,64,0.38);font-style:italic;}
 .csel-panel{
   position:fixed;background:#fffdf8;
-  border:1px solid rgba(184,150,12,0.22);border-radius:12px;
+  border:1px solid rgba(184,137,42,0.22);border-radius:12px;
   box-shadow:0 14px 42px rgba(0,0,0,0.16);
   z-index:99999;max-height:55vh;overflow-y:auto;
   -webkit-overflow-scrolling:touch;
@@ -342,18 +349,18 @@ body{font-size:16px;}
 }
 @keyframes cselpop{from{opacity:0;transform:scale(0.96) translateY(-5px);}to{opacity:1;transform:scale(1) translateY(0);}}
 .csel-panel-hdr{
-  padding:.5rem .9rem .35rem;border-bottom:1px solid rgba(184,150,12,0.1);
+  padding:.5rem .9rem .35rem;border-bottom:1px solid rgba(184,137,42,0.1);
   font-family:'Cinzel',serif;font-size:.42rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
   position:sticky;top:0;background:#fffdf8;z-index:1;
 }
 .csel-item{
   padding:.65rem .9rem;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);
-  cursor:pointer;border-bottom:1px solid rgba(184,150,12,.06);
+  cursor:pointer;border-bottom:1px solid rgba(184,137,42,.06);
   transition:background .1s;-webkit-tap-highlight-color:transparent;
 }
 .csel-item:last-child{border-bottom:none;}
-.csel-item:hover,.csel-item:active{background:rgba(184,150,12,.07);}
-.csel-item.csel-selected{color:var(--crimson);font-weight:600;background:rgba(139,0,0,.04);}
+.csel-item:hover,.csel-item:active{background:rgba(184,137,42,.07);}
+.csel-item.csel-selected{color:var(--crimson);font-weight:600;background:rgba(123,31,46,.04);}
 .csel-backdrop{position:fixed;inset:0;z-index:99998;}
 @media(max-width:900px){
   .csel-trigger{font-size:1rem;min-height:44px;}
@@ -714,7 +721,7 @@ body{font-size:16px;}
     <div class="a-sec" id="secEditReq">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Profile update requests submitted by members. Review and apply changes directly to their Firestore profile.</p>
       <div style="margin-bottom:1rem;">
-        <button onclick="loadEditRequests()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh Requests</button>
+        <button onclick="loadEditRequests()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh Requests</button>
       </div>
       <div id="editReqGrid" class="card-grid"></div>
     </div>
@@ -723,8 +730,8 @@ body{font-size:16px;}
     <div class="a-sec" id="secAppointments">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Branch visit appointment requests submitted by members and visitors.</p>
       <div style="margin-bottom:1rem;display:flex;gap:0.6rem;flex-wrap:wrap;">
-        <button onclick="loadAppointments()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
-        <select id="apptStatusFilter" onchange="loadAppointments()" style="padding:0.4rem 0.8rem;border:1px solid rgba(184,150,12,0.25);border-radius:8px;font-family:'EB Garamond',serif;font-size:0.9rem;">
+        <button onclick="loadAppointments()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+        <select id="apptStatusFilter" onchange="loadAppointments()" style="padding:0.4rem 0.8rem;border:1px solid rgba(184,137,42,0.25);border-radius:8px;font-family:'EB Garamond',serif;font-size:0.9rem;">
           <option value="pending">Pending</option>
           <option value="confirmed">Confirmed</option>
           <option value="all">All</option>
@@ -737,7 +744,7 @@ body{font-size:16px;}
     <div class="a-sec" id="secStories">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Happy stories submitted by couples. Approve to publish on the main site, or dismiss.</p>
       <div style="margin-bottom:1rem;">
-        <button onclick="loadPendingStories()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+        <button onclick="loadPendingStories()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
       </div>
       <div id="storiesGrid" class="card-grid"></div>
     </div>
@@ -908,7 +915,7 @@ function openAdminNotifPanel(){
   const panel=document.createElement('div');
   panel.style.cssText='position:fixed;top:0;right:0;width:360px;max-width:100vw;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,0.12);overflow-y:auto;display:flex;flex-direction:column;';
   const items=adminNotifs.length?adminNotifs.map(n=>`<div style="padding:0.9rem 1.5rem;border-bottom:1px solid #eee;${n.read?'opacity:0.55':''}"><div style="font-family:'EB Garamond',serif;font-size:0.95rem;line-height:1.5;">${n.msg||'Notification'}</div><div style="font-family:'Cinzel',serif;font-size:0.4rem;color:#999;margin-top:0.3rem;">${(n.ts||'').substring(0,10)} ${n.read?'· Read':'· New'}</div></div>`).join(''):'<div style="padding:2rem;text-align:center;font-style:italic;color:#999;">No notifications.</div>';
-  panel.innerHTML=`<div style="padding:1.2rem 1.5rem;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;color:#8b0000;">NOTIFICATIONS</div><button onclick="document.getElementById('adminNotifOv').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✕</button></div>${items}`;
+  panel.innerHTML=`<div style="padding:1.2rem 1.5rem;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;color:var(--primary);">NOTIFICATIONS</div><button onclick="document.getElementById('adminNotifOv').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✕</button></div>${items}`;
   ov.appendChild(panel);document.body.appendChild(ov);
   // Mark all read
   adminNotifs.forEach(n=>n.read=true);
@@ -954,7 +961,7 @@ function renderDash(){
     return {ic:icons[i.status]||'📋',txt:`${p1?.name||i.from} & ${p2?.name||i.to} — ${i.status.replace('_',' ')}`,dt:i.date||'—'};
   }),...ST.engaged.map(e=>({ic:'💍',txt:`${e.p1.name} & ${e.p2.name} — Engagement confirmed`,dt:e.engDate}))].reverse().slice(0,8);
   document.getElementById('actFeed').innerHTML=acts.length?acts.map(a=>`
-    <div style="display:flex;align-items:center;gap:.9rem;padding:.65rem 0;border-bottom:1px solid rgba(184,150,12,.08);">
+    <div style="display:flex;align-items:center;gap:.9rem;padding:.65rem 0;border-bottom:1px solid rgba(184,137,42,.08);">
       <span style="font-size:1rem;">${a.ic}</span>
       <span style="font-family:'EB Garamond',serif;font-size:.9rem;color:var(--text);flex:1;">${a.txt}</span>
       <span style="font-family:'Cormorant Garamond',serif;font-size:.78rem;font-style:italic;color:var(--muted);">${a.dt}</span>
@@ -993,7 +1000,7 @@ function viewProf(u){
     return `<div style="margin-bottom:1.4rem;">
       <div style="font-family:'Cinzel',serif;font-size:0.52rem;font-weight:700;
         letter-spacing:0.14em;text-transform:uppercase;color:var(--crimson);
-        border-bottom:1px solid rgba(184,150,12,0.15);padding-bottom:0.4rem;
+        border-bottom:1px solid rgba(184,137,42,0.15);padding-bottom:0.4rem;
         margin-bottom:0.7rem;">${title}</div>
       <div class="pd-grid">
         ${visible.map(([l,v])=>`
@@ -1012,7 +1019,7 @@ function viewProf(u){
         font-size:0.46rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;
         color:rgba(255,248,220,0.96);">✏ Edit Profile</button>
       <button onclick="closeOv('profOv')"
-        style="background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;
+        style="background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;
         padding:0.5rem 1.2rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;
         letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);">Close</button>
     </div>
@@ -1130,7 +1137,7 @@ function viewProf(u){
 
     ${p.about && p.about !== '—' ? `
       <div style="margin-top:0.5rem;background:rgba(253,246,216,0.4);
-        border-left:2px solid rgba(184,150,12,0.3);border-radius:0 10px 10px 0;
+        border-left:2px solid rgba(184,137,42,0.3);border-radius:0 10px 10px 0;
         padding:0.9rem 1.1rem;font-family:'EB Garamond',serif;font-size:0.92rem;
         font-style:italic;color:var(--muted);line-height:1.85;">
         <strong style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.12em;
@@ -1210,7 +1217,7 @@ function editProf(u){
         </div>
         <div style="margin-top:0.8rem;">
           <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Membership Tier</label>
-          <select id="edit_tier" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.2);padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);">
+          <select id="edit_tier" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);">
             <option ${p.tier==='VIP'?'selected':''}>VIP</option>
             <option ${p.tier==='VVIP'?'selected':''}>VVIP</option>
             <option ${p.tier==='Elite'?'selected':''}>Elite</option>
@@ -1218,19 +1225,19 @@ function editProf(u){
         </div>
         <div style="margin-top:0.8rem;">
           <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Admin Notes</label>
-          <textarea id="edit_notes" rows="3" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.2);padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);resize:vertical;">${p.notes||''}</textarea>
+          <textarea id="edit_notes" rows="3" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);resize:vertical;">${p.notes||''}</textarea>
         </div>
         ${buildEditSection('Profile Photos')}
         <div id="adminPhotosSection_${u}" style="margin-bottom:1rem;">
           <div id="adminPhotoGrid_${u}" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">
-            ${(p.photos||[]).map((url,i)=>`<div style="position:relative;"><img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(139,0,0,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join('')}
-            ${(p.photos||[]).length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,150,12,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:''}
+            ${(p.photos||[]).map((url,i)=>`<div style="position:relative;"><img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join('')}
+            ${(p.photos||[]).length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:''}
           </div>
           <div style="font-family:'EB Garamond',serif;font-size:0.75rem;font-style:italic;color:var(--muted);">Up to 5 photos. ${5-(p.photos||[]).length} slot(s) remaining.</div>
         </div>
         <div style="margin-top:1.2rem;display:flex;gap:0.6rem;">
-          <button onclick="saveEditProf('${u}')" style="flex:1;padding:0.85rem;background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,248,220,0.96);box-shadow:0 4px 16px rgba(139,0,0,0.2);">Save Changes</button>
-          <button onclick="document.getElementById('editProfModal').remove()" style="padding:0.85rem 1.5rem;background:transparent;border:1.5px solid rgba(184,150,12,0.28);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);">Cancel</button>
+          <button onclick="saveEditProf('${u}')" style="flex:1;padding:0.85rem;background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,248,220,0.96);box-shadow:0 4px 16px rgba(123,31,46,0.2);">Save Changes</button>
+          <button onclick="document.getElementById('editProfModal').remove()" style="padding:0.85rem 1.5rem;background:transparent;border:1.5px solid rgba(184,137,42,0.28);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);">Cancel</button>
         </div>
       </div>
     </div>`;
@@ -1249,22 +1256,22 @@ function buildEditField(label, key, value, type){
     return `<div>
       <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">${label}</label>
       <div class="dob-parts">
-        <select id="edit_${key}_d" style="flex:1;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);cursor:pointer;appearance:none;"><option value="">Day</option>${days}</select>
+        <select id="edit_${key}_d" style="flex:1;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);cursor:pointer;appearance:none;"><option value="">Day</option>${days}</select>
         <span class="dob-sep">/</span>
-        <select id="edit_${key}_m" style="flex:2;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);cursor:pointer;appearance:none;"><option value="">Month</option>${months}</select>
+        <select id="edit_${key}_m" style="flex:2;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);cursor:pointer;appearance:none;"><option value="">Month</option>${months}</select>
         <span class="dob-sep">/</span>
-        <select id="edit_${key}_y" style="flex:1.5;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);cursor:pointer;appearance:none;"><option value="">Year</option>${years}</select>
+        <select id="edit_${key}_y" style="flex:1.5;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);cursor:pointer;appearance:none;"><option value="">Year</option>${years}</select>
       </div>
     </div>`;
   }
   return `<div>
     <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">${label}</label>
     <input id="edit_${key}" type="${type}" value="${value||''}"
-      style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,150,12,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);">
+      style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);">
   </div>`;
 }
 function buildEditSection(title){
-  return `<div style="font-family:'Cinzel',serif;font-size:0.48rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,150,12,0.15);padding-bottom:0.3rem;margin:0.8rem 0 0.5rem;">${title}</div>`;
+  return `<div style="font-family:'Cinzel',serif;font-size:0.48rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,137,42,0.15);padding-bottom:0.3rem;margin:0.8rem 0 0.5rem;">${title}</div>`;
 }
 
 function saveEditProf(u){
@@ -1326,8 +1333,8 @@ async function adminUploadPhoto(u, file){
     // Re-render photo grid
     const grid=document.getElementById('adminPhotoGrid_'+u);
     if(grid){
-      grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(139,0,0,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
-        +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,150,12,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
+      grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
+        +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
     }
     toast('✅ Photo uploaded!');
   }catch(e){toast('Upload failed: '+e.message);}
@@ -1344,8 +1351,8 @@ async function adminDeletePhoto(u, idx){
   }
   const grid=document.getElementById('adminPhotoGrid_'+u);
   if(grid){
-    grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(139,0,0,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
-      +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,150,12,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
+    grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
+      +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
   }
   toast('Photo removed.');
 }
@@ -2093,7 +2100,7 @@ async function loadAppointments(){
             <div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;color:var(--text);">${a.name}</div>
             <div style="font-family:'EB Garamond',serif;font-size:0.88rem;color:var(--muted);">${a.mob} ${a.username&&a.username!=='guest'?'· @'+a.username:''}</div>
           </div>
-          <span style="font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:0.2rem 0.7rem;border-radius:20px;background:${a.status==='confirmed'?'rgba(46,125,50,0.1)':'rgba(139,0,0,0.08)'};color:${a.status==='confirmed'?'#2e7d32':'var(--crimson)'};">${a.status}</span>
+          <span style="font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:0.2rem 0.7rem;border-radius:20px;background:${a.status==='confirmed'?'rgba(46,125,50,0.1)':'rgba(123,31,46,0.08)'};color:${a.status==='confirmed'?'#2e7d32':'var(--crimson)'};">${a.status}</span>
         </div>
         <div style="font-family:'EB Garamond',serif;font-size:0.92rem;color:var(--text);margin:0.6rem 0 0.3rem;">
           📅 ${a.date} · ${a.time}<br>
@@ -2104,9 +2111,9 @@ async function loadAppointments(){
         <div style="font-family:'Cinzel',serif;font-size:0.42rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(a.ts).toLocaleString('en-IN')}</div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
           ${a.status==='pending'?`<button onclick="confirmAppt('${a.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Confirm</button>`:''}
-          <a href="tel:${a.mob}" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(184,150,12,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);text-decoration:none;">📞 Call</a>
+          <a href="tel:${a.mob}" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);text-decoration:none;">📞 Call</a>
           <a href="https://wa.me/${a.mob.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Namaste '+a.name+', your appointment at Naveen Reddy Marriage Bureau on '+a.date+' ('+a.time+') at '+a.branch+' is confirmed. Please arrive 10 minutes early. Contact: +91 72079 99985')}" target="_blank" style="padding:0.38rem 1rem;background:#25d366;border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;text-decoration:none;">WhatsApp</a>
-          <button onclick="deleteAppt('${a.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(139,0,0,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Remove</button>
+          <button onclick="deleteAppt('${a.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Remove</button>
         </div>
       </div>`).join('');
   }catch(e){toast('Error loading appointments: '+e.message);}
@@ -2145,7 +2152,7 @@ async function loadPendingStories(){
         <div style="font-family:'Cinzel',serif;font-size:0.42rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(s.ts).toLocaleString('en-IN')} · by ${s.submittedBy}</div>
         <div style="display:flex;gap:0.5rem;">
           <button onclick="approveStory('${s.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Publish</button>
-          <button onclick="dismissStory('${s.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(139,0,0,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Dismiss</button>
+          <button onclick="dismissStory('${s.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Dismiss</button>
         </div>
       </div>`).join('');
   }catch(e){toast('Error loading stories: '+e.message);}
