@@ -402,17 +402,18 @@ body{font-size:16px;}
       stRef, uploadBytes, getDownloadURL
     };
     window.FIREBASE_READY = true;
-    console.log("✅ Admin Firebase initialized");
+    // removed: console.log
 
     window.loadProfilesFromFirebase = async ()=>{
-      console.log("🔄 Loading profiles from Firestore...");
+      // removed: console.log
       try{
         const snap = await getDocs(collection(db,'users'));
-        console.log("📦 Firestore returned", snap.size, "users");
+        // removed: console.log
         window.ST.profiles = [];
         snap.forEach(d=>{
           const data = d.data();
           if(data.status==='deleted')return; // skip deleted profiles
+          if(data.status==='merged')return; // skip offline docs merged into auth account
           window.ST.profiles.push({ ...data, uid: d.id, u: data.u||d.id });
         });
         window.renderAll();
@@ -445,6 +446,104 @@ body{font-size:16px;}
 </head>
 <body>
 
+<!-- ══════ COOKIE CONSENT BANNER ══════ -->
+<div id="cookieConsent" class="cookie-banner" style="display: none;">
+  <div class="cookie-content">
+    <p>We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.</p>
+    <div class="cookie-buttons">
+      <button class="cookie-btn cookie-accept" onclick="acceptCookies()" aria-label="Accept">Accept</button>
+      <button class="cookie-btn cookie-decline" onclick="declineCookies()" aria-label="Decline">Decline</button>
+    </div>
+  </div>
+</div>
+<style>
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-top: 2px solid #d4af37;
+  padding: 20px;
+  z-index: 10000;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+  font-family: 'EB Garamond', serif;
+}
+.cookie-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.cookie-content p {
+  color: #fefcf8;
+  font-size: 16px;
+  margin: 0;
+  flex: 1;
+  min-width: 280px;
+}
+.cookie-buttons {
+  display: flex;
+  gap: 10px;
+}
+.cookie-btn {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+.cookie-accept {
+  background: linear-gradient(135deg, #8b0000 0%, #a52a2a 100%);
+  color: #d4af37;
+  border: 1px solid #d4af37;
+}
+.cookie-accept:hover {
+  background: linear-gradient(135deg, #a52a2a 0%, #8b0000 100%);
+  box-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+}
+.cookie-decline {
+  background: transparent;
+  color: #fefcf8;
+  border: 1px solid #666;
+}
+.cookie-decline:hover {
+  border-color: #fefcf8;
+}
+</style>
+<script>
+// XSS Protection - Escape HTML to prevent script injection
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Cookie Consent Functions
+function checkCookieConsent() {
+  const consent = localStorage.getItem('cookieConsent');
+  if (!consent) {
+    document.getElementById('cookieConsent').style.display = 'block';
+  }
+}
+function acceptCookies() {
+  localStorage.setItem('cookieConsent', 'accepted');
+  document.getElementById('cookieConsent').style.display = 'none';
+}
+function declineCookies() {
+  localStorage.setItem('cookieConsent', 'declined');
+  document.getElementById('cookieConsent').style.display = 'none';
+}
+checkCookieConsent();
+</script>
+<!-- ══════ END COOKIE CONSENT ══════ -->
+
 <!-- ── ADMIN LOGIN ── -->
 <div id="adminLogin" class="doodle-bg" style="background:linear-gradient(160deg,#fff8ee,#fde8d0,#fff3e0);">
   <div class="al-card">
@@ -460,10 +559,10 @@ body{font-size:16px;}
     <div class="inp-luxury">
       <label>Admin Password</label>
       <input id="ap" type="password" placeholder="secure password">
-      <button class="eb" onclick="tpwd('ap',this)">👁</button>
+      <button class="eb" onclick="tpwd('ap',this)" aria-label="👁">👁</button>
       <div class="inp-line"></div>
     </div>
-    <button class="btn-lux" onclick="adminLogin()">Access Admin Portal</button>
+    <button class="btn-lux" onclick="adminLogin()" aria-label="Access Admin Portal">Access Admin Portal</button>
     <p style="text-align:center;margin-top:1rem;font-family:'Cormorant Garamond',serif;font-size:.78rem;font-style:italic;color:var(--muted);">Unauthorised access is strictly prohibited and may result in legal action.</p>
   </div>
 </div>
@@ -485,28 +584,28 @@ body{font-size:16px;}
     <div id="adminBranchLabel" style="font-family:'Cinzel',serif;font-size:.48rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--crimson);border-radius:20px;padding:.22rem .8rem;text-align:center;margin-bottom:1rem;display:block;"></div>
 
     <div class="sb-sec-lbl">Overview</div>
-    <button class="sb-btn active" id="bDash" onclick="goSec('secDash')">📊 &nbsp;Dashboard</button>
+    <button class="sb-btn active" id="bDash" onclick="goSec('secDash')" aria-label="📊 &nbsp;Dashboard">📊 &nbsp;Dashboard</button>
 
     <div class="sb-sec-lbl">Members</div>
     <button class="sb-btn" id="bProf" onclick="goSec('secProfiles')">👥 &nbsp;All Profiles <span class="sb-badge" id="profCnt">6</span></button>
-    <button class="sb-btn" id="bAdd" onclick="goSec('secAdd')">➕ &nbsp;Add Offline Member</button>
+    <button class="sb-btn" id="bAdd" onclick="goSec('secAdd')" aria-label="➕ &nbsp;Add Offline Member">➕ &nbsp;Add Offline Member</button>
 
     <div class="sb-sec-lbl">Matchmaking</div>
     <button class="sb-btn" id="bInt" onclick="goSec('secInterests')">💌 &nbsp;All Interests <span class="sb-badge" id="intCnt">3</span></button>
     <button class="sb-btn" id="bMut" onclick="goSec('secMutual')">❤ &nbsp;Mutual Matches <span class="sb-badge" id="mutCnt">2</span></button>
 
     <div class="sb-sec-lbl">Records</div>
-    <button class="sb-btn" id="bEng" onclick="goSec('secEngaged')">💍 &nbsp;Engaged Couples</button>
-    <button class="sb-btn" id="bChat" onclick="goSec('secChats')">💬 &nbsp;All Conversations</button>
+    <button class="sb-btn" id="bEng" onclick="goSec('secEngaged')" aria-label="💍 &nbsp;Engaged Couples">💍 &nbsp;Engaged Couples</button>
+    <button class="sb-btn" id="bChat" onclick="goSec('secChats')" aria-label="💬 &nbsp;All Conversations">💬 &nbsp;All Conversations</button>
     <button class="sb-btn" id="bEditReq" onclick="goSec('secEditReq')">✏ &nbsp;Edit Requests <span class="sb-badge" id="editReqCnt" style="display:none;">0</span></button>
     <button class="sb-btn" id="bAppt" onclick="goSec('secAppointments')">📅 &nbsp;Appointments <span class="sb-badge" id="apptCnt" style="display:none;">0</span></button>
     <button class="sb-btn" id="bStories" onclick="goSec('secStories')">💐 &nbsp;Pending Stories <span class="sb-badge" id="storiesCnt" style="display:none;">0</span></button>
 
     <div class="sb-sec-lbl">Records</div>
-    <button class="sb-btn" id="bArch" onclick="goSec('secArchived')">📁 &nbsp;Archived / Closed</button>
+    <button class="sb-btn" id="bArch" onclick="goSec('secArchived')" aria-label="📁 &nbsp;Archived / Closed">📁 &nbsp;Archived / Closed</button>
 
     <div class="sb-sec-lbl">Account</div>
-    <button class="sb-btn" style="color:var(--crimson);" onclick="adminLogout()">🚪 &nbsp;Sign Out</button>
+    <button class="sb-btn" style="color:var(--crimson);" onclick="adminLogout()" aria-label="🚪 &nbsp;Sign Out">🚪 &nbsp;Sign Out</button>
   </aside>
 
   <main class="admin-main">
@@ -686,8 +785,8 @@ body{font-size:16px;}
         <div class="inp-f-group"><label class="inp-f-lbl">Notes / Remarks</label><textarea class="inp-f-field" id="onotes" rows="2" style="resize:vertical;" placeholder="Walk-in / Phone enquiry / Referral details…"></textarea></div>
 
         <div style="display:flex;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap;">
-          <button class="btn-lux" style="width:auto;padding:.7rem 2rem;" onclick="addOffline()">Register Member</button>
-          <button class="btn-lux outline" style="width:auto;padding:.7rem 1.5rem;" onclick="clearOff()">Clear Form</button>
+          <button class="btn-lux" style="width:auto;padding:.7rem 2rem;" onclick="addOffline()" aria-label="Register Member">Register Member</button>
+          <button class="btn-lux outline" style="width:auto;padding:.7rem 1.5rem;" onclick="clearOff()" aria-label="Clear Form">Clear Form</button>
         </div>
       </div>
     </div>
@@ -722,7 +821,7 @@ body{font-size:16px;}
     <div class="a-sec" id="secEditReq">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Profile update requests submitted by members. Review and apply changes directly to their Firestore profile.</p>
       <div style="margin-bottom:1rem;">
-        <button onclick="loadEditRequests()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh Requests</button>
+        <button onclick="loadEditRequests()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);" aria-label="↻ Refresh Requests">↻ Refresh Requests</button>
       </div>
       <div id="editReqGrid" class="card-grid"></div>
     </div>
@@ -731,7 +830,7 @@ body{font-size:16px;}
     <div class="a-sec" id="secAppointments">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Branch visit appointment requests submitted by members and visitors.</p>
       <div style="margin-bottom:1rem;display:flex;gap:0.6rem;flex-wrap:wrap;">
-        <button onclick="loadAppointments()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+        <button onclick="loadAppointments()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);" aria-label="↻ Refresh">↻ Refresh</button>
         <select id="apptStatusFilter" onchange="loadAppointments()" style="padding:0.4rem 0.8rem;border:1px solid rgba(184,137,42,0.25);border-radius:8px;font-family:'EB Garamond',serif;font-size:0.9rem;">
           <option value="pending">Pending</option>
           <option value="confirmed">Confirmed</option>
@@ -745,7 +844,7 @@ body{font-size:16px;}
     <div class="a-sec" id="secStories">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Happy stories submitted by couples. Approve to publish on the main site, or dismiss.</p>
       <div style="margin-bottom:1rem;">
-        <button onclick="loadPendingStories()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+        <button onclick="loadPendingStories()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);" aria-label="↻ Refresh">↻ Refresh</button>
       </div>
       <div id="storiesGrid" class="card-grid"></div>
     </div>
@@ -753,11 +852,11 @@ body{font-size:16px;}
 </div>
 
 <!-- Modals -->
-<div class="overlay" id="profOv" onclick="bgC(event,'profOv')"><div class="modal-lux" style="max-width:760px;max-height:92vh;overflow-y:auto;"><div class="m-head"><div class="m-title" id="pdTitle">Profile</div><button class="m-close" onclick="closeOv('profOv')">✕</button></div><div class="m-body" id="pdBody"></div></div></div>
-<div class="overlay" id="releaseOv" onclick="bgC(event,'releaseOv')"><div class="modal-lux" style="max-width:420px;"><div class="m-head"><div class="m-title">Release from Hold</div><div class="m-sub">This will return both profiles to the active pool</div><button class="m-close" onclick="closeOv('releaseOv')">✕</button></div><div class="m-body"><div class="eng-warn">Once released, both profiles will again be visible to all eligible members.</div><div style="display:flex;gap:.7rem;"><button class="btn-lux" onclick="doRelease()">Confirm Release</button><button class="btn-lux outline" onclick="closeOv('releaseOv')">Cancel</button></div></div></div></div>
-<div class="overlay" id="contactOv" onclick="bgC(event,'contactOv')"><div class="modal-lux" style="max-width:440px;"><div class="m-head"><div class="m-title">Approve Contact Disclosure</div><div class="m-sub">Contact details will be released to both families</div><button class="m-close" onclick="closeOv('contactOv')">✕</button></div><div class="m-body"><div class="eng-warn">This will enable both families to view full contact details and activate the private family chat. This action cannot be reversed.</div><div style="display:flex;gap:.7rem;"><button class="btn-lux grn" onclick="doContact()">Approve & Release</button><button class="btn-lux outline" onclick="closeOv('contactOv')">Cancel</button></div></div></div></div>
-<div class="overlay" id="engOv" onclick="bgC(event,'engOv')"><div class="modal-lux" style="max-width:440px;"><div class="m-head"><div class="m-title">Confirm Engagement</div><div class="m-sub">Set the engagement date to begin the 7-day payment countdown</div><button class="m-close" onclick="closeOv('engOv')">✕</button></div><div class="m-body"><div class="eng-warn">⚠ Once confirmed, both profiles will be permanently removed from the active member pool and the payment countdown will begin.</div><div class="inp-f-group"><label class="inp-f-lbl">Engagement Date *</label><input class="inp-f-field" type="date" id="engD"></div><div style="display:flex;gap:.7rem;margin-top:.5rem;"><button class="btn-lux" onclick="doEngage()">Confirm Engagement</button><button class="btn-lux outline" onclick="closeOv('engOv')">Cancel</button></div></div></div></div>
-<div class="overlay chat-av" id="chatViewOv" onclick="bgC(event,'chatViewOv')"><div class="modal-lux" style="max-width:620px;"><div class="ca-head"><span>👁</span><span class="ca-title" id="caTitle">Conversation</span><button class="m-close" onclick="closeOv('chatViewOv')">✕</button></div><div class="ca-body" id="caBody"></div></div></div>
+<div class="overlay" id="profOv" onclick="bgC(event,'profOv')"><div class="modal-lux" style="max-width:760px;max-height:92vh;overflow-y:auto;"><div class="m-head"><div class="m-title" id="pdTitle">Profile</div><button class="m-close" onclick="closeOv('profOv')" aria-label="✕">✕</button></div><div class="m-body" id="pdBody"></div></div></div>
+<div class="overlay" id="releaseOv" onclick="bgC(event,'releaseOv')"><div class="modal-lux" style="max-width:420px;"><div class="m-head"><div class="m-title">Release from Hold</div><div class="m-sub">This will return both profiles to the active pool</div><button class="m-close" onclick="closeOv('releaseOv')" aria-label="✕">✕</button></div><div class="m-body"><div class="eng-warn">Once released, both profiles will again be visible to all eligible members.</div><div style="display:flex;gap:.7rem;"><button class="btn-lux" onclick="doRelease()" aria-label="Confirm Release">Confirm Release</button><button class="btn-lux outline" onclick="closeOv('releaseOv')" aria-label="Cancel">Cancel</button></div></div></div></div>
+<div class="overlay" id="contactOv" onclick="bgC(event,'contactOv')"><div class="modal-lux" style="max-width:440px;"><div class="m-head"><div class="m-title">Approve Contact Disclosure</div><div class="m-sub">Contact details will be released to both families</div><button class="m-close" onclick="closeOv('contactOv')" aria-label="✕">✕</button></div><div class="m-body"><div class="eng-warn">This will enable both families to view full contact details and activate the private family chat. This action cannot be reversed.</div><div style="display:flex;gap:.7rem;"><button class="btn-lux grn" onclick="doContact()" aria-label="Approve & Release">Approve & Release</button><button class="btn-lux outline" onclick="closeOv('contactOv')" aria-label="Cancel">Cancel</button></div></div></div></div>
+<div class="overlay" id="engOv" onclick="bgC(event,'engOv')"><div class="modal-lux" style="max-width:440px;"><div class="m-head"><div class="m-title">Confirm Engagement</div><div class="m-sub">Set the engagement date to begin the 7-day payment countdown</div><button class="m-close" onclick="closeOv('engOv')" aria-label="✕">✕</button></div><div class="m-body"><div class="eng-warn">⚠ Once confirmed, both profiles will be permanently removed from the active member pool and the payment countdown will begin.</div><div class="inp-f-group"><label class="inp-f-lbl">Engagement Date *</label><input class="inp-f-field" type="date" id="engD"></div><div style="display:flex;gap:.7rem;margin-top:.5rem;"><button class="btn-lux" onclick="doEngage()" aria-label="Confirm Engagement">Confirm Engagement</button><button class="btn-lux outline" onclick="closeOv('engOv')" aria-label="Cancel">Cancel</button></div></div></div></div>
+<div class="overlay chat-av" id="chatViewOv" onclick="bgC(event,'chatViewOv')"><div class="modal-lux" style="max-width:620px;"><div class="ca-head"><span>👁</span><span class="ca-title" id="caTitle">Conversation</span><button class="m-close" onclick="closeOv('chatViewOv')" aria-label="✕">✕</button></div><div class="ca-body" id="caBody"></div></div></div>
 
 <!-- Payment Reminder Modal -->
 <div class="overlay" id="reminderOv" onclick="bgC(event,'reminderOv')">
@@ -765,14 +864,14 @@ body{font-size:16px;}
     <div class="m-head">
       <div class="m-title">Payment Reminder</div>
       <div class="m-sub">Send a reminder to the couple about the pending payment</div>
-      <button class="m-close" onclick="closeOv('reminderOv')">✕</button>
+      <button class="m-close" onclick="closeOv('reminderOv')" aria-label="✕">✕</button>
     </div>
     <div class="m-body">
       <div style="font-family:'EB Garamond',serif;font-size:0.9rem;color:var(--muted);line-height:1.8;margin-bottom:1rem;">
         A reminder will be sent via email/WhatsApp to both parties about their outstanding post-engagement service fee.<br><br>
         <em>Note: In production, connect to Firebase Cloud Functions or an SMS/Email API (e.g. Twilio, SendGrid) to automate this.</em>
       </div>
-      <button class="btn-lux" onclick="toast('📨 Reminder sent successfully.');closeOv('reminderOv');">Send Reminder Now</button>
+      <button class="btn-lux" onclick="toast('📨 Reminder sent successfully.');closeOv('reminderOv');" aria-label="Send Reminder Now">Send Reminder Now</button>
     </div>
   </div>
 </div>
@@ -916,7 +1015,7 @@ function openAdminNotifPanel(){
   const panel=document.createElement('div');
   panel.style.cssText='position:fixed;top:0;right:0;width:360px;max-width:100vw;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,0.12);overflow-y:auto;display:flex;flex-direction:column;';
   const items=adminNotifs.length?adminNotifs.map(n=>`<div style="padding:0.9rem 1.5rem;border-bottom:1px solid #eee;${n.read?'opacity:0.55':''}"><div style="font-family:'EB Garamond',serif;font-size:0.95rem;line-height:1.5;">${n.msg||'Notification'}</div><div style="font-family:'Cinzel',serif;font-size:0.6rem;color:#999;margin-top:0.3rem;">${(n.ts||'').substring(0,10)} ${n.read?'· Read':'· New'}</div></div>`).join(''):'<div style="padding:2rem;text-align:center;font-style:italic;color:#999;">No notifications.</div>';
-  panel.innerHTML=`<div style="padding:1.2rem 1.5rem;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;color:var(--primary);">NOTIFICATIONS</div><button onclick="document.getElementById('adminNotifOv').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✕</button></div>${items}`;
+  panel.innerHTML=`<div style="padding:1.2rem 1.5rem;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;color:var(--primary);">NOTIFICATIONS</div><button onclick="document.getElementById('adminNotifOv').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;" aria-label="✕">✕</button></div>${items}`;
   ov.appendChild(panel);document.body.appendChild(ov);
   // Mark all read
   adminNotifs.forEach(n=>n.read=true);
@@ -982,10 +1081,10 @@ function renderProfiles(list){
       </div>
       <div class="ac-det"><strong>Age:</strong> ${p.age||'—'} · <strong>Ht:</strong> ${p.ht||'—'} · <strong>Gender:</strong> ${p.g||'—'}<br><strong>Profession:</strong> ${p.prof||p.occ||'—'}<br><strong>City:</strong> ${p.city||'—'}, ${p.state||'—'}, ${p.country||'—'}<br><strong>Income:</strong> ${p.inc||p.sal?'₹'+(p.inc||p.sal):' —'}<br><strong>📞</strong> ${p.mob||'—'} &nbsp;·&nbsp; <strong>✉</strong> ${p.email||'—'}${p.edu?`<br><strong>Education:</strong> ${p.edu}`:''}${p.nat||p.native?`<br><strong>Native:</strong> ${p.nat||p.native}`:''}${p.notes?`<br><em style="font-size:.78rem;">${p.notes}</em>`:''}</div>
       <div class="ac-acts">
-        <button class="act-b prim" onclick="viewProf('${p.u}')">👁 View Details</button>
-        <button class="act-b grn" onclick="editProf('${p.u}')">✏ Edit</button>
-        <button class="act-b" onclick="adminViewBiodata('${p.u}')">📄 Biodata</button>
-        <button class="act-b" onclick="delProf('${p.u}')" style="color:#c0392b;border-color:rgba(192,57,43,0.3);">Remove</button>
+        <button class="act-b prim" onclick="viewProf('${p.u}')" aria-label="👁 View Details">👁 View Details</button>
+        <button class="act-b grn" onclick="editProf('${p.u}')" aria-label="✏ Edit">✏ Edit</button>
+        <button class="act-b" onclick="adminViewBiodata('${p.u}')" aria-label="📄 Biodata">📄 Biodata</button>
+        <button class="act-b" onclick="delProf('${p.u}')" style="color:#c0392b;border-color:rgba(192,57,43,0.3);" aria-label="Remove">Remove</button>
       </div>
     </div>`).join('')||'<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">No profiles match the selected filters.</p>';
 }
@@ -1018,11 +1117,11 @@ function viewProf(u){
         style="background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;
         border-radius:50px;padding:0.5rem 1.4rem;cursor:pointer;font-family:'Cinzel',serif;
         font-size:0.6rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;
-        color:rgba(255,248,220,0.96);">✏ Edit Profile</button>
+        color:rgba(255,248,220,0.96);" aria-label="✏ Edit Profile">✏ Edit Profile</button>
       <button onclick="closeOv('profOv')"
         style="background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;
         padding:0.5rem 1.2rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;
-        letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);">Close</button>
+        letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);" aria-label="Close">Close</button>
     </div>
 
     ${sec('Basic Information', [
@@ -1167,7 +1266,7 @@ function editProf(u){
       <div class="m-head" style="flex-shrink:0;">
         <div class="m-title">✏ Edit Profile — ${p.name}</div>
         <div class="m-sub">Changes are saved immediately to local data</div>
-        <button class="m-close" onclick="document.getElementById('editProfModal').remove()">✕</button>
+        <button class="m-close" onclick="document.getElementById('editProfModal').remove()" aria-label="✕">✕</button>
       </div>
       <div class="m-body" style="overflow-y:auto;flex:1;">
         ${buildEditSection('Basic Information')}
@@ -1231,14 +1330,14 @@ function editProf(u){
         ${buildEditSection('Profile Photos')}
         <div id="adminPhotosSection_${u}" style="margin-bottom:1rem;">
           <div id="adminPhotoGrid_${u}" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">
-            ${(p.photos||[]).map((url,i)=>`<div style="position:relative;"><img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join('')}
+            ${(p.photos||[]).map((url,i)=>`<div style="position:relative;"><img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;" aria-label="✕">✕</button></div>`).join('')}
             ${(p.photos||[]).length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.6rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:''}
           </div>
           <div style="font-family:'EB Garamond',serif;font-size:0.75rem;font-style:italic;color:var(--muted);">Up to 5 photos. ${5-(p.photos||[]).length} slot(s) remaining.</div>
         </div>
         <div style="margin-top:1.2rem;display:flex;gap:0.6rem;">
-          <button onclick="saveEditProf('${u}')" style="flex:1;padding:0.85rem;background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,248,220,0.96);box-shadow:0 4px 16px rgba(123,31,46,0.2);">Save Changes</button>
-          <button onclick="document.getElementById('editProfModal').remove()" style="padding:0.85rem 1.5rem;background:transparent;border:1.5px solid rgba(184,137,42,0.28);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);">Cancel</button>
+          <button onclick="saveEditProf('${u}')" style="flex:1;padding:0.85rem;background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,248,220,0.96);box-shadow:0 4px 16px rgba(123,31,46,0.2);" aria-label="Save Changes">Save Changes</button>
+          <button onclick="document.getElementById('editProfModal').remove()" style="padding:0.85rem 1.5rem;background:transparent;border:1.5px solid rgba(184,137,42,0.28);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);" aria-label="Cancel">Cancel</button>
         </div>
       </div>
     </div>`;
@@ -1334,7 +1433,7 @@ async function adminUploadPhoto(u, file){
     // Re-render photo grid
     const grid=document.getElementById('adminPhotoGrid_'+u);
     if(grid){
-      grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
+      grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;" aria-label="✕">✕</button></div>`).join(''))
         +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.6rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
     }
     toast('✅ Photo uploaded!');
@@ -1352,7 +1451,7 @@ async function adminDeletePhoto(u, idx){
   }
   const grid=document.getElementById('adminPhotoGrid_'+u);
   if(grid){
-    grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
+    grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;" aria-label="✕">✕</button></div>`).join(''))
       +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.6rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
   }
   toast('Photo removed.');
@@ -1549,9 +1648,12 @@ async function addOffline(){
   // Save to Firestore — source of truth
   if(window.FIREBASE_READY && window.FB){
     try{
-      const {addDoc,collection,db}=window.FB;
-      const docRef=await addDoc(collection(db,'users'),newP);
-      newP.uid=docRef.id;
+      const {setDoc,doc,db}=window.FB;
+      const emailSlug=newP.email?newP.email.toLowerCase().replace(/[^a-z0-9]/g,'_'):'offline_'+Date.now();
+      const docId='offline_'+emailSlug;
+      newP.uid=docId;
+      newP.linkedEmail=newP.email?newP.email.toLowerCase():'';
+      await setDoc(doc(db,'users',docId),newP);
       ST.profiles.push(newP);
       renderAll();
       clearOff();
@@ -1637,8 +1739,8 @@ function adminViewBiodata(u){
     ${p.pp_note&&p.pp_note!=='—'?row('Other Preferences',p.pp_note):''}
     <div class="bio-footer">Relationship : Father / Guardian &nbsp;&nbsp;&nbsp; Contact : ${p.pgmob1||p.fmob||'—'}</div>
     <div style="text-align:center;margin-top:0.6rem;display:flex;gap:0.6rem;justify-content:center;">
-      <button onclick="window.print()" style="padding:0.5rem 1.2rem;background:var(--crimson);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:#fff;">🖨 Print</button>
-      <button onclick="document.getElementById('adminBiodataOv').remove()" style="padding:0.5rem 1.2rem;background:transparent;border:1px solid var(--crimson);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;color:var(--crimson);">Close</button>
+      <button onclick="window.print()" style="padding:0.5rem 1.2rem;background:var(--crimson);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:#fff;" aria-label="🖨 Print">🖨 Print</button>
+      <button onclick="document.getElementById('adminBiodataOv').remove()" style="padding:0.5rem 1.2rem;background:transparent;border:1px solid var(--crimson);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;color:var(--crimson);" aria-label="Close">Close</button>
     </div>
   </div>`;
   document.body.appendChild(el);
@@ -1698,15 +1800,15 @@ function renderInterests(){
     const cls=statusCls[int.status]||'';
     const actions=[];
     if(int.status==='pending'){
-      actions.push(`<button class="act-b prim" onclick="markMutual(${idx})">✓ Mark Mutual</button>`);
-      actions.push(`<button class="act-b" onclick="removeInterest(${idx})">Remove</button>`);
+      actions.push(`<button class="act-b prim" onclick="markMutual(${idx})" aria-label="✓ Mark Mutual">✓ Mark Mutual</button>`);
+      actions.push(`<button class="act-b" onclick="removeInterest(${idx})" aria-label="Remove">Remove</button>`);
     }
     if(int.status==='mutual'){
-      actions.push(`<button class="act-b grn" onclick="prepContact(${idx})">📞 Release Contact</button>`);
-      actions.push(`<button class="act-b" onclick="prepRelease(${idx})">🔓 Release Hold</button>`);
+      actions.push(`<button class="act-b grn" onclick="prepContact(${idx})" aria-label="📞 Release Contact">📞 Release Contact</button>`);
+      actions.push(`<button class="act-b" onclick="prepRelease(${idx})" aria-label="🔓 Release Hold">🔓 Release Hold</button>`);
     }
     if(int.status==='contact_released'){
-      actions.push(`<button class="act-b prim" onclick="prepEngage(${idx})">💍 Confirm Engagement</button>`);
+      actions.push(`<button class="act-b prim" onclick="prepEngage(${idx})" aria-label="💍 Confirm Engagement">💍 Confirm Engagement</button>`);
     }
     return `<div class="ac">
       <div class="ac-top">
@@ -1750,11 +1852,11 @@ function renderMutual(){
     const cls=statusCls[int.status]||'';
     const actions=[];
     if(int.status==='mutual'){
-      actions.push(`<button class="act-b grn" onclick="prepContact(${idx});goSec('secMutual')">📞 Release Contact</button>`);
-      actions.push(`<button class="act-b" onclick="prepRelease(${idx});goSec('secMutual')">🔓 Release Hold</button>`);
+      actions.push(`<button class="act-b grn" onclick="prepContact(${idx});goSec('secMutual')" aria-label="📞 Release Contact">📞 Release Contact</button>`);
+      actions.push(`<button class="act-b" onclick="prepRelease(${idx});goSec('secMutual')" aria-label="🔓 Release Hold">🔓 Release Hold</button>`);
     }
     if(int.status==='contact_released'){
-      actions.push(`<button class="act-b prim" onclick="prepEngage(${idx});goSec('secMutual')">💍 Confirm Engagement</button>`);
+      actions.push(`<button class="act-b prim" onclick="prepEngage(${idx});goSec('secMutual')" aria-label="💍 Confirm Engagement">💍 Confirm Engagement</button>`);
     }
     return `<div class="ac">
       <div class="ac-top">
@@ -1789,9 +1891,9 @@ function renderEngaged(){
         <strong>${e.p1?.name||'P1'} (${e.p1?.tier||'VIP'}):</strong> ${e.p1_paid?'✅ Paid':'❌ Unpaid'} &nbsp;·&nbsp; <strong>${e.p2?.name||'P2'} (${e.p2?.tier||'VIP'}):</strong> ${e.p2_paid?'✅ Paid':'❌ Unpaid'}
       </div>
       <div class="ac-acts">
-        ${!e.p1_paid?`<button class="act-b" onclick="markPaid(${idx},1)">Mark ${e.p1?.name||'P1'} Paid</button>`:''}
-        ${!e.p2_paid?`<button class="act-b" onclick="markPaid(${idx},2)">Mark ${e.p2?.name||'P2'} Paid</button>`:''}
-        <button class="act-b" onclick="sendReminder(${idx})">📨 Reminder</button>
+        ${!e.p1_paid?`<button class="act-b" onclick="markPaid(${idx},1)" aria-label="Mark ${e.p1?.name||'P1'} Paid">Mark ${e.p1?.name||'P1'} Paid</button>`:''}
+        ${!e.p2_paid?`<button class="act-b" onclick="markPaid(${idx},2)" aria-label="Mark ${e.p2?.name||'P2'} Paid">Mark ${e.p2?.name||'P2'} Paid</button>`:''}
+        <button class="act-b" onclick="sendReminder(${idx})" aria-label="📨 Reminder">📨 Reminder</button>
       </div>
     </div>`;
   }).join('');
@@ -1828,7 +1930,7 @@ function renderChats(){
         <div><div class="ac-name">${p1.name} &amp; ${p2.name}</div><div class="ac-status s-cont">${msgs.length} messages</div></div>
       </div>
       <div class="ac-det"><strong>Last message:</strong> "${last?.msg||'—'}"<br><em style="font-size:.78rem;">${last?.sender||''} · ${last?.time||''}</em></div>
-      <div class="ac-acts"><button class="act-b prim" onclick="viewChat('${k}')">👁 View Conversation</button></div>
+      <div class="ac-acts"><button class="act-b prim" onclick="viewChat('${k}')" aria-label="👁 View Conversation">👁 View Conversation</button></div>
     </div>`;
   }).join('');
 }
@@ -1859,8 +1961,8 @@ function renderArchived(){
       </div>
       <div class="ac-det"><strong>Age:</strong> ${p.age} · <strong>Gender:</strong> ${p.g}<br><strong>Tier:</strong> ${p.tier} · <strong>City:</strong> ${p.city}<br><strong>Closed:</strong> ${p.closedDate||'—'} · <strong>Reason:</strong> ${p.reason||'—'}</div>
       <div class="ac-acts">
-        <button class="act-b prim" onclick="restoreProfile(${idx})">↩ Restore</button>
-        <button class="act-b" onclick="purgeProfile(${idx})">🗑 Delete Permanently</button>
+        <button class="act-b prim" onclick="restoreProfile(${idx})" aria-label="↩ Restore">↩ Restore</button>
+        <button class="act-b" onclick="purgeProfile(${idx})" aria-label="🗑 Delete Permanently">🗑 Delete Permanently</button>
       </div>
     </div>`).join('');
 }
@@ -1891,6 +1993,7 @@ function _startAdminRealTime(){
       const data={...change.doc.data(),uid:change.doc.id,u:change.doc.data().u||change.doc.id};
       if(change.type==='added'){
         if(data.status==='deleted')return; // skip soft-deleted
+        if(data.status==='merged')return; // skip offline docs merged into auth account
         const exists=window.ST.profiles.some(p=>p.uid===data.uid||p.u===data.u);
         if(!exists){ window.ST.profiles.push(data); window.renderAll(); }
       } else if(change.type==='modified'){
@@ -1983,8 +2086,8 @@ function renderEditRequests(){
         ${req.note?`<div style="margin-top:0.4rem;font-style:italic;color:var(--muted);">Note: ${req.note}</div>`:''}
       </div>
       <div class="ac-acts">
-        <button class="act-b grn" onclick="applyEditRequest('${req.docId}',${i})">✓ Apply Changes</button>
-        <button class="act-b" onclick="dismissEditRequest('${req.docId}',${i})" style="color:#c0392b;border-color:rgba(192,57,43,0.3);">✕ Dismiss</button>
+        <button class="act-b grn" onclick="applyEditRequest('${req.docId}',${i})" aria-label="✓ Apply Changes">✓ Apply Changes</button>
+        <button class="act-b" onclick="dismissEditRequest('${req.docId}',${i})" style="color:#c0392b;border-color:rgba(192,57,43,0.3);" aria-label="✕ Dismiss">✕ Dismiss</button>
       </div>
     </div>`;
   }).join('');
@@ -2111,10 +2214,10 @@ async function loadAppointments(){
         </div>
         <div style="font-family:'Cinzel',serif;font-size:0.6rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(a.ts).toLocaleString('en-IN')}</div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-          ${a.status==='pending'?`<button onclick="confirmAppt('${a.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Confirm</button>`:''}
+          ${a.status==='pending'?`<button onclick="confirmAppt('${a.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;" aria-label="✓ Confirm">✓ Confirm</button>`:''}
           <a href="tel:${a.mob}" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);text-decoration:none;">📞 Call</a>
           <a href="https://wa.me/${a.mob.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Namaste '+a.name+', your appointment at Naveen Reddy Marriage Bureau on '+a.date+' ('+a.time+') at '+a.branch+' is confirmed. Please arrive 10 minutes early. Contact: +91 72079 99985')}" target="_blank" style="padding:0.38rem 1rem;background:#25d366;border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;text-decoration:none;">WhatsApp</a>
-          <button onclick="deleteAppt('${a.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Remove</button>
+          <button onclick="deleteAppt('${a.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);" aria-label="✕ Remove">✕ Remove</button>
         </div>
       </div>`).join('');
   }catch(e){toast('Error loading appointments: '+e.message);}
@@ -2152,8 +2255,8 @@ async function loadPendingStories(){
         ${s.contact?`<div style="font-family:'EB Garamond',serif;font-size:0.82rem;color:var(--muted);">Contact: ${s.contact}</div>`:''}
         <div style="font-family:'Cinzel',serif;font-size:0.6rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(s.ts).toLocaleString('en-IN')} · by ${s.submittedBy}</div>
         <div style="display:flex;gap:0.5rem;">
-          <button onclick="approveStory('${s.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Publish</button>
-          <button onclick="dismissStory('${s.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Dismiss</button>
+          <button onclick="approveStory('${s.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;" aria-label="✓ Publish">✓ Publish</button>
+          <button onclick="dismissStory('${s.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);" aria-label="✕ Dismiss">✕ Dismiss</button>
         </div>
       </div>`).join('');
   }catch(e){toast('Error loading stories: '+e.message);}
