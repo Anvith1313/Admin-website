@@ -513,9 +513,9 @@ body{font-size:16px;}
     <div class="a-topbar">
       <div class="a-title" id="secTitleEl">Dashboard</div>
       <div class="a-meta" id="secMetaEl">Bureau Administrator</div>
-      <button onclick="openAdminNotifPanel()" style="position:relative;background:none;border:1.5px solid var(--border);border-radius:50px;padding:0.4rem 0.9rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:0.35rem;">
+      <button onclick="openAdminNotifPanel()" style="position:relative;background:none;border:1.5px solid var(--border);border-radius:50px;padding:0.4rem 0.9rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:0.35rem;">
         🔔 Notifications
-        <span id="adminNotifBadge" style="display:none;background:#e8002d;color:#fff;font-size:0.38rem;font-weight:700;min-width:16px;height:16px;border-radius:20px;padding:0 4px;align-items:center;justify-content:center;line-height:16px;text-align:center;">0</span>
+        <span id="adminNotifBadge" style="display:none;background:#e8002d;color:#fff;font-size:0.5rem;font-weight:700;min-width:16px;height:16px;border-radius:20px;padding:0 4px;align-items:center;justify-content:center;line-height:16px;text-align:center;">0</span>
       </button>
     </div>
 
@@ -722,7 +722,7 @@ body{font-size:16px;}
     <div class="a-sec" id="secEditReq">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Profile update requests submitted by members. Review and apply changes directly to their Firestore profile.</p>
       <div style="margin-bottom:1rem;">
-        <button onclick="loadEditRequests()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh Requests</button>
+        <button onclick="loadEditRequests()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh Requests</button>
       </div>
       <div id="editReqGrid" class="card-grid"></div>
     </div>
@@ -731,7 +731,7 @@ body{font-size:16px;}
     <div class="a-sec" id="secAppointments">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Branch visit appointment requests submitted by members and visitors.</p>
       <div style="margin-bottom:1rem;display:flex;gap:0.6rem;flex-wrap:wrap;">
-        <button onclick="loadAppointments()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+        <button onclick="loadAppointments()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
         <select id="apptStatusFilter" onchange="loadAppointments()" style="padding:0.4rem 0.8rem;border:1px solid rgba(184,137,42,0.25);border-radius:8px;font-family:'EB Garamond',serif;font-size:0.9rem;">
           <option value="pending">Pending</option>
           <option value="confirmed">Confirmed</option>
@@ -745,7 +745,7 @@ body{font-size:16px;}
     <div class="a-sec" id="secStories">
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Happy stories submitted by couples. Approve to publish on the main site, or dismiss.</p>
       <div style="margin-bottom:1rem;">
-        <button onclick="loadPendingStories()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+        <button onclick="loadPendingStories()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
       </div>
       <div id="storiesGrid" class="card-grid"></div>
     </div>
@@ -915,7 +915,7 @@ function openAdminNotifPanel(){
   ov.onclick=e=>{if(e.target===ov)ov.remove();};
   const panel=document.createElement('div');
   panel.style.cssText='position:fixed;top:0;right:0;width:360px;max-width:100vw;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,0.12);overflow-y:auto;display:flex;flex-direction:column;';
-  const items=adminNotifs.length?adminNotifs.map(n=>`<div style="padding:0.9rem 1.5rem;border-bottom:1px solid #eee;${n.read?'opacity:0.55':''}"><div style="font-family:'EB Garamond',serif;font-size:0.95rem;line-height:1.5;">${n.msg||'Notification'}</div><div style="font-family:'Cinzel',serif;font-size:0.4rem;color:#999;margin-top:0.3rem;">${(n.ts||'').substring(0,10)} ${n.read?'· Read':'· New'}</div></div>`).join(''):'<div style="padding:2rem;text-align:center;font-style:italic;color:#999;">No notifications.</div>';
+  const items=adminNotifs.length?adminNotifs.map(n=>`<div style="padding:0.9rem 1.5rem;border-bottom:1px solid #eee;${n.read?'opacity:0.55':''}"><div style="font-family:'EB Garamond',serif;font-size:0.95rem;line-height:1.5;">${n.msg||'Notification'}</div><div style="font-family:'Cinzel',serif;font-size:0.6rem;color:#999;margin-top:0.3rem;">${(n.ts||'').substring(0,10)} ${n.read?'· Read':'· New'}</div></div>`).join(''):'<div style="padding:2rem;text-align:center;font-style:italic;color:#999;">No notifications.</div>';
   panel.innerHTML=`<div style="padding:1.2rem 1.5rem;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;color:var(--primary);">NOTIFICATIONS</div><button onclick="document.getElementById('adminNotifOv').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✕</button></div>${items}`;
   ov.appendChild(panel);document.body.appendChild(ov);
   // Mark all read
@@ -999,7 +999,7 @@ function viewProf(u){
     const visible = rows.filter(([l,v]) => l); // Show all rows with a label
     if(!visible.length) return '';
     return `<div style="margin-bottom:1.4rem;">
-      <div style="font-family:'Cinzel',serif;font-size:0.52rem;font-weight:700;
+      <div style="font-family:'Cinzel',serif;font-size:0.6rem;font-weight:700;
         letter-spacing:0.14em;text-transform:uppercase;color:var(--crimson);
         border-bottom:1px solid rgba(184,137,42,0.15);padding-bottom:0.4rem;
         margin-bottom:0.7rem;">${title}</div>
@@ -1017,11 +1017,11 @@ function viewProf(u){
       <button onclick="closeOv('profOv');editProf('${p.u}')"
         style="background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;
         border-radius:50px;padding:0.5rem 1.4rem;cursor:pointer;font-family:'Cinzel',serif;
-        font-size:0.46rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;
+        font-size:0.6rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;
         color:rgba(255,248,220,0.96);">✏ Edit Profile</button>
       <button onclick="closeOv('profOv')"
         style="background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;
-        padding:0.5rem 1.2rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;
+        padding:0.5rem 1.2rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;
         letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);">Close</button>
     </div>
 
@@ -1141,7 +1141,7 @@ function viewProf(u){
         border-left:2px solid rgba(184,137,42,0.3);border-radius:0 10px 10px 0;
         padding:0.9rem 1.1rem;font-family:'EB Garamond',serif;font-size:0.92rem;
         font-style:italic;color:var(--muted);line-height:1.85;">
-        <strong style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.12em;
+        <strong style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;
           text-transform:uppercase;color:var(--gold);font-style:normal;">About Member</strong><br>
         ${p.about}
       </div>` : ''}
@@ -1217,7 +1217,7 @@ function editProf(u){
           ${buildEditField('Guardian Mobile 2','pgmob2',p.pgmob2||p.mmob,'tel')}
         </div>
         <div style="margin-top:0.8rem;">
-          <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Membership Tier</label>
+          <label style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Membership Tier</label>
           <select id="edit_tier" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);">
             <option ${p.tier==='VIP'?'selected':''}>VIP</option>
             <option ${p.tier==='VVIP'?'selected':''}>VVIP</option>
@@ -1225,20 +1225,20 @@ function editProf(u){
           </select>
         </div>
         <div style="margin-top:0.8rem;">
-          <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Admin Notes</label>
+          <label style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">Admin Notes</label>
           <textarea id="edit_notes" rows="3" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);resize:vertical;">${p.notes||''}</textarea>
         </div>
         ${buildEditSection('Profile Photos')}
         <div id="adminPhotosSection_${u}" style="margin-bottom:1rem;">
           <div id="adminPhotoGrid_${u}" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">
             ${(p.photos||[]).map((url,i)=>`<div style="position:relative;"><img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join('')}
-            ${(p.photos||[]).length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:''}
+            ${(p.photos||[]).length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.6rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:''}
           </div>
           <div style="font-family:'EB Garamond',serif;font-size:0.75rem;font-style:italic;color:var(--muted);">Up to 5 photos. ${5-(p.photos||[]).length} slot(s) remaining.</div>
         </div>
         <div style="margin-top:1.2rem;display:flex;gap:0.6rem;">
-          <button onclick="saveEditProf('${u}')" style="flex:1;padding:0.85rem;background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,248,220,0.96);box-shadow:0 4px 16px rgba(123,31,46,0.2);">Save Changes</button>
-          <button onclick="document.getElementById('editProfModal').remove()" style="padding:0.85rem 1.5rem;background:transparent;border:1.5px solid rgba(184,137,42,0.28);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);">Cancel</button>
+          <button onclick="saveEditProf('${u}')" style="flex:1;padding:0.85rem;background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,248,220,0.96);box-shadow:0 4px 16px rgba(123,31,46,0.2);">Save Changes</button>
+          <button onclick="document.getElementById('editProfModal').remove()" style="padding:0.85rem 1.5rem;background:transparent;border:1.5px solid rgba(184,137,42,0.28);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);">Cancel</button>
         </div>
       </div>
     </div>`;
@@ -1255,7 +1255,7 @@ function buildEditField(label, key, value, type){
     const curY=new Date().getFullYear();
     const years=Array.from({length:80},(_,i)=>curY-18-i).map(y=>`<option value="${y}"${yv===String(y)?' selected':''}>${y}</option>`).join('');
     return `<div>
-      <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">${label}</label>
+      <label style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">${label}</label>
       <div class="dob-parts">
         <select id="edit_${key}_d" style="flex:1;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);cursor:pointer;appearance:none;"><option value="">Day</option>${days}</select>
         <span class="dob-sep">/</span>
@@ -1266,13 +1266,13 @@ function buildEditField(label, key, value, type){
     </div>`;
   }
   return `<div>
-    <label style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">${label}</label>
+    <label style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.3rem;">${label}</label>
     <input id="edit_${key}" type="${type}" value="${value||''}"
       style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(184,137,42,0.2);outline:none;padding:0.4rem 0;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);">
   </div>`;
 }
 function buildEditSection(title){
-  return `<div style="font-family:'Cinzel',serif;font-size:0.48rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,137,42,0.15);padding-bottom:0.3rem;margin:0.8rem 0 0.5rem;">${title}</div>`;
+  return `<div style="font-family:'Cinzel',serif;font-size:0.6rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,137,42,0.15);padding-bottom:0.3rem;margin:0.8rem 0 0.5rem;">${title}</div>`;
 }
 
 function saveEditProf(u){
@@ -1335,7 +1335,7 @@ async function adminUploadPhoto(u, file){
     const grid=document.getElementById('adminPhotoGrid_'+u);
     if(grid){
       grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
-        +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
+        +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.6rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
     }
     toast('✅ Photo uploaded!');
   }catch(e){toast('Upload failed: '+e.message);}
@@ -1353,7 +1353,7 @@ async function adminDeletePhoto(u, idx){
   const grid=document.getElementById('adminPhotoGrid_'+u);
   if(grid){
     grid.innerHTML=(photos.map((ph,i)=>`<div style="position:relative;"><img src="${ph}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" alt="Photo"><button onclick="adminDeletePhoto('${u}',${i})" style="position:absolute;top:2px;right:2px;background:rgba(123,31,46,0.85);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;color:#fff;font-size:0.5rem;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button></div>`).join(''))
-      +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.38rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
+      +(photos.length<5?`<label style="width:72px;height:72px;border:1.5px dashed rgba(184,137,42,0.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.2rem;font-family:'Cinzel',serif;font-size:0.6rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">📷<span>Add</span><input type="file" accept="image/*" style="display:none;" onchange="adminUploadPhoto('${u}',this.files[0])"></label>`:'');
   }
   toast('Photo removed.');
 }
@@ -1637,8 +1637,8 @@ function adminViewBiodata(u){
     ${p.pp_note&&p.pp_note!=='—'?row('Other Preferences',p.pp_note):''}
     <div class="bio-footer">Relationship : Father / Guardian &nbsp;&nbsp;&nbsp; Contact : ${p.pgmob1||p.fmob||'—'}</div>
     <div style="text-align:center;margin-top:0.6rem;display:flex;gap:0.6rem;justify-content:center;">
-      <button onclick="window.print()" style="padding:0.5rem 1.2rem;background:var(--crimson);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;font-weight:600;letter-spacing:0.12em;color:#fff;">🖨 Print</button>
-      <button onclick="document.getElementById('adminBiodataOv').remove()" style="padding:0.5rem 1.2rem;background:transparent;border:1px solid var(--crimson);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.46rem;letter-spacing:0.12em;color:var(--crimson);">Close</button>
+      <button onclick="window.print()" style="padding:0.5rem 1.2rem;background:var(--crimson);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:#fff;">🖨 Print</button>
+      <button onclick="document.getElementById('adminBiodataOv').remove()" style="padding:0.5rem 1.2rem;background:transparent;border:1px solid var(--crimson);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;color:var(--crimson);">Close</button>
     </div>
   </div>`;
   document.body.appendChild(el);
@@ -1967,7 +1967,7 @@ function renderEditRequests(){
     return;
   }
   grid.innerHTML=_editRequests.map((req,i)=>{
-    const chFields=Object.entries(req.changes||{}).map(([k,v])=>`<div><span style="font-family:'Cinzel',serif;font-size:0.42rem;text-transform:uppercase;color:var(--gold);letter-spacing:0.1em;">${k}</span>: <strong>${v}</strong></div>`).join('');
+    const chFields=Object.entries(req.changes||{}).map(([k,v])=>`<div><span style="font-family:'Cinzel',serif;font-size:0.6rem;text-transform:uppercase;color:var(--gold);letter-spacing:0.1em;">${k}</span>: <strong>${v}</strong></div>`).join('');
     return `<div class="ac">
       <div class="ac-top">
         <div class="ac-av">✏</div>
@@ -2101,7 +2101,7 @@ async function loadAppointments(){
             <div style="font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;color:var(--text);">${a.name}</div>
             <div style="font-family:'EB Garamond',serif;font-size:0.88rem;color:var(--muted);">${a.mob} ${a.username&&a.username!=='guest'?'· @'+a.username:''}</div>
           </div>
-          <span style="font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:0.2rem 0.7rem;border-radius:20px;background:${a.status==='confirmed'?'rgba(46,125,50,0.1)':'rgba(123,31,46,0.08)'};color:${a.status==='confirmed'?'#2e7d32':'var(--crimson)'};">${a.status}</span>
+          <span style="font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:0.2rem 0.7rem;border-radius:20px;background:${a.status==='confirmed'?'rgba(46,125,50,0.1)':'rgba(123,31,46,0.08)'};color:${a.status==='confirmed'?'#2e7d32':'var(--crimson)'};">${a.status}</span>
         </div>
         <div style="font-family:'EB Garamond',serif;font-size:0.92rem;color:var(--text);margin:0.6rem 0 0.3rem;">
           📅 ${a.date} · ${a.time}<br>
@@ -2109,12 +2109,12 @@ async function loadAppointments(){
           🎯 ${a.purpose}
           ${a.msg?`<br>💬 <em>${a.msg}</em>`:''}
         </div>
-        <div style="font-family:'Cinzel',serif;font-size:0.42rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(a.ts).toLocaleString('en-IN')}</div>
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(a.ts).toLocaleString('en-IN')}</div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-          ${a.status==='pending'?`<button onclick="confirmAppt('${a.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Confirm</button>`:''}
-          <a href="tel:${a.mob}" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);text-decoration:none;">📞 Call</a>
-          <a href="https://wa.me/${a.mob.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Namaste '+a.name+', your appointment at Naveen Reddy Marriage Bureau on '+a.date+' ('+a.time+') at '+a.branch+' is confirmed. Please arrive 10 minutes early. Contact: +91 72079 99985')}" target="_blank" style="padding:0.38rem 1rem;background:#25d366;border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;text-decoration:none;">WhatsApp</a>
-          <button onclick="deleteAppt('${a.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Remove</button>
+          ${a.status==='pending'?`<button onclick="confirmAppt('${a.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Confirm</button>`:''}
+          <a href="tel:${a.mob}" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);text-decoration:none;">📞 Call</a>
+          <a href="https://wa.me/${a.mob.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Namaste '+a.name+', your appointment at Naveen Reddy Marriage Bureau on '+a.date+' ('+a.time+') at '+a.branch+' is confirmed. Please arrive 10 minutes early. Contact: +91 72079 99985')}" target="_blank" style="padding:0.38rem 1rem;background:#25d366;border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;text-decoration:none;">WhatsApp</a>
+          <button onclick="deleteAppt('${a.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Remove</button>
         </div>
       </div>`).join('');
   }catch(e){toast('Error loading appointments: '+e.message);}
@@ -2147,13 +2147,13 @@ async function loadPendingStories(){
     grid.innerHTML=stories.map(s=>`
       <div class="m-card" style="border-left:3px solid var(--gold2);">
         <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--crimson);">${s.names}</div>
-        <div style="font-family:'Cinzel',serif;font-size:0.44rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin:0.2rem 0;">Married · ${s.year}${s.location?' · '+s.location:''}</div>
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin:0.2rem 0;">Married · ${s.year}${s.location?' · '+s.location:''}</div>
         <div style="font-family:'EB Garamond',serif;font-size:0.92rem;color:var(--muted);font-style:italic;margin:0.5rem 0 0.3rem;">"${s.text}"</div>
         ${s.contact?`<div style="font-family:'EB Garamond',serif;font-size:0.82rem;color:var(--muted);">Contact: ${s.contact}</div>`:''}
-        <div style="font-family:'Cinzel',serif;font-size:0.42rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(s.ts).toLocaleString('en-IN')} · by ${s.submittedBy}</div>
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;color:var(--muted);margin-bottom:0.7rem;">${new Date(s.ts).toLocaleString('en-IN')} · by ${s.submittedBy}</div>
         <div style="display:flex;gap:0.5rem;">
-          <button onclick="approveStory('${s.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Publish</button>
-          <button onclick="dismissStory('${s.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.44rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Dismiss</button>
+          <button onclick="approveStory('${s.docId}')" style="padding:0.38rem 1rem;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;">✓ Publish</button>
+          <button onclick="dismissStory('${s.docId}')" style="padding:0.38rem 1rem;background:transparent;border:1.5px solid rgba(123,31,46,0.25);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);">✕ Dismiss</button>
         </div>
       </div>`).join('');
   }catch(e){toast('Error loading stories: '+e.message);}
