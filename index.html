@@ -327,6 +327,16 @@ body{font-size:16px;}
 .bio-sec-title{font-style:italic;font-weight:700;text-decoration:underline;color:#c0392b;margin:0.8rem 0 0.4rem;font-size:0.9rem;}
 .bio-footer{text-align:right;font-style:italic;color:#c0392b;font-size:0.78rem;margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid #eee;}
 
+/* ── IMPORT DROP ZONE ── */
+.import-zone{
+  border:2px dashed rgba(184,137,42,0.35);padding:1.8rem;text-align:center;
+  background:rgba(253,246,216,0.25);cursor:pointer;transition:all .2s;margin-bottom:1.4rem;
+}
+.import-zone:hover,.import-zone.drag-over{border-color:var(--gold);background:rgba(253,246,216,0.5);}
+.import-zone-icon{font-size:1.6rem;margin-bottom:0.5rem;line-height:1;}
+.import-zone-title{font-family:'Cinzel',serif;font-size:0.62rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;}
+.import-zone-sub{font-family:'EB Garamond',serif;font-size:0.88rem;font-style:italic;color:var(--muted);}
+.import-result{margin-bottom:1rem;padding:0.8rem 1rem;background:rgba(27,94,32,0.07);border-left:2px solid #2e7d32;font-family:'EB Garamond',serif;font-size:0.9rem;color:#1b5e20;line-height:1.6;display:none;}
 /* ── OFFLINE FORM ENHANCEMENTS ── */
 .off-sec-title{font-family:'Cinzel',serif;font-size:.5rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--crimson);border-bottom:1px solid rgba(184,137,42,.12);padding-bottom:.4rem;margin:1.4rem 0 .9rem;}
 .off-sec-title:first-of-type{margin-top:0;}
@@ -432,6 +442,8 @@ body{font-size:16px;}
 .act-log-empty{font-family:'EB Garamond',serif;font-size:.9rem;font-style:italic;color:var(--muted);text-align:center;padding:2.5rem;}
 </style>
 
+  <!-- SheetJS for Excel import -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- ══ FIREBASE SDK (Admin) ══ -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
@@ -706,6 +718,21 @@ checkCookieConsent();
       <div class="off-form">
         <div class="off-form-title">Register Offline / Walk-In Member</div>
         <div class="off-form-sub">Manually register members who visit the bureau office or contact us by phone. All fields mirror online registration for full compatibility.</div>
+
+        <!-- IMPORT FROM FILE -->
+        <div class="off-sec-title">Import from File (Optional)</div>
+        <div class="import-zone" id="importZone" onclick="document.getElementById('importFileInput').click()"
+          ondragover="_importDragOver(event)" ondragleave="_importDragLeave(event)" ondrop="_importDrop(event)">
+          <div class="import-zone-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <div class="import-zone-title">Drop CSV or Excel file here</div>
+          <div class="import-zone-sub">Supports .csv, .xlsx, .xls — fields will auto-fill below. Email &amp; mobile are required.</div>
+          <input type="file" id="importFileInput" accept=".csv,.xlsx,.xls" style="display:none;" onchange="_importFile(this.files[0])">
+        </div>
+        <div class="import-result" id="importResult"></div>
 
         <!-- MEMBERSHIP TIER -->
         <div class="off-sec-title">Membership Tier *</div>
@@ -1179,7 +1206,8 @@ function renderProfiles(list){
       </div>
       <div class="ac-det"><strong>Age:</strong> ${p.age||'—'} · <strong>Ht:</strong> ${p.ht||'—'} · <strong>Gender:</strong> ${p.g||'—'}<br><strong>Profession:</strong> ${p.prof||p.occ||'—'}<br><strong>City:</strong> ${p.city||'—'}, ${p.state||'—'}, ${p.country||'—'}<br><strong>Income:</strong> ${p.inc||p.sal?'₹'+(p.inc||p.sal):' —'}<br><strong>📞</strong> ${p.mob||'—'} &nbsp;·&nbsp; <strong>✉</strong> ${p.email||'—'}${p.edu?`<br><strong>Education:</strong> ${p.edu}`:''}${p.nat||p.native?`<br><strong>Native:</strong> ${p.nat||p.native}`:''}${p.notes?`<br><em style="font-size:.78rem;">${p.notes}</em>`:''}</div>
       <div class="ac-acts">
-        <button class="act-b prim" onclick="viewProf('${p.u}')" aria-label="👁 View Details">👁 View Details</button>
+        <button class="act-b prim" onclick="viewProf('${p.u}')" aria-label="View Details">View Details</button>
+        <button class="act-b" onclick="viewProfileActivity('${p.u}','${(p.name||'').replace(/'/g,"\\'")}')">Activity</button>
         <button class="act-b grn" onclick="editProf('${p.u}')" aria-label="✏ Edit">✏ Edit</button>
         <button class="act-b" onclick="adminViewBiodata('${p.u}')" aria-label="📄 Biodata">📄 Biodata</button>
         <button class="act-b" onclick="delProf('${p.u}')" style="color:#c0392b;border-color:rgba(192,57,43,0.3);" aria-label="Remove">Remove</button>
@@ -1651,17 +1679,35 @@ function clearOff(){
   document.getElementById('oGMale') && (document.getElementById('oGMale').checked=true);
   toast('Form cleared.');
 }
+function _genCredentials(name, dob){
+  const parts=(name||'').trim().split(/\s+/);
+  const first=(parts[0]||'member').toLowerCase().replace(/[^a-z]/g,'');
+  const last=(parts[1]||parts[0]||'member').toLowerCase().replace(/[^a-z]/g,'');
+  const yr=dob?new Date(dob).getFullYear():new Date().getFullYear();
+  const rnd=String(Math.floor(100+Math.random()*900));
+  const username=first+'.'+last+rnd;
+  const password=parts[0].charAt(0).toUpperCase()+parts[0].slice(1).toLowerCase()+'@'+yr+'#NR';
+  return{username,password};
+}
+
 async function addOffline(){
   const name=_oVal('on');
   const dob=_dobFromParts('odob_d','odob_m','odob_y');
   const g=document.getElementById('oGMale')?.checked?'Male':'Female';
-  const u=_oVal('ou').toLowerCase().replace(/\s+/g,'_');
+  let u=_oVal('ou').toLowerCase().replace(/\s+/g,'_');
   const mob=_oVal('om');
   const city=_oVal('oci');
   const email=_oVal('oe');
-  if(!name||!dob||!g||!u||!mob||!city||!email){toast('Please fill in all required fields (Name, DOB, Mobile, Email, City, Username).');return;}
+  if(!name||!dob||!g||!mob||!city||!email){toast('Please fill in all required fields (Name, DOB, Mobile, Email, City).');return;}
   if(!offT){toast('Please select a membership tier.');return;}
-  if(ST.profiles.find(p=>p.u===u)){toast('Username already exists. Please choose a different username.');return;}
+  // Auto-generate username if blank
+  if(!u){
+    const cred=_genCredentials(name,dob);
+    u=cred.username;
+    const ouEl=document.getElementById('ou');
+    if(ouEl)ouEl.value=u;
+  }
+  if(ST.profiles.find(p=>p.u===u)){toast('Username already exists. Please choose a different one.');return;}
   // Age validation
   const age=Math.floor((Date.now()-new Date(dob))/(365.25*24*3600*1000));
   const minAge=g==='Male'?21:18;
@@ -1743,6 +1789,10 @@ async function addOffline(){
     createdAt:new Date().toISOString(),
     status:'active',
   };
+  // Generate login credentials
+  const cred=_genCredentials(name,dob);
+  const autoPass=cred.password;
+  newP.autoPassword=autoPass; // stored so admin can retrieve later
   // Save to Firestore — source of truth
   if(window.FIREBASE_READY && window.FB){
     try{
@@ -1755,8 +1805,8 @@ async function addOffline(){
       ST.profiles.push(newP);
       renderAll();
       clearOff();
-      goSec('secProfiles');
-      toast(`✅ ${name} registered and saved to Firebase as ${offT} member.`);
+      // Show credentials popup (don't navigate away yet)
+      _showCredentials(name,email,u,autoPass,offT,()=>goSec('secProfiles'));
     }catch(e){
       console.error('Firebase save error:',e);
       toast('Firebase error: '+e.message);
@@ -1764,6 +1814,46 @@ async function addOffline(){
   } else {
     toast('Firebase not ready — cannot register member.');
   }
+}
+
+function _showCredentials(name,email,username,password,tier,onClose){
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(26,10,8,0.55);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem;';
+  ov.innerHTML=`<div style="background:var(--offwhite);border:1px solid rgba(184,137,42,0.22);width:100%;max-width:480px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.22);">
+    <div style="padding:1.6rem 2rem;border-bottom:1px solid rgba(184,137,42,0.12);background:linear-gradient(180deg,var(--cream),rgba(253,248,240,0.4));position:relative;">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--crimson),var(--gold2),var(--crimson));"></div>
+      <div style="font-family:'Cinzel',serif;font-size:1rem;font-weight:600;color:var(--crimson);letter-spacing:0.04em;">Member Registered Successfully</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:0.88rem;font-style:italic;color:var(--muted);margin-top:0.2rem;">${name} · ${tier}</div>
+    </div>
+    <div style="padding:1.6rem 2rem;">
+      <div style="font-family:'EB Garamond',serif;font-size:0.9rem;color:var(--text);line-height:1.7;margin-bottom:1.2rem;">Share these login credentials with the member. They can change their password from the login page using their email.</div>
+      <div style="background:rgba(253,246,216,0.6);border:1px solid rgba(184,137,42,0.22);padding:1.2rem 1.4rem;margin-bottom:1.2rem;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.6rem;">
+          <span style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">Email (Login ID)</span>
+          <span id="cred_email" style="font-family:'EB Garamond',serif;font-size:0.95rem;color:var(--text);font-weight:600;">${email}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.6rem;">
+          <span style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">Username</span>
+          <span id="cred_user" style="font-family:'EB Garamond',serif;font-size:0.95rem;color:var(--text);font-weight:600;">${username}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);">Temporary Password</span>
+          <span id="cred_pass" style="font-family:'EB Garamond',serif;font-size:0.95rem;color:var(--crimson);font-weight:700;letter-spacing:0.04em;">${password}</span>
+        </div>
+      </div>
+      <div style="background:rgba(123,31,46,0.05);border-left:2px solid var(--crimson);padding:0.7rem 1rem;font-family:'EB Garamond',serif;font-size:0.85rem;font-style:italic;color:var(--muted);line-height:1.6;margin-bottom:1.4rem;">The member can log in with their email and change this password from the login page at any time.</div>
+      <div style="display:flex;gap:0.6rem;">
+        <button onclick="_copyCredentials('${email}','${username}','${password}')" style="flex:1;padding:0.8rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);cursor:pointer;font-family:'Cinzel',serif;font-size:0.52rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);">Copy Credentials</button>
+        <button id="credDoneBtn" style="flex:1;padding:0.8rem;background:linear-gradient(135deg,var(--crimson),var(--crimson2));border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.52rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,248,220,0.96);">Done</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#credDoneBtn').onclick=()=>{ov.remove();if(onClose)onClose();};
+}
+function _copyCredentials(email,username,password){
+  const text=`Login Credentials — Naveen Reddy Marriage Bureau\nEmail: ${email}\nUsername: ${username}\nPassword: ${password}\n\nLogin at: https://nrmb.in`;
+  navigator.clipboard?.writeText(text).then(()=>toast('Credentials copied to clipboard.')).catch(()=>toast('Copy failed — please note credentials manually.'));
 }
 
 // ═══════════════════════════════════════
@@ -1782,66 +1872,92 @@ function adminViewBiodata(u){
   const p=ST.profiles.find(x=>x.u===u);
   if(!p){toast('Profile not found.');return;}
   const existing=document.getElementById('adminBiodataOv');if(existing)existing.remove();
-  const tier=p.tier||'VIP';
-  const slId=tier.toUpperCase()+' '+String(10000+Math.abs(p.u.charCodeAt(0)*17+(p.u.charCodeAt(1)||0)*7)%9000);
-  const gender=p.g==='Female'?'Bride':'Groom';
-  const dobStr=p.dob&&p.dob!=='—'?new Date(p.dob).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}):p.dob||'—';
-  const inc=p.inc?formatIncomeDisplay(p.inc):(p.sal||'—');
-  function fmt12(t){if(!t||t==='—')return '';try{const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';const h12=h%12||12;return h12+':'+String(m).padStart(2,'0')+' '+ampm;}catch(e){return t;}}
-  const tobStr=fmt12(p.tob);
-  const timePlace=(tobStr||p.pob&&p.pob!=='—')?[tobStr,p.pob&&p.pob!=='—'?p.pob:''].filter(Boolean).join(', '):'';
-  const boardLbl=p.board&&p.board!=='—'&&p.board!=='Other'?p.board+' School Name':'School Name';
-  function row(label,val,label2,val2){
-    if(label2!==undefined) return `<div class="bio-two"><div class="bio-row"><span class="bio-lbl">${label}</span><span class="bio-val"> : ${val||'—'}</span></div><div class="bio-row"><span class="bio-lbl">${label2}</span><span class="bio-val"> : ${val2||'—'}</span></div></div>`;
-    return `<div class="bio-row"><span class="bio-lbl">${label}</span><span class="bio-val"> : ${val||'—'}</span></div>`;
-  }
+  // Use the logo already loaded in the admin page
+  const logoEl=document.getElementById('alLogoImg')||document.getElementById('sbLogo');
+  const logoSrc=logoEl?logoEl.src:'';
   const el=document.createElement('div');
   el.className='biodata-overlay';el.id='adminBiodataOv';
   el.onclick=(e)=>{if(e.target===el)el.remove();};
-  el.innerHTML=`<div class="biodata-sheet">
+  el.innerHTML=_biodataFmt(p,logoSrc);
+  document.body.appendChild(el);
+}
+
+/* ── Shared biodata HTML generator (used by both user-facing and admin views) ── */
+function _biodataFmt(p,logoSrc){
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function fmtDob(d){if(!d||d==='—')return '—';try{const dt=new Date(d);return `${String(dt.getDate()).padStart(2,'0')}-${MONTHS[dt.getMonth()]}-${dt.getFullYear()}`;}catch(e){return d;}}
+  function fmt12(t){if(!t||t==='—')return '';try{const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';return (h%12||12)+':'+String(m).padStart(2,'0')+' '+ampm;}catch(e){return t;}}
+  function row(lbl,val,lbl2,val2){
+    if(lbl2!==undefined)return `<div class="bio-two"><div class="bio-row"><span class="bio-lbl">${lbl}</span><span class="bio-val"> : ${val||'—'}</span></div><div class="bio-row"><span class="bio-lbl">${lbl2}</span><span class="bio-val"> : ${val2||'—'}</span></div></div>`;
+    return `<div class="bio-row"><span class="bio-lbl">${lbl}</span><span class="bio-val"> : ${val||'—'}</span></div>`;
+  }
+  const tier=p.tier||'VIP';
+  const uidHash=(p.u||'').split('').reduce((a,c,i)=>a+c.charCodeAt(0)*(i+7),0);
+  const slNum=10000+Math.abs(uidHash%90000);
+  const slId=`${tier.toUpperCase()} ${slNum}`;
+  const gender=p.g==='Female'?'Bride':'Groom';
+  const dobStr=fmtDob(p.dob);
+  const tobStr=fmt12(p.tob);
+  const timePlace=[tobStr,p.pob&&p.pob!=='—'?p.pob:''].filter(Boolean).join(', ');
+  const boardLbl=p.board&&p.board!=='—'&&p.board!=='Other'?p.board+' School Name':'School Name';
+  const colVal=(p.col||'').trim();
+  const colLow=colVal.toLowerCase();
+  const pgLbl=colLow.startsWith('ms ')||colLow.includes(' ms ')||colLow.startsWith('m.s.')?'MS College Name':colLow.startsWith('mba')||colLow.includes(' mba ')?'MBA College Name':'PG College Name';
+  const salDisplay=(p.sal&&p.sal!=='—'&&p.sal!=='0 L')?p.sal:(p.inc&&p.inc!=='—'?p.inc:'');
+  const isBusinessOcc=(p.emp==='Business / Self-Employed')||(p.prof||'').toLowerCase().includes('business')||(p.prof||'').toLowerCase().includes('director');
+  const placeLabel=isBusinessOcc?'Place of Business':'Place of Job';
+  const isOnline=(p.registrationSource||'online')!=='offline';
+  const brC=isOnline?'#1565c0':'#c0392b';
+  const bCnt=parseInt(p.br)||0,sCnt=parseInt(p.sr)||0;
+  const bMar=parseInt(p.brm)||0,sMar=parseInt(p.srm)||0;
+  let sibRows='';
+  if(bCnt>0)sibRows+=row(bCnt>1?'Brothers':'Brother',`${bCnt} (Married: ${bMar})`+(p.bro_occ&&p.bro_occ!=='—'?' / '+p.bro_occ:''));
+  if(sCnt>0)sibRows+=row(sCnt>1?'Sisters':'Sister',`${sCnt} (Married: ${sMar})`+(p.sis_occ&&p.sis_occ!=='—'?' / '+p.sis_occ:''));
+  if(!bCnt&&!sCnt)sibRows=row('Siblings','No Siblings');
+  const msVal=(p.ms||p.maritalStatus||'');
+  const isDivorced=msVal.toLowerCase().includes('divorce')||msVal.toLowerCase().includes('separated');
+  const ageGap=(p.pp_af&&p.pp_at)?`${p.pp_af} - ${p.pp_at} Years`:'—';
+  const logoHtml=logoSrc?`<img src="${logoSrc}" style="width:60px;height:60px;object-fit:contain;border-radius:50%;border:2px solid #c0392b;" alt="NRMB Logo">`:'<div style="width:60px;height:60px;border-radius:50%;border:2px solid #c0392b;display:flex;align-items:center;justify-content:center;font-family:serif;font-weight:700;font-size:1.1rem;color:#c0392b;">NR</div>';
+  return `<div class="biodata-sheet">
     <div class="bio-header">
-      <div class="bio-meta"><span><em>Since 2000</em></span><span><strong>Sl No : ${slId}</strong></span></div>
-      <div class="bio-bureau">NAVEEN REDDY</div>
-      <div class="bio-sub">MARRIAGE BUREAU</div>
-      <div class="bio-address">Corporate office: <u>Somajiguda</u>, Branches: <u>Kothapet</u>, <u>Warangal</u>, <u>Karimnagar</u></div>
+      <div class="bio-meta"><span><em>Since 2000</em></span><span style="font-style:normal;"><strong>Sl No : <span style="color:#c0392b;">${slId}</span></strong></span></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin:0.5rem 0 0.25rem;">${logoHtml}<div style="text-align:center;"><div class="bio-bureau">NAVEEN REDDY</div><div class="bio-sub">MARRIAGE BUREAU</div></div>${logoHtml}</div>
+      <div class="bio-address">Corporate office: <u style="color:${brC};">Somajiguda</u>, &nbsp;Branches: <u style="color:${brC};">Kothapet</u>, <u style="color:${brC};">Warangal</u>, <u style="color:${brC};">Karimnagar</u></div>
     </div>
     ${row('Name of the '+gender,p.name)}
     ${row('Date of Birth',dobStr,'Height',p.ht||'—')}
-    ${timePlace?row('Time and Place of Birth',timePlace):''}
+    ${timePlace?row('Time and Place',timePlace):''}
     ${row('Complexion / Color',p.cx||'—','Gotram',p.gotra||p.fg||'—')}
-    ${row('Sub Caste',p.subCaste||p.gotra||'Reddy','Star / Nakshatra',p.nak||'—')}
-    ${row('Native District',p.nat||p.native||'—','Raasi',p.rashi||'—')}
+    ${row('Sub Caste',p.subCaste||'Reddy','Star',p.nak||'—')}
+    ${row('Native Dist',p.nat||p.native||'—','Raasi',p.rashi||'—')}
     ${row('Settled Place',p.city||'—')}
     ${p.school&&p.school!=='—'?row(boardLbl,p.school):''}
     ${p.inter&&p.inter!=='—'?row('Inter College Name',p.inter):''}
     ${p.engcol&&p.engcol!=='—'?row('Engineering College Name',p.engcol):''}
-    ${p.col&&p.col!=='—'?row('PG / MS College',p.col):''}
+    ${colVal&&colVal!=='—'?row(pgLbl,colVal):''}
     ${row('Occupation',p.prof||p.occ||'—')}
     ${p.co&&p.co!=='—'?row('Company Name',p.co):''}
-    ${p.workplace&&p.workplace!=='—'?row('Place of Job / Business',p.workplace):''}
-    ${inc&&inc!=='—'?row('Annual Income',inc):''}
+    ${p.workplace&&p.workplace!=='—'?row(placeLabel,p.workplace):''}
+    ${salDisplay?row('Salary',salDisplay):''}
     ${p.visa&&p.visa!=='—'?row('Visa Status',p.visa):''}
+    ${p.sinceWork&&p.sinceWork!=='—'?row('Since Working',p.sinceWork):''}
+    ${isDivorced&&p.divorceInfo&&p.divorceInfo!=='—'?row('Divorces',p.divorceInfo):''}
     <div class="bio-sec-title">FAMILY MEMBERS DETAILS</div>
-    ${row("Father's Name",p.fn||'—')}
     ${row("Father's Profession",p.fo||p.fp||'—')}
-    ${row("Mother's Name",p.mn||'—')}
     ${row("Mother's Profession",p.mo||'—')}
-    ${p.br&&p.br!=='0'?row('Brothers',p.br+' (Married: '+(p.brm||'0')+')'):''}
-    ${p.sr&&p.sr!=='0'?row('Sisters',p.sr+' (Married: '+(p.srm||'0')+')'):''}
-    ${(!p.br||p.br==='0')&&(!p.sr||p.sr==='0')?row('Siblings','No Siblings'):''}
+    ${sibRows}
     ${p.pval&&p.pval!=='—'?row('Property Value',p.pval):''}
     <div class="bio-sec-title">CHOICE PREFERRED</div>
-    ${p.pp_af&&p.pp_at?row('Age Preferred',p.pp_af+' to '+p.pp_at+' Years'):''}
-    ${p.pp_hf&&p.pp_hf!=='Any'?row('Height',p.pp_hf+' &amp; Above'):''}
+    ${row('Complexion / Color',p.pp_cx||'Fair','Age Gap',ageGap)}
+    ${p.pp_hf&&p.pp_hf!=='Any'?row('Height',p.pp_hf+' And Above'):''}
     ${p.pp_edu&&p.pp_edu!=='Any'?row('Qualification',p.pp_edu):''}
     ${p.pp_note&&p.pp_note!=='—'?row('Other Preferences',p.pp_note):''}
-    <div class="bio-footer">Relationship : Father / Guardian &nbsp;&nbsp;&nbsp; Contact : ${p.pgmob1||p.fmob||'—'}</div>
+    <div class="bio-footer">Relationship : ${p.rel||'Father'} &nbsp;&nbsp;&nbsp; Contact : ${p.pgmob1||p.fmob||'—'}</div>
     <div style="text-align:center;margin-top:0.6rem;display:flex;gap:0.6rem;justify-content:center;">
-      <button onclick="window.print()" style="padding:0.5rem 1.2rem;background:var(--crimson);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:#fff;" aria-label="🖨 Print">🖨 Print</button>
-      <button onclick="document.getElementById('adminBiodataOv').remove()" style="padding:0.5rem 1.2rem;background:transparent;border:1px solid var(--crimson);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;color:var(--crimson);" aria-label="Close">Close</button>
+      <button onclick="window.print()" style="padding:0.5rem 1.2rem;background:var(--crimson);border:none;border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.12em;color:#fff;">Print</button>
+      <button onclick="this.closest('.biodata-overlay').remove()" style="padding:0.5rem 1.2rem;background:transparent;border:1px solid var(--crimson);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;color:var(--crimson);">Close</button>
     </div>
   </div>`;
-  document.body.appendChild(el);
 }
 
 // ═══════════════════════════════════════
@@ -2550,6 +2666,174 @@ window._initCustomSelects=function(root){
   });
 };
 document.addEventListener('DOMContentLoaded',()=>window._initCustomSelects(document));
+
+// ── PER-PROFILE ACTIVITY ──
+async function viewProfileActivity(uid, name){
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(26,10,8,0.5);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:1rem;';
+  ov.onclick=e=>{if(e.target===ov)ov.remove();};
+  const panel=document.createElement('div');
+  panel.style.cssText='background:var(--offwhite);border:1px solid rgba(184,137,42,0.18);width:100%;max-width:560px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 40px 100px rgba(0,0,0,0.2);';
+  panel.innerHTML=`<div style="padding:1.4rem 1.8rem;border-bottom:1px solid rgba(184,137,42,0.12);background:linear-gradient(180deg,var(--cream),rgba(253,248,240,0.4));flex-shrink:0;position:relative;">
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--crimson),var(--gold2),var(--crimson));"></div>
+    <div style="font-family:'Cinzel',serif;font-size:0.9rem;font-weight:600;color:var(--crimson);">Activity History</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:0.85rem;font-style:italic;color:var(--muted);margin-top:0.1rem;">${name}</div>
+    <button onclick="this.closest('div[style*=fixed]').remove()" style="position:absolute;top:1rem;right:1.2rem;background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--muted);">✕</button>
+  </div>
+  <div id="paFeed" style="overflow-y:auto;flex:1;padding:0.4rem 0;"><div style="padding:2rem;text-align:center;font-family:'EB Garamond',serif;font-size:0.9rem;font-style:italic;color:var(--muted);">Loading…</div></div>`;
+  ov.appendChild(panel);
+  document.body.appendChild(ov);
+  // Fetch activities
+  const items=[];
+  if(!window.FIREBASE_READY){document.getElementById('paFeed').innerHTML='<div style="padding:2rem;text-align:center;font-style:italic;color:var(--muted);">Firebase not ready.</div>';return;}
+  const{getDocs,collection,query,where,db}=window.FB;
+  // Interests involving this user
+  try{
+    const si=await getDocs(query(collection(db,'interests'),where('from','==',uid)));
+    const ri=await getDocs(query(collection(db,'interests'),where('to','==',uid)));
+    const statusLabels={pending:'sent interest to',mutual:'mutual match with',contact_released:'contact released with',released:'interest released'};
+    si.forEach(d=>{const i=d.data();const p2=ST.profiles.find(x=>x.u===i.to);items.push({icon:'💌',desc:`${statusLabels[i.status]||i.status} ${p2?.name||i.to}`,ts:i.date||i.updatedAt||'',type:'interest'});});
+    ri.forEach(d=>{const i=d.data();const p1=ST.profiles.find(x=>x.u===i.from);items.push({icon:'💌',desc:`Received interest from ${p1?.name||i.from} (${i.status})`,ts:i.date||i.updatedAt||'',type:'interest'});});
+  }catch(e){}
+  // Edit requests
+  try{
+    const er=await getDocs(query(collection(db,'editRequests'),where('uid','==',uid)));
+    er.forEach(d=>{const r=d.data();items.push({icon:'✏',desc:`Edit request — fields: ${Object.keys(r.changes||{}).join(', ')||'notes'} (${r.status})`,ts:r.ts||'',type:'edit'});});
+  }catch(e){}
+  // Appointments
+  try{
+    const ap=await getDocs(query(collection(db,'appointments'),where('uid','==',uid)));
+    ap.forEach(d=>{const a=d.data();items.push({icon:'📅',desc:`Appointment booked — ${a.slot||a.date||''}`,ts:a.createdAt||a.date||'',type:'appt'});});
+  }catch(e){}
+  // Notifications for this user
+  try{
+    const nt=await getDocs(query(collection(db,'notifications'),where('uid','==',uid)));
+    nt.forEach(d=>{const n=d.data();items.push({icon:'🔔',desc:n.msg||'Notification',ts:n.ts||'',type:'notif'});});
+  }catch(e){}
+  // Profile data (signup / updates)
+  const prof=ST.profiles.find(x=>x.u===uid);
+  if(prof?.createdAt)items.push({icon:'✅',desc:'Member registered',ts:prof.createdAt,type:'signup'});
+  if(prof?.lastEditTs)items.push({icon:'🔒',desc:'Edit cooldown started (15-day lock)',ts:prof.lastEditTs,type:'lock'});
+  // Sort
+  items.sort((a,b)=>{
+    const ta=typeof a.ts==='object'&&a.ts?.toDate?a.ts.toDate().getTime():new Date(a.ts||0).getTime();
+    const tb=typeof b.ts==='object'&&b.ts?.toDate?b.ts.toDate().getTime():new Date(b.ts||0).getTime();
+    return tb-ta;
+  });
+  const feed=document.getElementById('paFeed');
+  if(!items.length){feed.innerHTML='<div style="padding:2rem;text-align:center;font-family:\'EB Garamond\',serif;font-size:0.9rem;font-style:italic;color:var(--muted);">No activity recorded for this member.</div>';return;}
+  feed.innerHTML=items.map(a=>`
+    <div class="act-log-item">
+      <div class="act-log-av">${a.icon}</div>
+      <div class="act-log-main"><div class="act-log-desc">${a.desc}</div></div>
+      <div class="act-log-time">${_fmtActTs(a.ts)}</div>
+    </div>`).join('');
+}
+
+// ── IMPORT CSV/EXCEL ──
+function _importDragOver(e){e.preventDefault();document.getElementById('importZone').classList.add('drag-over');}
+function _importDragLeave(e){document.getElementById('importZone').classList.remove('drag-over');}
+function _importDrop(e){e.preventDefault();document.getElementById('importZone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)_importFile(f);}
+
+// Column name aliases → internal field IDs
+const _COL_MAP={
+  'name':['name','full name','candidate name'],'dob':['dob','date of birth','birth date','birthdate'],
+  'gender':['gender','sex','g'],'mobile':['mobile','mob','phone','contact'],'email':['email','email address'],
+  'city':['city','place','settled place'],'state':['state'],'height':['height','ht'],
+  'occupation':['occupation','profession','job','prof'],'company':['company','company name','co'],
+  'income':['income','salary','annual income','sal'],'education':['education','qualification','edu'],
+  'school':['school','ssc school','cbse school','school name'],'inter':['inter','intermediate','inter college'],
+  'engcol':['engineering college','eng college','b.tech college','btech college'],
+  'col':['pg college','ms college','mba college','pg/ms college'],'gotra':['gotra','sub caste','subcaste'],
+  'nakshatra':['nakshatra','star','nak'],'rashi':['rashi','raasi'],
+  'father_name':['father name','fn','father\'s name'],'father_prof':['father profession','fp','fo','father\'s profession'],
+  'mother_name':['mother name','mn','mother\'s name'],'mother_prof':['mother profession','mo','mother\'s profession'],
+  'visa':['visa','visa status'],'native':['native','native district','native dist'],
+  'board':['board','schooling board'],'marital':['marital status','ms'],
+};
+
+function _matchCol(header){
+  const h=(header||'').toLowerCase().trim();
+  for(const[field,aliases]of Object.entries(_COL_MAP)){
+    if(aliases.some(a=>h===a||h.includes(a)))return field;
+  }
+  return null;
+}
+
+function _importFile(file){
+  if(!file)return;
+  const name=file.name.toLowerCase();
+  const res=document.getElementById('importResult');
+  if(name.endsWith('.csv')){
+    const reader=new FileReader();
+    reader.onload=e=>_parseCSV(e.target.result,res);
+    reader.readAsText(file);
+  } else if(name.endsWith('.xlsx')||name.endsWith('.xls')){
+    if(typeof XLSX==='undefined'){res.style.display='block';res.textContent='Excel library not loaded. Please try a CSV file.';return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const csv=XLSX.utils.sheet_to_csv(ws);
+      _parseCSV(csv,res);
+    };
+    reader.readAsBinaryString(file);
+  } else {
+    res.style.display='block';res.style.borderColor='var(--crimson)';res.style.color='var(--crimson)';
+    res.textContent='Unsupported file type. Please use .csv, .xlsx, or .xls';
+  }
+}
+
+function _parseCSV(csv,res){
+  const lines=csv.trim().split('\n').filter(l=>l.trim());
+  if(lines.length<2){res.style.display='block';res.textContent='File is empty or has no data rows.';return;}
+  const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+  const colMap=headers.map(_matchCol);
+  // Use first data row
+  const row=lines[1].split(',').map(v=>v.replace(/^"|"$/g,'').trim());
+  const data={};
+  headers.forEach((h,i)=>{if(colMap[i])data[colMap[i]]=row[i]||'';});
+  // Fill form fields
+  const fills=[];
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val){el.value=val;fills.push(id);}};
+  set('on',data.name);set('oe',data.email);set('om',data.mobile||data.mob);
+  set('oci',data.city);set('ost',data.state);set('oht',data.height);
+  set('opf',data.occupation);set('o_co',data.company);set('osal',data.income);
+  set('oedu_raw',data.education);set('o_school',data.school);set('o_inter',data.inter);
+  set('o_engcol',data.engcol);set('o_col',data.col);set('ogotra',data.gotra);
+  set('o_nak',data.nakshatra);set('o_rashi',data.rashi);set('ofn',data.father_name);
+  set('ofp',data.father_prof);set('omn',data.mother_name);set('omo',data.mother_prof);
+  set('o_visa',data.visa);set('o_native',data.native);
+  // DOB: parse and set parts
+  if(data.dob){
+    try{
+      const d=new Date(data.dob);
+      if(!isNaN(d)){
+        const dayEl=document.getElementById('odob_d');
+        const monEl=document.getElementById('odob_m');
+        const yrEl=document.getElementById('odob_y');
+        if(dayEl)dayEl.value=String(d.getDate()).padStart(2,'0');
+        if(monEl)monEl.value=String(d.getMonth()+1).padStart(2,'0');
+        if(yrEl)yrEl.value=d.getFullYear();
+        fills.push('dob');
+      }
+    }catch(e){}
+  }
+  // Gender
+  if(data.gender){
+    const gm=document.getElementById('oGMale'),gf=document.getElementById('oGFemale');
+    const isFemale=data.gender.toLowerCase().startsWith('f');
+    if(gm)gm.checked=!isFemale;
+    if(gf)gf.checked=isFemale;
+    fills.push('gender');
+  }
+  window._initCustomSelects&&window._initCustomSelects(document.getElementById('secAdd'));
+  res.style.display='block';
+  res.style.borderColor='#2e7d32';res.style.color='#1b5e20';res.style.background='rgba(27,94,32,0.07)';
+  res.innerHTML=fills.length
+    ?`<strong>Import successful</strong> — ${fills.length} fields filled from file. Please verify the details below and complete any missing required fields before registering.`
+    :'No matching columns found. Please check the file format or enter details manually.';
+}
 
 // ── ACTIVITY LOG ──
 let _allActItems=[];
