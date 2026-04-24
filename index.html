@@ -389,6 +389,47 @@ body{font-size:16px;}
   .csel-trigger{font-size:1rem;min-height:44px;}
   .csel-item{padding:.78rem .9rem;font-size:1rem;}
 }
+
+/* ── FLUID DROPDOWN HIGHLIGHT ── */
+.csel-highlight{
+  position:absolute;left:4px;right:4px;border-radius:6px;
+  background:linear-gradient(120deg,rgba(184,137,42,0.12),rgba(123,31,46,0.07));
+  transition:top .18s cubic-bezier(0.34,1.4,0.64,1),height .18s cubic-bezier(0.34,1.4,0.64,1),opacity .12s;
+  pointer-events:none;z-index:0;opacity:0;
+}
+.csel-item{position:relative;z-index:1;}
+.csel-item:hover{background:transparent !important;}
+
+/* ── ACTIVITY LOG PANEL ── */
+.act-log-feed{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border);overflow:hidden;}
+.act-log-item{
+  display:flex;align-items:center;gap:.9rem;
+  padding:.75rem 1.2rem;border-bottom:1px solid rgba(184,137,42,.07);
+  transition:background .14s;
+}
+.act-log-item:last-child{border-bottom:none;}
+.act-log-item:hover{background:rgba(253,246,216,.45);}
+.act-log-av{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(184,137,42,.15),rgba(123,31,46,.1));
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;
+  border:1px solid rgba(184,137,42,.18);
+}
+.act-log-main{flex:1;min-width:0;}
+.act-log-name{font-family:'Cormorant Garamond',serif;font-size:.98rem;font-weight:600;color:var(--crimson);display:inline;}
+.act-log-desc{font-family:'EB Garamond',serif;font-size:.88rem;color:var(--text2);line-height:1.5;}
+.act-log-time{font-family:'Cormorant Garamond',serif;font-size:.76rem;font-style:italic;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.act-log-badge{
+  display:inline-flex;align-items:center;padding:.1rem .5rem;margin-left:.4rem;vertical-align:middle;
+  font-family:'Cinzel',serif;font-size:.38rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid;
+}
+.act-b-signup{color:#1b5e20;border-color:rgba(27,94,32,.28);background:rgba(27,94,32,.07);}
+.act-b-interest{color:var(--crimson);border-color:rgba(123,31,46,.22);background:rgba(123,31,46,.05);}
+.act-b-appt{color:#1a237e;border-color:rgba(26,35,126,.22);background:rgba(26,35,126,.06);}
+.act-b-update{color:var(--gold2);border-color:rgba(139,94,60,.22);background:rgba(139,94,60,.06);}
+.act-b-engaged{color:#880e4f;border-color:rgba(136,14,79,.22);background:rgba(136,14,79,.06);}
+.act-b-story{color:#4a148c;border-color:rgba(74,20,140,.22);background:rgba(74,20,140,.06);}
+.act-log-empty{font-family:'EB Garamond',serif;font-size:.9rem;font-style:italic;color:var(--muted);text-align:center;padding:2.5rem;}
 </style>
 
   <!-- ══ FIREBASE SDK (Admin) ══ -->
@@ -622,6 +663,7 @@ checkCookieConsent();
     <button class="sb-btn" id="bEditReq" onclick="goSec('secEditReq')">✏ &nbsp;Edit Requests <span class="sb-badge" id="editReqCnt" style="display:none;">0</span></button>
     <button class="sb-btn" id="bAppt" onclick="goSec('secAppointments')">📅 &nbsp;Appointments <span class="sb-badge" id="apptCnt" style="display:none;">0</span></button>
     <button class="sb-btn" id="bStories" onclick="goSec('secStories')">💐 &nbsp;Pending Stories <span class="sb-badge" id="storiesCnt" style="display:none;">0</span></button>
+    <button class="sb-btn" id="bActivity" onclick="goSec('secActivity')">📋 &nbsp;Activity Log</button>
 
     <div class="sb-sec-lbl">Records</div>
     <button class="sb-btn" id="bArch" onclick="goSec('secArchived')" aria-label="📁 &nbsp;Archived / Closed">📁 &nbsp;Archived / Closed</button>
@@ -853,13 +895,33 @@ checkCookieConsent();
       <p style="font-family:'EB Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-bottom:1.2rem;">Branch visit appointment requests submitted by members and visitors.</p>
       <div style="margin-bottom:1rem;display:flex;gap:0.6rem;flex-wrap:wrap;">
         <button onclick="loadAppointments()" style="padding:0.5rem 1.4rem;background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);" aria-label="↻ Refresh">↻ Refresh</button>
-        <select id="apptStatusFilter" onchange="loadAppointments()" style="padding:0.4rem 0.8rem;border:1px solid rgba(184,137,42,0.25);border-radius:8px;font-family:'EB Garamond',serif;font-size:0.9rem;">
+        <select id="apptStatusFilter" onchange="loadAppointments()" class="sec-filter">
           <option value="pending">Pending</option>
           <option value="confirmed">Confirmed</option>
           <option value="all">All</option>
         </select>
       </div>
       <div id="apptGrid" class="card-grid"></div>
+    </div>
+
+    <!-- ACTIVITY LOG SECTION -->
+    <div class="a-sec" id="secActivity">
+      <div class="sec-tools" style="flex-wrap:wrap;gap:.8rem;margin-bottom:1.4rem;">
+        <select class="sec-filter" id="actTypeFilter" onchange="applyActFilter()">
+          <option value="">All Activity</option>
+          <option value="signup">Signups</option>
+          <option value="interest">Interests</option>
+          <option value="update">Profile Updates</option>
+          <option value="appt">Appointments</option>
+          <option value="engaged">Engagements</option>
+          <option value="story">Stories</option>
+        </select>
+        <button onclick="loadActivityFeed()" style="padding:.45rem 1.2rem;background:transparent;border:1.5px solid rgba(184,137,42,.3);border-radius:50px;cursor:pointer;font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);">↻ Refresh</button>
+        <span id="actCount" style="font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--muted);margin-left:auto;"></span>
+      </div>
+      <div class="act-log-feed" id="actLogFeed">
+        <div class="act-log-empty">Loading activity…</div>
+      </div>
     </div>
 
     <!-- PENDING STORIES SECTION -->
@@ -1000,8 +1062,8 @@ function closeMobileSidebar(){
   document.getElementById('sidebarOverlay').classList.remove('open');
 }
 
-const secT={secDash:'Dashboard',secArchived:'Archived Profiles',secProfiles:'All Member Profiles',secAdd:'Add Offline Member',secInterests:'All Interest Records',secMutual:'Mutual Matches',secEngaged:'Engaged Couples',secChats:'All Conversations',secEditReq:'Member Edit Requests',secAppointments:'Appointments',secStories:'Pending Stories'};
-const bMap={secDash:'bDash',secArchived:'bArch',secProfiles:'bProf',secAdd:'bAdd',secInterests:'bInt',secMutual:'bMut',secEngaged:'bEng',secChats:'bChat',secEditReq:'bEditReq',secAppointments:'bAppt',secStories:'bStories'};
+const secT={secDash:'Dashboard',secArchived:'Archived Profiles',secProfiles:'All Member Profiles',secAdd:'Add Offline Member',secInterests:'All Interest Records',secMutual:'Mutual Matches',secEngaged:'Engaged Couples',secChats:'All Conversations',secEditReq:'Member Edit Requests',secAppointments:'Appointments',secStories:'Pending Stories',secActivity:'Activity Log'};
+const bMap={secDash:'bDash',secArchived:'bArch',secProfiles:'bProf',secAdd:'bAdd',secInterests:'bInt',secMutual:'bMut',secEngaged:'bEng',secChats:'bChat',secEditReq:'bEditReq',secAppointments:'bAppt',secStories:'bStories',secActivity:'bActivity'};
 function goSec(id){
   document.querySelectorAll('.a-sec').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -1018,6 +1080,7 @@ function goSec(id){
   if(id==='secEditReq')renderEditRequests();
   if(id==='secAppointments')loadAppointments();
   if(id==='secStories')loadPendingStories();
+  if(id==='secActivity')loadActivityFeed();
 }
 
 function renderAll(){
@@ -2385,7 +2448,7 @@ async function dismissStory(docId){
 
 // ── CUSTOM SELECT DROPDOWNS (admin) ──
 window._initCustomSelects=function(root){
-  (root||document).querySelectorAll('.inp-f-group .inp-f-sel').forEach(sel=>{
+  (root||document).querySelectorAll('.inp-f-group .inp-f-sel, .sec-filter').forEach(sel=>{
     if(sel._cselInit)return;
     sel._cselInit=true;
     const first=sel.options[0];
@@ -2447,6 +2510,19 @@ window._initCustomSelects=function(root){
         panel.appendChild(item);
       });
       document.body.appendChild(panel);
+      // ── Fluid highlight for dropdown items ──
+      const hl=document.createElement('div');
+      hl.className='csel-highlight';
+      panel.insertBefore(hl,panel.firstChild);
+      panel.querySelectorAll('.csel-item').forEach(item=>{
+        item.addEventListener('mouseenter',()=>{
+          const iR=item.getBoundingClientRect(),pR=panel.getBoundingClientRect();
+          hl.style.opacity='1';
+          hl.style.top=(iR.top-pR.top+panel.scrollTop)+'px';
+          hl.style.height=iR.height+'px';
+        });
+      });
+      panel.addEventListener('mouseleave',()=>{hl.style.opacity='0';});
       trigger.classList.add('open');
       const rect=trigger.getBoundingClientRect();
       const pw=Math.min(Math.max(rect.width,200),340);
@@ -2474,6 +2550,120 @@ window._initCustomSelects=function(root){
   });
 };
 document.addEventListener('DOMContentLoaded',()=>window._initCustomSelects(document));
+
+// ── ACTIVITY LOG ──
+let _allActItems=[];
+async function loadActivityFeed(){
+  const feed=document.getElementById('actLogFeed');
+  if(!feed)return;
+  feed.innerHTML='<div class="act-log-empty">Loading activity…</div>';
+  if(!window.FIREBASE_READY){feed.innerHTML='<div class="act-log-empty">Firebase not ready.</div>';return;}
+  const{getDocs,collection,db,query,orderBy}=window.FB;
+  const items=[];
+  try{
+    // Signups + profile updates from users collection
+    const userSnap=await getDocs(collection(db,'users'));
+    userSnap.forEach(d=>{
+      const p=d.data();
+      if(p.status==='deleted'||p.status==='merged')return;
+      const em=p.em||p.emoji||'👤';
+      const nm=p.name||p.displayName||p.email||d.id;
+      if(p.createdAt){
+        items.push({type:'signup',icon:em,name:nm,desc:'New member registered',ts:p.createdAt,uid:d.id});
+      }
+      if(p.updatedAt&&p.updatedAt!==p.createdAt){
+        items.push({type:'update',icon:em,name:nm,desc:'Profile updated',ts:p.updatedAt,uid:d.id});
+      }
+    });
+  }catch(e){console.warn('Activity: users load failed',e);}
+  try{
+    // Interest events
+    const intSnap=await getDocs(collection(db,'interests'));
+    intSnap.forEach(d=>{
+      const i=d.data();
+      const p1=ST.profiles.find(x=>x.u===i.from);
+      const p2=ST.profiles.find(x=>x.u===i.to);
+      const n1=p1?.name||i.from||'Member';
+      const n2=p2?.name||i.to||'Member';
+      const statusLabels={pending:'sent interest to',mutual:'matched with',contact_released:'contact released for',released:'interest released between'};
+      items.push({type:'interest',icon:p1?.em||'💌',name:n1,desc:`${statusLabels[i.status]||i.status} ${n2}`,ts:i.date||i.updatedAt||i.createdAt||'',uid:i.from});
+    });
+  }catch(e){console.warn('Activity: interests load failed',e);}
+  try{
+    // Appointments
+    const apptSnap=await getDocs(collection(db,'appointments'));
+    apptSnap.forEach(d=>{
+      const a=d.data();
+      const nm=a.name||a.userName||a.email||'Member';
+      items.push({type:'appt',icon:'📅',name:nm,desc:`Appointment booked — ${a.slot||a.date||''}`,ts:a.createdAt||a.date||'',uid:d.id});
+    });
+  }catch(e){console.warn('Activity: appointments load failed',e);}
+  try{
+    // Engagements
+    ST.engaged.forEach(e=>{
+      items.push({type:'engaged',icon:'💍',name:e.p1?.name||'Member',desc:`Engaged with ${e.p2?.name||'Member'}`,ts:e.engDate||'',uid:e.p1?.u||''});
+    });
+  }catch(e){}
+  try{
+    // Stories
+    const stSnap=await getDocs(collection(db,'stories'));
+    stSnap.forEach(d=>{
+      const s=d.data();
+      const nm=s.name||s.bride||s.groom||'Couple';
+      items.push({type:'story',icon:'💐',name:nm,desc:`Success story submitted (${s.status||'pending'})`,ts:s.submittedAt||s.createdAt||'',uid:d.id});
+    });
+  }catch(e){console.warn('Activity: stories load failed',e);}
+
+  // Sort by timestamp descending
+  items.sort((a,b)=>{
+    const ta=typeof a.ts==='object'&&a.ts?.toDate?a.ts.toDate().getTime():new Date(a.ts||0).getTime();
+    const tb=typeof b.ts==='object'&&b.ts?.toDate?b.ts.toDate().getTime():new Date(b.ts||0).getTime();
+    return tb-ta;
+  });
+  _allActItems=items;
+  applyActFilter();
+}
+
+function applyActFilter(){
+  const type=document.getElementById('actTypeFilter')?.value||'';
+  const filtered=type?_allActItems.filter(i=>i.type===type):_allActItems;
+  renderActFeed(filtered);
+}
+
+function _fmtActTs(ts){
+  if(!ts)return '—';
+  let d;
+  try{d=typeof ts==='object'&&ts?.toDate?ts.toDate():new Date(ts);}catch(e){return String(ts).substring(0,10);}
+  if(isNaN(d))return String(ts).substring(0,10);
+  const now=new Date();
+  const diff=Math.floor((now-d)/1000);
+  if(diff<60)return 'just now';
+  if(diff<3600)return Math.floor(diff/60)+'m ago';
+  if(diff<86400)return Math.floor(diff/3600)+'h ago';
+  if(diff<604800)return Math.floor(diff/86400)+'d ago';
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'});
+}
+
+const _actBadge={signup:'act-b-signup',interest:'act-b-interest',appt:'act-b-appt',update:'act-b-update',engaged:'act-b-engaged',story:'act-b-story'};
+const _actLabel={signup:'Signup',interest:'Interest',appt:'Appointment',update:'Update',engaged:'Engaged',story:'Story'};
+
+function renderActFeed(items){
+  const feed=document.getElementById('actLogFeed');
+  const countEl=document.getElementById('actCount');
+  if(!feed)return;
+  if(countEl)countEl.textContent=items.length+' event'+(items.length!==1?'s':'');
+  if(!items.length){feed.innerHTML='<div class="act-log-empty">No activity found.</div>';return;}
+  feed.innerHTML=items.slice(0,150).map(a=>`
+    <div class="act-log-item">
+      <div class="act-log-av">${a.icon}</div>
+      <div class="act-log-main">
+        <span class="act-log-name">${a.name}</span>
+        <span class="act-log-badge ${_actBadge[a.type]||''}">${_actLabel[a.type]||a.type}</span>
+        <div class="act-log-desc">${a.desc}</div>
+      </div>
+      <div class="act-log-time">${_fmtActTs(a.ts)}</div>
+    </div>`).join('');
+}
 </script>
 </body>
 </html>
