@@ -792,14 +792,13 @@ checkCookieConsent();
         <div class="off-sec-title">Login Credentials</div>
         <div class="fr2">
           <div class="inp-f-group"><label class="inp-f-lbl">Username *</label><input class="inp-f-field" id="ou" placeholder="Choose a username (lowercase, no spaces)"></div>
-          <div class="inp-f-group"><label class="inp-f-lbl">Aadhaar Number</label><input class="inp-f-field" id="oadh" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
+          <div class="inp-f-group"><label class="inp-f-lbl">Password</label><input class="inp-f-field" id="oadh" type="text" placeholder="Auto-generated if left blank"></div>
         </div>
 
         <!-- PHYSICAL ATTRIBUTES -->
         <div class="off-sec-title">Physical Attributes</div>
         <div class="fr3">
           <div class="inp-f-group"><label class="inp-f-lbl">Height *</label><input class="inp-f-field" id="oht" list="oHtList" placeholder="e.g. 5'6&quot; (167cm)"><datalist id="oHtList"><option>4'10" (147cm)</option><option>4'11" (149cm)</option><option>5'0" (152cm)</option><option>5'1" (154cm)</option><option>5'2" (157cm)</option><option>5'3" (160cm)</option><option>5'4" (162cm)</option><option>5'5" (165cm)</option><option>5'6" (167cm)</option><option>5'7" (170cm)</option><option>5'8" (172cm)</option><option>5'9" (175cm)</option><option>5'10" (177cm)</option><option>5'11" (180cm)</option><option>6'0" (182cm)</option><option>6'1" (185cm)</option><option>6'2" (187cm)</option><option>6'3" (190cm)</option></datalist></div>
-          <div class="inp-f-group"><label class="inp-f-lbl">Weight (kg)</label><input class="inp-f-field" id="o_wt" type="number" placeholder="65"></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Complexion</label><select class="inp-f-sel" id="ocx"><option value="">Select</option><option>Very Fair</option><option>Fair</option><option>Wheatish</option><option>Wheatish Brown</option><option>Dark</option></select></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Body Type</label><select class="inp-f-sel" id="o_bt"><option value="">Select</option><option>Slim</option><option>Athletic</option><option>Average</option><option>Heavy</option></select></div>
           <div class="inp-f-group"><label class="inp-f-lbl">Blood Group</label><select class="inp-f-sel" id="o_bg"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
@@ -1672,7 +1671,7 @@ function clearOff(){
   const textIds=['on','oht','osal','ofp','oci','oco','om','oe','ou','oadh','onotes',
     'ofn','ofmob','omn','ommob','omo','ofp','o_tob','o_pob','ogotra','o_nak','o_rashi',
     'o_school','o_inter','o_engcol','o_col','o_co','o_workplace','o_visa','o_native',
-    'o_wt','o_pp_af','o_pp_at','o_pp_occ','o_pp_st','o_pp_note','o_about','o_pval'];
+    'o_pp_af','o_pp_at','o_pp_occ','o_pp_st','o_pp_note','o_about','o_pval'];
   textIds.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const selIds=['ocx','oedu','ofas','ofg','omas','o_mt','o_ms','o_res','o_board',
     'o_emp','o_diet','o_smk','o_drk','o_ft','o_fv','o_fst','o_bt','o_bg','o_da',
@@ -1790,17 +1789,16 @@ async function addOffline(){
     pp_note:_oVal('o_pp_note')||'—',
     about:_oVal('o_about')||'—',
     notes:_oVal('onotes')||'Walk-in / Offline registration',
-    adh:_oVal('oadh')||'—',
     photoURL:'',photos:[],views:0,
     registrationSource:'offline',
     registeredAt:new Date().toISOString(),
     createdAt:new Date().toISOString(),
     status:'active',
   };
-  // Generate login credentials
+  // Generate login credentials (use manually entered password if provided)
   const cred=_genCredentials(name,dob);
-  const autoPass=cred.password;
-  newP.autoPassword=autoPass; // stored so admin can retrieve later
+  const autoPass=_oVal('oadh')||cred.password;
+  newP.autoPassword=autoPass;
   // Save to Firestore — source of truth
   if(window.FIREBASE_READY && window.FB){
     try{
@@ -2852,114 +2850,174 @@ function _parseBiodataXLSX(wb,res){
   const ws=wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
   const clean=s=>String(s||'').replace(/[^\x20-\x7e]/g,"'").toLowerCase().trim().replace(/\s+/g,' ');
-  // Section-aware label maps — same label (e.g. "Height") means different things in personal vs choice section
+  // Section-aware maps: same label ("Height","Complexion") means different things in personal vs choice
   const PERSONAL={
-    'name of the groom':{f:'name',gender:'Male'},
-    'name of the bride':{f:'name',gender:'Female'},
-    'date of birth':{f:'dob'},
-    'height':{f:'height'},
-    'time and place':{f:'tob_pob'},
-    'gotram':{f:'gotra'},
-    'star':{f:'nak'},
-    'native dist':{f:'native'},
-    'raasi':{f:'rashi'},'rashi':{f:'rashi'},
+    'name of the groom':{f:'name',gender:'Male'},'name of the bride':{f:'name',gender:'Female'},
+    'date of birth':{f:'dob'},'height':{f:'height'},'time and place':{f:'tob_pob'},
+    'complexion / color':{f:'cx'},
+    'gotram':{f:'gotra'},'star':{f:'nak'},
+    'native dist':{f:'native'},'raasi':{f:'rashi'},'rashi':{f:'rashi'},
     'settled place':{f:'city'},
-    'ssc school name':{f:'school'},
+    'ssc school name':{f:'school',board:'SSC'},'cbse school name':{f:'school',board:'CBSE'},
+    'icse school name':{f:'school',board:'ICSE'},'school name':{f:'school'},
     'inter college name':{f:'inter'},'inter college nname':{f:'inter'},
-    'engineering college name':{f:'engcol'},
-    'pg college name':{f:'col'},
-    'occupation':{f:'occ'},
-    'company name':{f:'company'},
-    'place of job':{f:'workplace'},
-    'salary':{f:'income'},'annual income':{f:'income'},
-    'visa status':{f:'visa'},
+    'engineering college name':{f:'engcol'},'pg college name':{f:'col'},
+    'occupation':{f:'occ'},'company name':{f:'company'},'place of job':{f:'workplace'},
+    'salary':{f:'income'},'annual income':{f:'income'},'visa status':{f:'visa'},
   };
   const FAMILY={
     "father's profession":{f:'fpro'},"father`s profession":{f:'fpro'},
     "mother's profession":{f:'mpro'},"mother`s profession":{f:'mpro'},
+    'younger brother':{f:'sib_yb'},'elder brother':{f:'sib_eb'},'brother':{f:'sib_b'},'brothers':{f:'sib_b'},
+    'younger sister':{f:'sib_ys'},'elder sister':{f:'sib_es'},'sister':{f:'sib_s'},'sisters':{f:'sib_s'},
   };
   const CHOICE={
-    'height':{f:'pp_ht'},
-    'qualification':{f:'pp_occ'},
+    'height':{f:'pp_ht'},'complexion / color':{f:null},
+    'qualification':{f:'pp_edu'},
     'age gap':{f:'pp_age'},'age  gap':{f:'pp_age'},'age   gap':{f:'pp_age'},
   };
   const data={};
   let section='personal';
   for(const row of rows){
     const l3=clean(row[3]);
-    // Detect section headers (no colon, no value)
     if(l3==='family members details'){section='family';continue;}
     if(l3==='choice preferred'){section='choice';continue;}
     const v3=String(row[5]||'').trim();
     const l6=clean(row[6]);
     const v6=String(row[8]||'').trim();
-    // SI No is always in col[6]/col[8] of the header row
     if(l6.includes('sl no')||l6.includes('si no')){if(v6)data.slid=v6;}
     const MAP=section==='personal'?PERSONAL:section==='family'?FAMILY:CHOICE;
-    if(l3&&v3){const m=MAP[l3];if(m){data[m.f]=v3;if(m.gender)data.gender=m.gender;}}
-    if(l6&&v6){const m=MAP[l6];if(m){data[m.f]=v6;if(m.gender)data.gender=m.gender;}}
+    const apply=(lbl,val)=>{
+      if(!lbl||!val)return;
+      const m=MAP[lbl];if(!m||m.f===null)return;
+      data[m.f]=val;
+      if(m.gender)data.gender=m.gender;
+      if(m.board)data.board=m.board;
+    };
+    apply(l3,v3);apply(l6,v6);
   }
+  // ── Helpers ──
   const fills=[];
-  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val&&val!=='—'){el.value=val;fills.push(id);}};
-  // Personal fields
-  set('on',data.name);
-  set('oht',data.height);
-  set('ogotra',data.gotra);
-  set('o_nak',data.nak);
-  set('o_rashi',data.rashi);
-  set('oci',data.city);
-  set('o_native',data.native);
-  set('o_school',data.school);
-  set('o_inter',data.inter);
-  set('o_engcol',data.engcol);
-  set('o_col',data.col);
-  set('opf',data.occ);
-  set('o_co',data.company);
-  set('o_workplace',data.workplace);
-  set('osal',data.income);
-  set('o_visa',data.visa);
-  // Family fields
-  set('ofp',data.fpro);
-  set('omo',data.mpro);
-  // Choice Preferred fields
-  set('o_pp_occ',data.pp_occ);
-  if(data.pp_age){
-    const ag=data.pp_age.match(/(\d+)\s*[-–]\s*(\d+)/);
-    if(ag){set('o_pp_af',ag[1]);set('o_pp_at',ag[2]);}
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val&&String(val)!=='—'){el.value=String(val);fills.push(id);}};
+  const setSel=(id,val)=>{
+    if(!val)return;
+    const el=document.getElementById(id);if(!el)return;
+    const v=String(val).toLowerCase().trim();
+    for(const o of el.options){if(o.value===val||o.text===val){el.value=o.value;fills.push(id);return;}}
+    for(const o of el.options){if(!o.value)continue;if(o.text.toLowerCase()===v){el.value=o.value;fills.push(id);return;}}
+    for(const o of el.options){if(!o.value)continue;if(o.text.toLowerCase().includes(v)||v.includes(o.text.toLowerCase())){el.value=o.value;fills.push(id);return;}}
+  };
+  // ── Personal ──
+  set('on',data.name);set('oht',data.height);set('ogotra',data.gotra);
+  set('o_nak',data.nak);set('o_rashi',data.rashi);set('oci',data.city);
+  set('o_native',data.native);set('o_school',data.school);set('o_inter',data.inter);
+  set('o_engcol',data.engcol);set('o_col',data.col);set('opf',data.occ);
+  set('o_co',data.company);set('o_workplace',data.workplace);set('osal',data.income);set('o_visa',data.visa);
+  // Complexion
+  const CXM={'very fair':'Very Fair','fair':'Fair','normal fair':'Fair','wheatish':'Wheatish','wheat':'Wheatish','wheatish brown':'Wheatish Brown','dark':'Dark','dusky':'Dark','brown':'Wheatish Brown','medium':'Wheatish'};
+  if(data.cx){const cx=CXM[(data.cx).toLowerCase()]||'';if(cx)setSel('ocx',cx);}
+  // Schooling board from label
+  if(data.board)setSel('o_board',data.board);
+  // Highest qualification — infer from which education fields are filled
+  const guessQual=()=>{
+    const pg=(data.col||'').toLowerCase(),eng=(data.engcol||'').toLowerCase();
+    if(pg){
+      if(/ph\.?d/.test(pg))return'Ph.D.';
+      if(/m\.tech|m\.e\b/.test(pg))return'M.Tech / M.E.';
+      if(/m\.b\.a|mba/.test(pg))return'M.B.A.';
+      if(/m\.sc|m\.com|m\.a\b/.test(pg))return'M.Sc / M.Com / M.A.';
+      if(/\bms\b|master/.test(pg))return'MS (USA/UK)';
+      if(/md\b|surgery/.test(pg))return'MD / MS';
+      return'M.Tech / M.E.';
+    }
+    if(eng){
+      if(/m\.tech|m\.e\b/.test(eng))return'M.Tech / M.E.';
+      if(/mbbs/.test(eng))return'MBBS';
+      if(/\bllb\b|law/.test(eng))return'LLB';
+      if(/\bca\b|\bcma\b|\bcs\b/.test(eng))return'CA / CMA / CS';
+      if(/b\.sc|b\.com|b\.a\b/.test(eng))return'B.Sc / B.Com / B.A.';
+      return'B.Tech / B.E.';
+    }
+    if(data.inter)return'Intermediate / 12th';
+    if(data.school)return'10th / SSC';
+    return'';
+  };
+  const q=guessQual();if(q)setSel('oedu',q);
+  // Employed In sector
+  const guessEmp=o=>{
+    const s=o.toLowerCase();
+    if(/\bit\b|software|developer|sde|swe|programmer|data.*scien|cyber/.test(s))return'IT / Software';
+    if(/police|army|navy|air force|defence|military|paramilitary|cid/.test(s))return'Defence';
+    if(/ias|ips|civil service|collector|sdo|tehsildar|dsp/.test(s))return'Civil Services';
+    if(/govt|government|psu|municipal|corporation|sbi|lic|ongc|bhel/.test(s))return'Government / PSU';
+    if(/teach|professor|lecturer|principal/.test(s))return'Teaching / Professor';
+    if(/business|self.employ|entrepreneur|proprietor/.test(s))return'Business / Self-Employed';
+    if(/farm|agricultur/.test(s))return'Agriculture';
+    if(/not work|home maker|homemaker/.test(s))return'Not Working';
+    return'Other';
+  };
+  if(data.occ)setSel('o_emp',guessEmp(data.occ));
+  // State + Country from city
+  const CS={'hyderabad':'Telangana','secunderabad':'Telangana','warangal':'Telangana','hanamkonda':'Telangana','karimnagar':'Telangana','nizamabad':'Telangana','khammam':'Telangana','nalgonda':'Telangana','adilabad':'Telangana','mahbubnagar':'Telangana','mahabubnagar':'Telangana','rangareddy':'Telangana','ranga reddy':'Telangana','medak':'Telangana','parkal':'Telangana','suryapet':'Telangana','siddipet':'Telangana','mancherial':'Telangana','jagtial':'Telangana','bhadradri':'Telangana','vijayawada':'Andhra Pradesh','visakhapatnam':'Andhra Pradesh','vizag':'Andhra Pradesh','tirupati':'Andhra Pradesh','nellore':'Andhra Pradesh','kurnool':'Andhra Pradesh','guntur':'Andhra Pradesh','rajahmundry':'Andhra Pradesh','rajamundry':'Andhra Pradesh','kakinada':'Andhra Pradesh','eluru':'Andhra Pradesh','anantapur':'Andhra Pradesh','bangalore':'Karnataka','bengaluru':'Karnataka','mysore':'Karnataka','hubli':'Karnataka','chennai':'Tamil Nadu','coimbatore':'Tamil Nadu','madurai':'Tamil Nadu','mumbai':'Maharashtra','pune':'Maharashtra','nagpur':'Maharashtra','delhi':'Delhi','new delhi':'Delhi','kolkata':'West Bengal','ahmedabad':'Gujarat','surat':'Gujarat','jaipur':'Rajasthan','lucknow':'Uttar Pradesh','noida':'Uttar Pradesh','gurgaon':'Haryana','gurugram':'Haryana','bhopal':'Madhya Pradesh','indore':'Madhya Pradesh','kochi':'Kerala','thiruvananthapuram':'Kerala'};
+  if(data.city){const st=CS[data.city.toLowerCase()]||'';if(st)set('ost',st);set('oco','India');}
+  // Marital status — default Never Married
+  const msEl=document.getElementById('o_ms');
+  if(msEl&&!msEl.value){msEl.value='Never Married';fills.push('o_ms');}
+  // ── Family ──
+  if(data.fpro){
+    const fp=data.fpro.toLowerCase();
+    const fasEl=document.getElementById('ofas');
+    if(fasEl){
+      if(/retd|retired/.test(fp))fasEl.value='Retired';
+      else if(/passed away|late\b|deceased/.test(fp))fasEl.value='Passed Away';
+      else if(/business|self.employ/.test(fp))fasEl.value='Business';
+      else if(/farm/.test(fp))fasEl.value='Farmer';
+      else fasEl.value='Employed';
+      fills.push('ofas');
+      const wr=document.getElementById('ofp_wrap');if(wr)wr.style.display='';
+      set('ofp',data.fpro);
+    }
   }
-  // Time and Place of Birth: "10:40 PM,Karimnagar"
+  if(data.mpro){
+    const mp=data.mpro.toLowerCase();
+    const omasEl=document.getElementById('omas');
+    if(omasEl){
+      if(/home maker|homemaker|housewife/.test(mp))omasEl.value='Homemaker';
+      else if(/passed away|late\b|deceased/.test(mp))omasEl.value='Passed Away';
+      else if(/retd|retired/.test(mp))omasEl.value='Retired';
+      else if(/business/.test(mp))omasEl.value='Business';
+      else omasEl.value='Employed';
+      fills.push('omas');
+      if(omasEl.value!=='Homemaker'&&omasEl.value!=='Passed Away'){const wr=document.getElementById('omo_wrap');if(wr)wr.style.display='';set('omo',data.mpro);}
+    }
+  }
+  // Siblings — parse count from "1-Web Designing" style values
+  const sibN=v=>{if(!v)return 0;const n=parseInt(v);return isNaN(n)?1:Math.max(0,n);};
+  const bro=sibN(data.sib_yb)+sibN(data.sib_eb)+sibN(data.sib_b);
+  const sis=sibN(data.sib_ys)+sibN(data.sib_es)+sibN(data.sib_s);
+  if(data.sib_yb!==undefined||data.sib_eb!==undefined||data.sib_b!==undefined)setSel('o_br',bro>=4?'4+':String(bro));
+  if(data.sib_ys!==undefined||data.sib_es!==undefined||data.sib_s!==undefined)setSel('o_sr',sis>=4?'4+':String(sis));
+  // ── Choice Preferred ──
+  if(data.pp_ht){const hm=data.pp_ht.match(/(\d+'\d+")/);if(hm){const pe=document.getElementById('o_pp_hf');if(pe){for(const o of pe.options){if(o.value===hm[1]||o.text===hm[1]){pe.value=o.value;fills.push('o_pp_hf');break;}}}}}
+  if(data.pp_edu){
+    const edu=data.pp_edu.toLowerCase();
+    if(/any|—/.test(edu)){const el=document.getElementById('o_pp_edu');if(el){el.value='';fills.push('o_pp_edu');}}
+    else setSel('o_pp_edu',data.pp_edu);
+  }
+  if(data.pp_age){const ag=data.pp_age.match(/(\d+)\s*[-–]\s*(\d+)/);if(ag){set('o_pp_af',ag[1]);set('o_pp_at',ag[2]);}}
+  // ── Time/Place of Birth ──
   if(data.tob_pob){
     const parts=data.tob_pob.split(',');
     const rawTime=(parts[0]||'').trim();
-    const place=parts.slice(1).join(',').trim()||'';
+    const place=parts.slice(1).join(',').trim();
     if(place)set('o_pob',place);
     const tm=rawTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-    if(tm){
-      let h=parseInt(tm[1]),mi=tm[2],ap=tm[3].toUpperCase();
-      if(ap==='PM'&&h!==12)h+=12;
-      if(ap==='AM'&&h===12)h=0;
-      set('o_tob',String(h).padStart(2,'0')+':'+mi);
-    }
+    if(tm){let h=parseInt(tm[1]),mi=tm[2],ap=tm[3].toUpperCase();if(ap==='PM'&&h!==12)h+=12;if(ap==='AM'&&h===12)h=0;set('o_tob',String(h).padStart(2,'0')+':'+mi);}
   }
-  // DOB: "11-April-1995"
-  if(data.dob){
-    try{
-      const d=new Date(data.dob);
-      if(!isNaN(d)){
-        const dd=document.getElementById('odob_d'),dm=document.getElementById('odob_m'),dy=document.getElementById('odob_y');
-        if(dd)dd.value=String(d.getDate()).padStart(2,'0');
-        if(dm)dm.value=String(d.getMonth()+1).padStart(2,'0');
-        if(dy)dy.value=d.getFullYear();
-        fills.push('dob');
-      }
-    }catch(e){}
-  }
-  // Gender from Groom/Bride
-  if(data.gender){
-    const gm=document.getElementById('oGMale'),gf=document.getElementById('oGFemale');
-    if(data.gender==='Male'&&gm){gm.checked=true;fills.push('gender');}
-    if(data.gender==='Female'&&gf){gf.checked=true;fills.push('gender');}
-  }
+  // ── DOB ──
+  if(data.dob){try{const d=new Date(data.dob);if(!isNaN(d)){const dd=document.getElementById('odob_d'),dm=document.getElementById('odob_m'),dy=document.getElementById('odob_y');if(dd)dd.value=String(d.getDate()).padStart(2,'0');if(dm)dm.value=String(d.getMonth()+1).padStart(2,'0');if(dy)dy.value=d.getFullYear();fills.push('dob');}}catch(e){}}
+  // ── Gender ──
+  if(data.gender){const gm=document.getElementById('oGMale'),gf=document.getElementById('oGFemale');if(data.gender==='Male'&&gm){gm.checked=true;fills.push('gender');}if(data.gender==='Female'&&gf){gf.checked=true;fills.push('gender');}}
   res.style.display='block';
   if(fills.length){
     res.style.borderColor='#2e7d32';res.style.color='#1b5e20';res.style.background='rgba(27,94,32,0.07)';
