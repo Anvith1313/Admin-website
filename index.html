@@ -2850,51 +2850,98 @@ function _parseBiodataXLSX(wb,res){
   const ws=wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
   const clean=s=>String(s||'').replace(/[^\x20-\x7e]/g,"'").toLowerCase().trim().replace(/\s+/g,' ');
-  // Section-aware maps: same label ("Height","Complexion") means different things in personal vs choice
+  const isColon=v=>String(v||'').trim()===':';
+
+  // Scan each row dynamically: find colon cells, look left for label, right for value
+  // Works regardless of which columns data is in
+  const extractPairs=row=>{
+    const pairs=[];
+    for(let ci=0;ci<row.length;ci++){
+      if(!isColon(row[ci]))continue;
+      let lbl='';
+      for(let i=ci-1;i>=0;i--){const v=String(row[i]||'').trim();if(v&&!isColon(row[i])){lbl=v;break;}}
+      let val='';
+      for(let i=ci+1;i<row.length;i++){if(isColon(row[i]))break;const v=String(row[i]||'').trim();if(v){val=v;break;}}
+      if(lbl&&val)pairs.push([lbl,val]);
+    }
+    return pairs;
+  };
+
+  // Section-aware maps — same label means different things in personal vs choice
   const PERSONAL={
     'name of the groom':{f:'name',gender:'Male'},'name of the bride':{f:'name',gender:'Female'},
-    'date of birth':{f:'dob'},'height':{f:'height'},'time and place':{f:'tob_pob'},
-    'complexion / color':{f:'cx'},
-    'gotram':{f:'gotra'},'star':{f:'nak'},
-    'native dist':{f:'native'},'raasi':{f:'rashi'},'rashi':{f:'rashi'},
-    'settled place':{f:'city'},
+    'groom name':{f:'name',gender:'Male'},'bride name':{f:'name',gender:'Female'},
+    'name':{f:'name'},'full name':{f:'name'},'candidate name':{f:'name'},
+    'date of birth':{f:'dob'},'dob':{f:'dob'},'birth date':{f:'dob'},'date of birth (dob)':{f:'dob'},
+    'height':{f:'height'},'ht':{f:'height'},
+    'time and place':{f:'tob_pob'},'time of birth':{f:'tob'},'place of birth':{f:'pob'},
+    'birth time':{f:'tob'},'birth place':{f:'pob'},
+    'complexion / color':{f:'cx'},'complexion':{f:'cx'},'color':{f:'cx'},'colour':{f:'cx'},
+    'gotram':{f:'gotra'},'gotra':{f:'gotra'},
+    'star':{f:'nak'},'nakshatra':{f:'nak'},'birth star':{f:'nak'},
+    'native dist':{f:'native'},'native':{f:'native'},'native place':{f:'native'},'native district':{f:'native'},
+    'raasi':{f:'rashi'},'rashi':{f:'rashi'},'moon sign':{f:'rashi'},
+    'settled place':{f:'city'},'city':{f:'city'},'current city':{f:'city'},'residing city':{f:'city'},
     'ssc school name':{f:'school',board:'SSC'},'cbse school name':{f:'school',board:'CBSE'},
-    'icse school name':{f:'school',board:'ICSE'},'school name':{f:'school'},
+    'icse school name':{f:'school',board:'ICSE'},'state board school name':{f:'school',board:'State Board'},
+    'school name':{f:'school'},'school':{f:'school'},
     'inter college name':{f:'inter'},'inter college nname':{f:'inter'},
-    'engineering college name':{f:'engcol'},'pg college name':{f:'col'},
-    'occupation':{f:'occ'},'company name':{f:'company'},'place of job':{f:'workplace'},
-    'salary':{f:'income'},'annual income':{f:'income'},'visa status':{f:'visa'},
+    'intermediate college':{f:'inter'},'junior college':{f:'inter'},'12th college':{f:'inter'},'inter college':{f:'inter'},
+    'engineering college name':{f:'engcol'},'degree college name':{f:'engcol'},'b.tech college':{f:'engcol'},
+    'engineering college':{f:'engcol'},'degree college':{f:'engcol'},
+    'pg college name':{f:'col'},'pg college':{f:'col'},'ms college':{f:'col'},'mba college':{f:'col'},'post graduation':{f:'col'},
+    'occupation':{f:'occ'},'profession':{f:'occ'},'job':{f:'occ'},'designation':{f:'occ'},'work':{f:'occ'},
+    'company name':{f:'company'},'company':{f:'company'},'organisation':{f:'company'},'organization':{f:'company'},'employer':{f:'company'},
+    'place of job':{f:'workplace'},'work location':{f:'workplace'},'job location':{f:'workplace'},'place of work':{f:'workplace'},
+    'salary':{f:'income'},'annual income':{f:'income'},'income':{f:'income'},'ctc':{f:'income'},'package':{f:'income'},
+    'visa status':{f:'visa'},'visa':{f:'visa'},
+    'sl no':{f:'slid'},'si no':{f:'slid'},'vip no':{f:'slid'},'elite no':{f:'slid'},
   };
   const FAMILY={
     "father's profession":{f:'fpro'},"father`s profession":{f:'fpro'},
+    "father's occupation":{f:'fpro'},"father occupation":{f:'fpro'},"father's job":{f:'fpro'},
+    "father's name":{f:'fname'},"father name":{f:'fname'},
     "mother's profession":{f:'mpro'},"mother`s profession":{f:'mpro'},
+    "mother's occupation":{f:'mpro'},"mother occupation":{f:'mpro'},"mother's job":{f:'mpro'},
+    "mother's name":{f:'mname'},"mother name":{f:'mname'},
     'younger brother':{f:'sib_yb'},'elder brother':{f:'sib_eb'},'brother':{f:'sib_b'},'brothers':{f:'sib_b'},
     'younger sister':{f:'sib_ys'},'elder sister':{f:'sib_es'},'sister':{f:'sib_s'},'sisters':{f:'sib_s'},
   };
   const CHOICE={
-    'height':{f:'pp_ht'},'complexion / color':{f:null},
-    'qualification':{f:'pp_edu'},
-    'age gap':{f:'pp_age'},'age  gap':{f:'pp_age'},'age   gap':{f:'pp_age'},
+    'height':{f:'pp_ht'},'min height':{f:'pp_ht'},'minimum height':{f:'pp_ht'},
+    'complexion / color':{f:null},'complexion':{f:null},
+    'qualification':{f:'pp_edu'},'education':{f:'pp_edu'},'expected education':{f:'pp_edu'},
+    'age gap':{f:'pp_age'},'age  gap':{f:'pp_age'},'age   gap':{f:'pp_age'},'preferred age gap':{f:'pp_age'},
+    'relationship':{f:'rel'},
   };
+
+  // Fuzzy match: exact first, then partial contains
+  const matchLabel=(raw,map)=>{
+    const lbl=clean(raw);
+    if(map[lbl])return map[lbl];
+    for(const[k,v]of Object.entries(map)){if(lbl===k||lbl.includes(k)||k.includes(lbl))return v;}
+    return null;
+  };
+
   const data={};
   let section='personal';
   for(const row of rows){
-    const l3=clean(row[3]);
-    if(l3==='family members details'){section='family';continue;}
-    if(l3==='choice preferred'){section='choice';continue;}
-    const v3=String(row[5]||'').trim();
-    const l6=clean(row[6]);
-    const v6=String(row[8]||'').trim();
-    if(l6.includes('sl no')||l6.includes('si no')){if(v6)data.slid=v6;}
+    // Detect section headers: rows that have no colon cells
+    const hasColon=row.some(v=>isColon(v));
+    if(!hasColon){
+      const txt=row.map(v=>String(v||'').trim()).filter(Boolean).join(' ').toLowerCase();
+      if(txt.includes('family members details')||txt.includes('family background')){section='family';continue;}
+      if(txt.includes('choice preferred')||txt.includes('partner preference')){section='choice';continue;}
+    }
+    const pairs=extractPairs(row);
     const MAP=section==='personal'?PERSONAL:section==='family'?FAMILY:CHOICE;
-    const apply=(lbl,val)=>{
-      if(!lbl||!val)return;
-      const m=MAP[lbl];if(!m||m.f===null)return;
+    for(const[rawLbl,val]of pairs){
+      const m=matchLabel(rawLbl,MAP);
+      if(!m||m.f===null)continue;
       data[m.f]=val;
       if(m.gender)data.gender=m.gender;
       if(m.board)data.board=m.board;
-    };
-    apply(l3,v3);apply(l6,v6);
+    }
   }
   // ── Helpers ──
   const fills=[];
