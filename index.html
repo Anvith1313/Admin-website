@@ -2852,8 +2852,8 @@ function _parseBiodataXLSX(wb,res){
   const ws=wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
   const clean=s=>String(s||'').replace(/[^\x20-\x7e]/g,"'").toLowerCase().trim().replace(/\s+/g,' ');
-  // label→field mapping (biodata document format: col[3]=label, col[5]=value, col[6]=label2, col[8]=value2)
-  const LM={
+  // Section-aware label maps — same label (e.g. "Height") means different things in personal vs choice section
+  const PERSONAL={
     'name of the groom':{f:'name',gender:'Male'},
     'name of the bride':{f:'name',gender:'Female'},
     'date of birth':{f:'dob'},
@@ -2873,26 +2873,35 @@ function _parseBiodataXLSX(wb,res){
     'place of job':{f:'workplace'},
     'salary':{f:'income'},'annual income':{f:'income'},
     'visa status':{f:'visa'},
+  };
+  const FAMILY={
     "father's profession":{f:'fpro'},"father`s profession":{f:'fpro'},
     "mother's profession":{f:'mpro'},"mother`s profession":{f:'mpro'},
-    'sl no':{f:'slid'},'si no':{f:'slid'},
-    'relationship':{f:'rel'},
-    'since working':{f:'since'},
+  };
+  const CHOICE={
+    'height':{f:'pp_ht'},
+    'qualification':{f:'pp_occ'},
+    'age gap':{f:'pp_age'},'age  gap':{f:'pp_age'},'age   gap':{f:'pp_age'},
   };
   const data={};
+  let section='personal';
   for(const row of rows){
-    // Primary: col[3]=label, col[5]=value
-    const l1=clean(row[3]),v1=String(row[5]||'').trim();
-    if(l1&&v1){const m=LM[l1];if(m){data[m.f]=v1;if(m.gender)data.gender=m.gender;}}
-    // Secondary: col[6]=label, col[8]=value
-    const l2=clean(row[6]),v2=String(row[8]||'').trim();
-    if(l2&&v2){
-      if(l2.includes('sl no')||l2.includes('si no')){data.slid=v2;}
-      else{const m=LM[l2];if(m){data[m.f]=v2;if(m.gender)data.gender=m.gender;}}
-    }
+    const l3=clean(row[3]);
+    // Detect section headers (no colon, no value)
+    if(l3==='family members details'){section='family';continue;}
+    if(l3==='choice preferred'){section='choice';continue;}
+    const v3=String(row[5]||'').trim();
+    const l6=clean(row[6]);
+    const v6=String(row[8]||'').trim();
+    // SI No is always in col[6]/col[8] of the header row
+    if(l6.includes('sl no')||l6.includes('si no')){if(v6)data.slid=v6;}
+    const MAP=section==='personal'?PERSONAL:section==='family'?FAMILY:CHOICE;
+    if(l3&&v3){const m=MAP[l3];if(m){data[m.f]=v3;if(m.gender)data.gender=m.gender;}}
+    if(l6&&v6){const m=MAP[l6];if(m){data[m.f]=v6;if(m.gender)data.gender=m.gender;}}
   }
   const fills=[];
   const set=(id,val)=>{const el=document.getElementById(id);if(el&&val&&val!=='—'){el.value=val;fills.push(id);}};
+  // Personal fields
   set('on',data.name);
   set('oht',data.height);
   set('ogotra',data.gotra);
@@ -2909,21 +2918,27 @@ function _parseBiodataXLSX(wb,res){
   set('o_workplace',data.workplace);
   set('osal',data.income);
   set('o_visa',data.visa);
+  // Family fields
   set('ofp',data.fpro);
   set('omo',data.mpro);
-  // Time and Place of Birth: "10:40 PM, Karimnagar"
+  // Choice Preferred fields
+  set('o_pp_occ',data.pp_occ);
+  if(data.pp_age){
+    const ag=data.pp_age.match(/(\d+)\s*[-–]\s*(\d+)/);
+    if(ag){set('o_pp_af',ag[1]);set('o_pp_at',ag[2]);}
+  }
+  // Time and Place of Birth: "10:40 PM,Karimnagar"
   if(data.tob_pob){
     const parts=data.tob_pob.split(',');
     const rawTime=(parts[0]||'').trim();
-    const place=parts.slice(1).join(',').trim()||rawTime;
-    set('o_pob',place);
-    // Convert to HH:MM for time input
+    const place=parts.slice(1).join(',').trim()||'';
+    if(place)set('o_pob',place);
     const tm=rawTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
     if(tm){
-      let h=parseInt(tm[1]),m=tm[2],ap=tm[3].toUpperCase();
+      let h=parseInt(tm[1]),mi=tm[2],ap=tm[3].toUpperCase();
       if(ap==='PM'&&h!==12)h+=12;
       if(ap==='AM'&&h===12)h=0;
-      set('o_tob',String(h).padStart(2,'0')+':'+m);
+      set('o_tob',String(h).padStart(2,'0')+':'+mi);
     }
   }
   // DOB: "11-April-1995"
@@ -2948,7 +2963,7 @@ function _parseBiodataXLSX(wb,res){
   res.style.display='block';
   if(fills.length){
     res.style.borderColor='#2e7d32';res.style.color='#1b5e20';res.style.background='rgba(27,94,32,0.07)';
-    res.innerHTML=`<strong>Import successful</strong> — ${fills.length} fields filled from biodata file. Please fill in <strong>Email</strong>, <strong>Mobile</strong>, and any other missing required fields before registering.`;
+    res.innerHTML=`<strong>Import successful</strong> — ${fills.length} fields filled from biodata. Please add <strong>Email</strong> and <strong>Mobile</strong> before registering.`;
   } else {
     res.style.borderColor='var(--crimson)';res.style.color='var(--crimson)';res.style.background='';
     res.textContent='Could not read biodata fields. Check the file or enter details manually.';
