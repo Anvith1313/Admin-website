@@ -315,11 +315,11 @@ body{font-size:16px;}
 /* ── ADMIN BIODATA STYLES ── */
 .biodata-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.60);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem 1rem;overflow-y:auto;}
 .biodata-sheet{background:#fff;width:210mm;min-height:297mm;border:6px double #E60000;font-family:Cambria,serif;padding:1mm 14mm 8mm;box-shadow:0 8px 48px rgba(0,0,0,0.22);box-sizing:border-box;display:flex;flex-direction:column;}
-.bio-meta-row{display:flex;justify-content:space-between;align-items:center;font-size:12pt;color:#E60000;margin-bottom:0;font-family:Cambria,serif;}
+.bio-meta-row{display:flex;justify-content:space-between;align-items:center;font-size:12pt;color:#E60000;margin-bottom:0.15rem;font-family:Cambria,serif;}
 .bio-meta-row em{font-style:italic;font-weight:700;}
 .bio-meta-row strong{font-style:normal;font-weight:700;}
-.bio-logo-main{display:block;margin:0 auto 0.15rem;width:58%;max-width:360px;height:auto;object-fit:contain;}
-.bio-address{text-align:center;font-size:12pt;font-style:italic;font-weight:700;margin:0.1rem 0 0.9rem;font-family:Cambria,serif;text-decoration:underline;text-underline-offset:2px;}
+.bio-logo-main{max-width:50%;max-height:30mm;width:auto;height:auto;object-fit:contain;display:block;}
+.bio-address{text-align:center;font-size:12pt;font-style:italic;font-weight:700;margin:0 0 0.9rem;font-family:Cambria,serif;text-decoration:underline;text-underline-offset:2px;}
 .bio-row{display:flex;align-items:baseline;margin-bottom:0.3rem;font-size:14pt;font-family:Cambria,serif;line-height:1.4;}
 .bio-lbl{color:#E60000;font-style:italic;font-weight:700;min-width:222px;flex-shrink:0;font-size:14pt;}
 .bio-colon{color:#111;padding-right:0.3rem;flex-shrink:0;}
@@ -329,7 +329,7 @@ body{font-size:16px;}
 .bio-two > .bio-row:first-child .bio-lbl{min-width:222px;}
 .bio-two > .bio-row:last-child .bio-lbl{min-width:100px;}
 .bio-spacer{flex:1;min-height:0.5rem;}
-.bio-sec-title{font-style:italic;font-weight:700;text-decoration:underline;text-underline-offset:2px;color:#E60000;margin:0.55rem 0 1.1rem;font-size:16pt;font-family:Cambria,serif;}.bio-gap{height:0.6rem;flex-shrink:0;}
+.bio-sec-title{font-style:italic;font-weight:700;text-decoration:underline;text-underline-offset:2px;color:#E60000;margin:0.55rem 0 1.6rem;font-size:16pt;font-family:Cambria,serif;}.bio-gap{height:0.6rem;flex-shrink:0;}
 .bio-footer{display:flex;align-items:baseline;padding-left:65%;font-size:14pt;font-family:Cambria,serif;margin-top:0.3rem;}
 .bio-action-row{display:flex;gap:0.5rem;justify-content:center;margin-top:0.9rem;}
 .bio-close-btn{padding:0.55rem 1.8rem;background:#E60000;color:#fff;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.58rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;}
@@ -1940,8 +1940,7 @@ function _biodataFmt(p,logoSrc){
   const isDivorced=msVal.toLowerCase().includes('divorce')||msVal.toLowerCase().includes('separated');
   const ageGap=(p.pp_af&&p.pp_at)?`${p.pp_af} - ${p.pp_at} Years`:'—';
   return `<div class="biodata-sheet">
-    <div class="bio-meta-row"><em>Since 2000</em><span><span style="font-style:italic;font-weight:700;">SI No :</span> <strong style="color:#111;">${slId}</strong></span></div>
-    <img src="${_BIODATA_LOGO}" class="bio-logo-main" alt="Naveen Reddy Marriage Bureau">
+    <div class="bio-meta-row"><em>Since 2000</em><img src="${_BIODATA_LOGO}" class="bio-logo-main" alt="Naveen Reddy Marriage Bureau"><span><span style="font-style:italic;font-weight:700;">SI No :</span> <strong style="color:#111;">${slId}</strong></span></div>
 
     <div class="bio-address"><span style="color:#E60000">Corporate office:</span> <span style="color:#0000FF">Somajiguda,</span>&nbsp; <span style="color:#E60000">Branches:</span> <span style="color:#000000">Kothapet, Warangal, Karimnagar</span></div>
     ${row('Name of the '+gender,p.name)}
