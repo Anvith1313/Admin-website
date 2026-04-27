@@ -947,6 +947,7 @@ checkCookieConsent();
         <select class="sec-filter" id="actTypeFilter" onchange="applyActFilter()">
           <option value="">All Activity</option>
           <option value="signup">Signups</option>
+          <option value="login">Logins</option>
           <option value="interest">Interests</option>
           <option value="update">Profile Updates</option>
           <option value="appt">Appointments</option>
@@ -2722,7 +2723,7 @@ async function viewProfileActivity(uid, name){
   // Appointments
   try{
     const ap=await getDocs(query(collection(db,'appointments'),where('uid','==',uid)));
-    ap.forEach(d=>{const a=d.data();items.push({icon:'📅',desc:`Appointment booked — ${a.slot||a.date||''}`,ts:a.createdAt||a.date||'',type:'appt'});});
+    ap.forEach(d=>{const a=d.data();items.push({icon:'📅',desc:`Appointment booked — ${a.slot||a.date||''}`,ts:a.createdAt||a.ts||a.date||'',type:'appt'});});
   }catch(e){}
   // Notifications for this user
   try{
@@ -3106,6 +3107,9 @@ async function loadActivityFeed(){
       if(p.updatedAt&&p.updatedAt!==p.createdAt){
         items.push({type:'update',icon:em,name:nm,desc:'Profile updated',ts:p.updatedAt,uid:d.id});
       }
+      if(p.lastLogin){
+        items.push({type:'login',icon:em,name:nm,desc:'Member logged in',ts:p.lastLogin,uid:d.id});
+      }
     });
   }catch(e){console.warn('Activity: users load failed',e);}
   try{
@@ -3127,7 +3131,7 @@ async function loadActivityFeed(){
     apptSnap.forEach(d=>{
       const a=d.data();
       const nm=a.name||a.userName||a.email||'Member';
-      items.push({type:'appt',icon:'📅',name:nm,desc:`Appointment booked — ${a.slot||a.date||''}`,ts:a.createdAt||a.date||'',uid:d.id});
+      items.push({type:'appt',icon:'📅',name:nm,desc:`Appointment booked — ${a.slot||a.date||''}`,ts:a.createdAt||a.ts||a.date||'',uid:d.id});
     });
   }catch(e){console.warn('Activity: appointments load failed',e);}
   try{
@@ -3142,7 +3146,7 @@ async function loadActivityFeed(){
     stSnap.forEach(d=>{
       const s=d.data();
       const nm=s.name||s.bride||s.groom||'Couple';
-      items.push({type:'story',icon:'💐',name:nm,desc:`Success story submitted (${s.status||'pending'})`,ts:s.submittedAt||s.createdAt||'',uid:d.id});
+      items.push({type:'story',icon:'💐',name:nm,desc:`Success story submitted (${s.status||'pending'})`,ts:s.submittedAt||s.createdAt||s.ts||'',uid:d.id});
     });
   }catch(e){console.warn('Activity: stories load failed',e);}
 
@@ -3176,8 +3180,8 @@ function _fmtActTs(ts){
   return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'});
 }
 
-const _actBadge={signup:'act-b-signup',interest:'act-b-interest',appt:'act-b-appt',update:'act-b-update',engaged:'act-b-engaged',story:'act-b-story'};
-const _actLabel={signup:'Signup',interest:'Interest',appt:'Appointment',update:'Update',engaged:'Engaged',story:'Story'};
+const _actBadge={signup:'act-b-signup',interest:'act-b-interest',appt:'act-b-appt',update:'act-b-update',engaged:'act-b-engaged',story:'act-b-story',login:'act-b-update'};
+const _actLabel={signup:'Signup',interest:'Interest',appt:'Appointment',update:'Update',engaged:'Engaged',story:'Story',login:'Login'};
 
 function renderActFeed(items){
   const feed=document.getElementById('actLogFeed');
