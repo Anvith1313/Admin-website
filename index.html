@@ -314,7 +314,7 @@ body{font-size:16px;}
 
 /* ── ADMIN BIODATA STYLES ── */
 .biodata-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.60);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem 1rem;overflow-y:auto;}
-.biodata-sheet{background:#fff;width:210mm;height:297mm;border:6px double #E60000;font-family:Cambria,serif;padding:0 14mm 8mm;box-shadow:0 8px 48px rgba(0,0,0,0.22);box-sizing:border-box;display:flex;flex-direction:column;}
+.biodata-sheet{background:#fff;width:210mm;min-height:297mm;border:6px double #E60000;font-family:Cambria,serif;padding:0 14mm 8mm;box-shadow:0 8px 48px rgba(0,0,0,0.22);box-sizing:border-box;display:flex;flex-direction:column;}
 .bio-meta-row{display:flex;justify-content:space-between;align-items:flex-start;font-size:12pt;color:#E60000;margin-bottom:0.15rem;font-family:Cambria,serif;}
 .bio-meta-row em{font-style:italic;font-weight:700;}
 .bio-meta-row strong{font-style:normal;font-weight:700;}
@@ -1961,12 +1961,13 @@ function _biodataFmt(p,logoSrc){
     ${salDisplay&&salDisplay!=='—'?(p.visa&&p.visa!=='—'?row('Salary',salDisplay,'Visa Status',p.visa):row('Salary',salDisplay)):''}
     ${p.sinceWork&&p.sinceWork!=='—'?row('Since Working',p.sinceWork):''}
     ${isDivorced&&p.divorceInfo&&p.divorceInfo!=='—'?row('Divorces',p.divorceInfo):''}
+    <div class="bio-spacer"></div>
     <div class="bio-sec-title">FAMILY MEMBERS DETAILS</div>
     ${row("Father's Profession",p.fo||p.fp||'—')}
     ${row("Mother's Profession",p.mo||'—')}
     <div class="bio-gap"></div>
     ${sibRows}
-    <div class="bio-spacer"></div>
+    <div class="bio-anchor"></div>
     <div class="bio-sec-title">CHOICE PREFERRED</div>
     ${row('Complexion / Color',p.pp_cx||'Fair','Age Gap',ageGap)}
     ${p.pp_hf&&p.pp_hf!=='Any'?row('Height',p.pp_hf+' And Above'):''}
