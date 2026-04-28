@@ -760,6 +760,23 @@ checkCookieConsent();
           </div>
         </div>
 
+        <!-- RELATIONSHIP -->
+        <div class="off-sec-title">Relationship to Candidate *</div>
+        <div class="inp-f-group" style="max-width:320px;">
+          <label class="inp-f-lbl">Who is filling this profile?</label>
+          <select class="inp-f-sel" id="o_rel">
+            <option value="Father">Father</option>
+            <option value="Mother">Mother</option>
+            <option value="Self">Self</option>
+            <option value="Brother">Brother</option>
+            <option value="Sister">Sister</option>
+            <option value="Uncle">Uncle</option>
+            <option value="Aunt">Aunt</option>
+            <option value="Relative">Relative</option>
+            <option value="Friend">Friend</option>
+          </select>
+        </div>
+
         <!-- BASIC INFORMATION -->
         <div class="off-sec-title">Basic Information</div>
         <div class="fr2">
@@ -1794,6 +1811,7 @@ async function addOffline(){
     pp_nri:_oSel('o_pp_nri')||'No Preference',
     pp_note:_oVal('o_pp_note')||'—',
     about:_oVal('o_about')||'—',
+    rel:_oSel('o_rel')||'Father',
     notes:_oVal('onotes')||'Walk-in / Offline registration',
     photoURL:'',photos:[],views:0,
     registrationSource:'offline',
