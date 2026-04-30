@@ -2232,10 +2232,11 @@ function renderMutual(){
     const actions=[];
     if(int.status==='mutual'){
       actions.push(`<button class="act-b grn" onclick="prepContact(${idx});goSec('secMutual')" aria-label="📞 Release Contact">📞 Release Contact</button>`);
-      actions.push(`<button class="act-b" onclick="prepRelease(${idx});goSec('secMutual')" aria-label="🔓 Release Hold">🔓 Release Hold</button>`);
+      actions.push(`<button class="act-b" onclick="prepRelease(${idx});goSec('secMutual')" aria-label="🔓 Reset Match">🔓 Reset Match</button>`);
     }
     if(int.status==='contact_released'){
       actions.push(`<button class="act-b prim" onclick="prepEngage(${idx});goSec('secMutual')" aria-label="💍 Confirm Engagement">💍 Confirm Engagement</button>`);
+      actions.push(`<button class="act-b" onclick="prepRelease(${idx});goSec('secMutual')" aria-label="🔓 Reset Match">🔓 Reset Match</button>`);
     }
     return `<div class="ac">
       <div class="ac-top">
@@ -2614,7 +2615,7 @@ async function doRelease(){
   ST.interests.splice(_actIdx,1);
   closeOv('releaseOv');
   renderInterests();renderMutual();renderAll();
-  toast('Profiles released back to active pool.');
+  toast('Match reset. Both profiles are now free to browse again.');
   _actIdx=null;
 }
 
