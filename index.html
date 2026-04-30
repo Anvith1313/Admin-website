@@ -1073,13 +1073,7 @@ let offT=null;
 let ST={archived:[],
   profiles:[],
   interests:[],
-  chats:{
-    'ananya_r_kiran_r':[
-      {sender:'Ananya Family',msg:'Namaste. We are most pleased to make your acquaintance.',time:'10:30 AM'},
-      {sender:'Kiran Family',msg:'The pleasure is equally ours, namaste.',time:'10:36 AM'},
-      {sender:'Ananya Family',msg:'We would be honoured to arrange a formal meeting.',time:'10:42 AM'},
-    ]
-  },
+  chats:{},
   engaged:[],
   relT:null,contT:null,engT:null,
   pf:{search:'',tier:'',gender:''}
@@ -1143,7 +1137,7 @@ function goSec(id){
   if(id==='secInterests')renderInterests();
   if(id==='secMutual')renderMutual();
   if(id==='secEngaged')renderEngaged();
-  if(id==='secChats')renderChats();
+  if(id==='secChats')loadChats();
   if(id==='secArchived')renderArchived();
   if(id==='secEditReq')renderEditRequests();
   if(id==='secAppointments')loadAppointments();
@@ -1289,6 +1283,10 @@ function viewProf(u){
         style="background:transparent;border:1.5px solid rgba(184,137,42,0.3);border-radius:50px;
         padding:0.5rem 1.2rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;
         letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);" aria-label="Close">Close</button>
+      <button onclick="closeOv('profOv');permanentlyDeleteProfile('${p.u}')"
+        style="background:transparent;border:1.5px solid rgba(180,30,30,0.45);border-radius:50px;
+        padding:0.5rem 1.2rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;
+        letter-spacing:0.14em;text-transform:uppercase;color:#b41e1e;" aria-label="🗑 Remove Permanently">🗑 Remove Permanently</button>
     </div>
 
     ${sec('Basic Information', [
@@ -2294,6 +2292,23 @@ function sendReminder(idx){
 // ═══════════════════════════════════════
 // CHATS SECTION
 // ═══════════════════════════════════════
+async function loadChats(){
+  const grid=document.getElementById('chatGrid');
+  if(!grid)return;
+  if(!window.FIREBASE_READY||!window.FB){renderChats();return;}
+  grid.innerHTML='<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--muted);">Loading conversations…</p>';
+  try{
+    const{rtdb,dbRef,get}=window.FB;
+    const snap=await get(dbRef(rtdb,'chats'));
+    if(snap.exists()){
+      ST.chats=snap.val()||{};
+    }else{
+      ST.chats={};
+    }
+  }catch(e){console.warn('loadChats RTDB error:',e);}
+  renderChats();
+}
+
 function renderChats(){
   const grid=document.getElementById('chatGrid');
   if(!grid)return;
@@ -2359,6 +2374,51 @@ function purgeProfile(idx){
   ST.archived.splice(idx,1);
   renderArchived();renderAll();
   toast('Record permanently deleted.');
+}
+
+async function permanentlyDeleteProfile(uid){
+  if(!uid)return;
+  const p=ST.profiles.find(x=>x.u===uid)||{name:uid};
+  const confirmed=confirm(
+    `PERMANENTLY REMOVE: ${p.name}\n\n` +
+    `This will:\n` +
+    `• Delete their Firestore user document\n` +
+    `• Delete all their interests (sent & received)\n` +
+    `• Delete their appointments\n` +
+    `• Mark their auth account as disabled (blocks future login)\n\n` +
+    `This cannot be undone. Are you absolutely sure?`
+  );
+  if(!confirmed)return;
+  if(!window.FIREBASE_READY||!window.FB){toast('Firebase not ready.');return;}
+  const{db,collection,doc,deleteDoc,getDocs,query,where,updateDoc}=window.FB;
+  try{
+    // 1. Delete user document
+    await deleteDoc(doc(db,'users',uid));
+
+    // 2. Delete interests where from===uid or to===uid
+    const intSnap=await getDocs(query(collection(db,'interests'),where('from','==',uid)));
+    for(const d of intSnap.docs) await deleteDoc(d.ref);
+    const intSnap2=await getDocs(query(collection(db,'interests'),where('to','==',uid)));
+    for(const d of intSnap2.docs) await deleteDoc(d.ref);
+
+    // 3. Delete appointments
+    const apptSnap=await getDocs(query(collection(db,'appointments'),where('uid','==',uid)));
+    for(const d of apptSnap.docs) await deleteDoc(d.ref);
+
+    // 4. Mark a deletion flag doc so login check can block them
+    const{setDoc,serverTimestamp}=window.FB;
+    await setDoc(doc(db,'deleted_accounts',uid),{uid,name:p.name,deletedAt:serverTimestamp(),deletedBy:'admin'});
+
+    // 5. Remove from local state
+    ST.profiles=ST.profiles.filter(x=>x.u!==uid);
+    ST.interests=ST.interests.filter(x=>x.from!==uid&&x.to!==uid);
+    renderProfiles(ST.profiles);
+    renderAll();
+    toast(`${p.name}'s profile has been permanently removed.`);
+  }catch(e){
+    console.error('permanentlyDeleteProfile error:',e);
+    toast('Error deleting profile: '+e.message);
+  }
 }
 
 // ═══ REAL-TIME ADMIN SYNC ═══
@@ -3289,7 +3349,7 @@ async function loadActivityFeed(){
     });
   }catch(e){console.warn('Activity: stories load failed',e);}
 
-  // Sort by timestamp descending
+  // Sort by timestamp descending (latest first)
   items.sort((a,b)=>{
     const ta=typeof a.ts==='object'&&a.ts?.toDate?a.ts.toDate().getTime():new Date(a.ts||0).getTime();
     const tb=typeof b.ts==='object'&&b.ts?.toDate?b.ts.toDate().getTime():new Date(b.ts||0).getTime();
